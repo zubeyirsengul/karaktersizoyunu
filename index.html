@@ -462,9 +462,14 @@ function createLevel() {
     }
 
     for(let i=0; i<20; i++) {
-        enemies.push({ 
-            x: 1500 + i * 1500, y: height - 270, w: 160, h: 210, 
-            timer: 0, interval: 200, dead: false
+        const homeX = 1500 + i * 1500;
+        enemies.push({
+            x: homeX, y: height - 270, w: 160, h: 210,
+            timer: 0, interval: 200, dead: false,
+            homeX: homeX,                          // Devriye merkezi
+            dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
+            speed: currentLevel === 1 ? 1.5 : 2.5, // 2. bölümde daha hızlı
+            walkCycle: Math.random() * Math.PI * 2
         });
     }
 }
@@ -520,6 +525,27 @@ function update() {
 
     enemies.forEach(en => {
         if(en.dead) return;
+
+        // --- Düşman hareketi ---
+        const PATROL_RANGE = 250, CHASE_RANGE = 400, CHASE_DIST = 700;
+        const enCenter = en.x + en.w / 2, plCenter = player.x + player.w / 2;
+        const distToPlayer = plCenter - enCenter;
+        let speed = en.speed;
+        if(!player.isDying && Math.abs(distToPlayer) < CHASE_DIST) {
+            // Oyuncu yakında: ona doğru yürü (ama bölgesinden fazla uzaklaşma)
+            en.dir = Math.sign(distToPlayer) || en.dir;
+            speed *= 1.4;
+            if(Math.abs(en.x + en.dir * speed - en.homeX) > CHASE_RANGE) speed = 0;
+            if(Math.abs(distToPlayer) < 20) speed = 0; // Tam üstündeyken titreme olmasın
+        } else {
+            // Devriye: bölge sınırına gelince geri dön
+            if(en.x - en.homeX > PATROL_RANGE) en.dir = -1;
+            else if(en.x - en.homeX < -PATROL_RANGE) en.dir = 1;
+        }
+        en.x += en.dir * speed;
+        en.x = Math.max(0, Math.min(en.x, WORLD_WIDTH - en.w));
+        if(speed > 0) en.walkCycle += 0.15 * (speed / 1.5);
+
         if(Math.abs(en.x - player.x) < 1200 && ++en.timer > en.interval) {
             en.timer = 0;
             // Çantaların menzili (life) kahramanın mermisinin (150) iki katı: 300
@@ -589,7 +615,17 @@ function draw() {
     });
 
     items.forEach(it => { if(!it.collected) drawKulHakkiBag(ctx, it.x, it.y, 80); });
-    enemies.forEach(en => { if(!en.dead) ctx.drawImage(imgEnemy, en.x, en.y, en.w, en.h); });
+    enemies.forEach(en => {
+        if(en.dead) return;
+        const cx = en.x + en.w / 2, bottom = en.y + en.h;
+        // Ayaklar (oyuncudakiyle aynı tarz)
+        ctx.fillStyle = "#000";
+        ctx.fillRect(cx - 18 + Math.sin(en.walkCycle) * 35, bottom - 15, 36, 15);
+        ctx.fillRect(cx - 18 + Math.sin(en.walkCycle + Math.PI) * 35, bottom - 15, 36, 15);
+        // Yürürken hafif zıplama (sadece görsel, çarpışmayı etkilemez)
+        const bob = -Math.abs(Math.sin(en.walkCycle)) * 8;
+        ctx.drawImage(imgEnemy, en.x, en.y + bob - 12, en.w, en.h);
+    });
 
     ctx.save();
     ctx.translate(player.x + player.w/2, player.y + player.h/2);

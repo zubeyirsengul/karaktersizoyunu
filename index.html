@@ -214,7 +214,7 @@ const WORLD_WIDTH = 40000;
 
 // Oyuncu Özellikleri
 const player = { 
-    x: 100, y: 0, w: 100, h: 140, 
+    x: 100, y: 0, w: 100, h: 180,   // 140 fotoğraf + bacaklar
     vx: 0, vy: 0, 
     speed: 7, jumpPower: -22, 
     grounded: false, dir: 1, 
@@ -225,6 +225,36 @@ const player = {
 
 const imgPlayer = new Image(); imgPlayer.src = 'recep.jpg';
 const imgEnemy = new Image(); imgEnemy.src = 'emine.jpg';
+
+// Fotoğrafın şeffaf kenarlarını bul ki karakter kutusuna tam otursun (havada durmasın, kaymasın).
+// Dosya bilgisayardan (file://) açıldığında tarayıcı piksel okumaya izin vermeyebilir: o zaman resmin tamamı kullanılır.
+function opaqueBounds(img) {
+    const full = { sx: 0, sy: 0, sw: img.naturalWidth, sh: img.naturalHeight };
+    try {
+        const c = document.createElement('canvas');
+        c.width = full.sw; c.height = full.sh;
+        const x = c.getContext('2d');
+        x.drawImage(img, 0, 0);
+        const d = x.getImageData(0, 0, c.width, c.height).data;
+        let top = -1, bot = -1, left = c.width, right = -1;
+        for (let y = 0; y < c.height; y++) {
+            for (let X = 0; X < c.width; X++) {
+                if (d[(y * c.width + X) * 4 + 3] > 40) {
+                    if (top < 0) top = y;
+                    bot = y;
+                    if (X < left) left = X;
+                    if (X > right) right = X;
+                }
+            }
+        }
+        return top < 0 ? full : { sx: left, sy: top, sw: right - left + 1, sh: bot - top + 1 };
+    } catch (e) {
+        return full;
+    }
+}
+let enemyCrop = null;
+imgEnemy.onload = () => { enemyCrop = opaqueBounds(imgEnemy); };
+if (imgEnemy.complete && imgEnemy.naturalWidth) enemyCrop = opaqueBounds(imgEnemy);
 
 // TTS exponential backoff implementation
 // Aynı anda tek konuşma; geç gelen ses anlamsız olacağı için en fazla 1 kısa tekrar
@@ -464,7 +494,7 @@ function createLevel() {
     for(let i=0; i<20; i++) {
         const homeX = 1500 + i * 1500;
         enemies.push({
-            x: homeX, y: height - 270, w: 160, h: 210,
+            x: homeX, y: height - 60 - 210, w: 160, h: 210,   // alt kenar zeminde
             timer: 0, interval: 200, dead: false,
             homeX: homeX,                          // Devriye merkezi
             dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
@@ -480,10 +510,9 @@ function update() {
     if(!player.isDying) {
         let moveDir = (keys.a ? -1 : (keys.d ? 1 : joyDir));
         player.vx = moveDir ? moveDir * player.speed : player.vx * 0.85;
-        if(moveDir) {
-            player.dir = moveDir;
-            player.legCycle += 0.2;
-        }
+        if(moveDir) player.dir = moveDir;
+        // Adım hızı yürüme hızına bağlı: ayaklar yerde kaymaz
+        if(player.grounded) player.legCycle += Math.abs(player.vx) * 0.06;
 
         player.vy += GRAVITY; 
         player.x += player.vx;
@@ -544,7 +573,8 @@ function update() {
         }
         en.x += en.dir * speed;
         en.x = Math.max(0, Math.min(en.x, WORLD_WIDTH - en.w));
-        if(speed > 0) en.walkCycle += 0.15 * (speed / 1.5);
+        en.walkCycle += speed * 0.08;   // Adım hızı yürüme hızına bağlı
+        en.lastSpeed = speed;           // Çizimde "yürüyor mu / duruyor mu" için
 
         if(Math.abs(en.x - player.x) < 1200 && ++en.timer > en.interval) {
             en.timer = 0;
@@ -604,6 +634,78 @@ function update() {
     projectiles = projectiles.filter(p => p.active && p.life > 0);
 }
 
+// --- BACAK ANİMASYONU (Recep) ---
+// Her bacak iki parçalı: kalça → diz → ayak bileği, ucunda ayakkabı.
+// photoW/photoH: fotoğrafın asıl en-boyu (oran korunur); ratio: bacak boyu / kutu yüksekliği
+const PLAYER_LEGS = {
+    photoW: 100, photoH: 140,
+    ratio: 0.27, width: 14, swing: 0.65,          // bacak boyu, kalınlık, adım açısı
+    front: "#475569", back: "#334155",            // füme takım pantolon (arka bacak daha koyu)
+    shoe: "#111111"
+};
+
+// Faza göre bir bacağın açıları: a = uyluk açısı (0 = dik, + = ileri), bend = diz bükümü
+function legPose(phase, moving, airborne, swing) {
+    if (airborne) return [{ a: 0.75, bend: 1.4 }, { a: -0.3, bend: 0.6 }];  // havada: bacaklar kırık
+    if (!moving)  return [{ a: 0.08, bend: 0.06 }, { a: -0.08, bend: 0.06 }]; // ayakta duruş
+    return [0, Math.PI].map(off => {
+        const p = phase + off;
+        // Öne doğru savrulurken (cos > 0) diz bükülür ve ayak yerden kalkar
+        return { a: swing * Math.sin(p), bend: 0.12 + 1.1 * Math.max(0, Math.cos(p)) };
+    });
+}
+
+function legJoints(hipX, hipY, len, leg) {
+    const half = len / 2;
+    const kx = hipX + Math.sin(leg.a) * half, ky = hipY + Math.cos(leg.a) * half;
+    const s = leg.a - leg.bend;  // baldır uyluktan geriye kırılır (diz öne bakar)
+    return { kx, ky, fx: kx + Math.sin(s) * half, fy: ky + Math.cos(s) * half, toe: Math.max(-0.5, Math.min(0.4, -s * 0.5)) };
+}
+
+function drawLeg(ctx, hipX, hipY, j, width, color, shoe) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(hipX, hipY);
+    ctx.lineTo(j.kx, j.ky);
+    ctx.lineTo(j.fx, j.fy);
+    ctx.stroke();
+    // Ayakkabı: öne uzanan yuvarlak burun, kalkan ayakta hafif eğik
+    ctx.save();
+    ctx.translate(j.fx, j.fy);
+    ctx.rotate(j.toe);
+    ctx.fillStyle = shoe;
+    ctx.beginPath();
+    ctx.ellipse(width * 0.45, width * 0.2, width * 1.0, width * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+// Kutunun (top-center = cx, topY; yükseklik h) alt kısmına bacakları çizer.
+// Dönüş: { k: fotoğrafın asıl boyutuna göre ölçeği, drop: gövdenin adımlarla inip kalkma miktarı }
+function drawLegs(ctx, cx, topY, h, dir, phase, moving, airborne, style) {
+    const legSpace = h * style.ratio;
+    const k = (h - legSpace) / style.photoH;        // fotoğraf kalan alana orantılı sığar
+    const hipY = h - legSpace - style.width * 0.6;  // kalça fotoğrafın alt kenarının hemen arkasında
+    const len = h - style.width * 0.7 - hipY;       // ayakkabı tabanı tam zemine değsin
+    const pose = legPose(phase, moving, airborne, style.swing);
+    const hips = [3, -3];
+    const joints = pose.map((leg, i) => legJoints(hips[i], hipY, len, leg));
+
+    // Yerdeyken en alttaki ayak zemine bassın: gövde buna göre iner (doğal sallanma)
+    const drop = airborne ? 0 : (hipY + len) - Math.max(joints[0].fy, joints[1].fy);
+
+    ctx.save();
+    ctx.translate(cx, topY + drop);
+    ctx.scale(dir, 1);
+    drawLeg(ctx, hips[1], hipY, joints[1], style.width, style.back, style.shoe);   // arka bacak önce
+    drawLeg(ctx, hips[0], hipY, joints[0], style.width, style.front, style.shoe);
+    ctx.restore();
+    return { k, drop };
+}
+
 function draw() {
     ctx.clearRect(0,0,width,height);
     ctx.save();
@@ -617,14 +719,20 @@ function draw() {
     items.forEach(it => { if(!it.collected) drawKulHakkiBag(ctx, it.x, it.y, 80); });
     enemies.forEach(en => {
         if(en.dead) return;
-        const cx = en.x + en.w / 2, bottom = en.y + en.h;
-        // Ayaklar (oyuncudakiyle aynı tarz)
-        ctx.fillStyle = "#000";
-        ctx.fillRect(cx - 18 + Math.sin(en.walkCycle) * 35, bottom - 15, 36, 15);
-        ctx.fillRect(cx - 18 + Math.sin(en.walkCycle + Math.PI) * 35, bottom - 15, 36, 15);
-        // Yürürken hafif zıplama (sadece görsel, çarpışmayı etkilemez)
-        const bob = -Math.abs(Math.sin(en.walkCycle)) * 8;
-        ctx.drawImage(imgEnemy, en.x, en.y + bob - 12, en.w, en.h);
+        // Emine'nin fotoğrafı boydan (kendi ayakları var), o yüzden ek bacak yok:
+        // yürürken ayakların üstünde sağa-sola salınır, her adımda hafif yükselir.
+        const moving = en.lastSpeed > 0;
+        const p = en.walkCycle;
+        const sway = moving ? Math.sin(p) * 0.07 + en.dir * 0.03 : 0;  // salınım + yürüme yönüne hafif eğilme
+        const bob  = moving ? -Math.abs(Math.cos(p)) * 6 : 0;          // adım ortasında yükselme
+        // Kırpılmış fotoğraf kutu yüksekliğine oranını koruyarak sığar, ayaklar zeminde
+        const c = enemyCrop || { sx: 0, sy: 0, sw: imgEnemy.naturalWidth || en.w, sh: imgEnemy.naturalHeight || en.h };
+        const dh = en.h, dw = Math.min(en.w, dh * c.sw / c.sh);
+        ctx.save();
+        ctx.translate(en.x + en.w / 2, en.y + en.h);   // dönme noktası: ayakların ortası
+        ctx.rotate(sway);
+        ctx.drawImage(imgEnemy, c.sx, c.sy, c.sw, c.sh, -dw / 2, -dh + bob, dw, dh);
+        ctx.restore();
     });
 
     ctx.save();
@@ -633,11 +741,16 @@ function draw() {
     if(player.isDying) ctx.rotate(player.deathAngle);
     if(player.dir === -1 && !player.isDying) ctx.scale(-1, 1);
 
-    ctx.fillStyle = "#000";
-    ctx.fillRect(-15 + Math.sin(player.legCycle)*30, player.h/2 - 15, 30, 15);
-    ctx.fillRect(-15 + Math.sin(player.legCycle + Math.PI)*30, player.h/2 - 15, 30, 15);
+    const playerMoving = player.grounded && Math.abs(player.vx) > 1;
+    const body = drawLegs(ctx, 0, -player.h/2, player.h, 1, player.legCycle, playerMoving, !player.grounded, PLAYER_LEGS);
 
-    ctx.drawImage(imgPlayer, -player.w/2, -player.h/2, player.w, player.h);
+    // Fotoğraf ve ağız, asıl 100x140 koordinatlarında çizilir; ölçek/kaydırma burada yapılır
+    const PW = PLAYER_LEGS.photoW, PH = PLAYER_LEGS.photoH;
+    ctx.translate(0, -player.h/2 + body.drop);
+    ctx.scale(body.k, body.k);
+    ctx.translate(0, PH/2);
+
+    ctx.drawImage(imgPlayer, -PW/2, -PH/2, PW, PH);
 
     if(player.mouthOpen > 0.1) {
         ctx.fillStyle = "black";

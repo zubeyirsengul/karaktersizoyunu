@@ -27,6 +27,7 @@
         .action-buttons { position: absolute; bottom: 50px; right: 50px; display: flex; gap: 20px; pointer-events: auto; }
         .btn { width: 100px; height: 100px; background: rgba(251,191,36,0.6); border: 4px solid var(--gold); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; text-align: center; font-size: 14px; color: white; text-shadow: 1px 1px 2px black; }
         .shoot-btn { background: rgba(34,197,94,0.6); border-color: #22c55e; }
+        .hammer-btn { position: absolute; bottom: 170px; right: 50px; pointer-events: auto; background: rgba(239,68,68,0.6); border-color: #ef4444; }
         /* Dokunmatik cihazlarda klavye ipuçlarını gizle */
         @media (hover: none) and (pointer: coarse) { .key-hint { display: none; } }
         
@@ -80,6 +81,7 @@
             <div class="btn shoot-btn" id="shoot-btn"><span data-i18n="shoot">FIRLAT</span> <span class="key-hint">(Enter)</span></div>
             <div class="btn" id="jump-btn"><span data-i18n="jump">ZIPLA</span> <span class="key-hint">(Space)</span></div>
         </div>
+        <div class="btn hammer-btn" id="hammer-btn"><span data-i18n="hammer">BALYOZ</span> <span class="key-hint">(F)</span></div>
     </div>
     <canvas id="gameCanvas"></canvas>
 </div>
@@ -97,7 +99,7 @@ const LANGS = {
         desc: "Kul Hakkı Torbalarını Topla!",
         start: "OYUNU BAŞLAT",
         treasure: "Hazine", level: "Seviye", kills: "Leş",
-        shoot: "FIRLAT", jump: "ZIPLA",
+        shoot: "FIRLAT", jump: "ZIPLA", hammer: "BALYOZ",
         die: "GEBER!", hit: "aaah", pickup: "MİS!",
         l1Title: "BÖLÜM 1 TAMAM!", l1Note: "Torbaları mideye indirdin! Şimdi sıra ikinci bölümde.", l1Btn: "2. BÖLÜME GEÇ",
         winTitle: "ZAFER SİZİN!", winNote: "Karnımız doydu, ekonomi bitti!", winBtn: "TEKRAR OYNA",
@@ -111,7 +113,7 @@ const LANGS = {
         desc: "Collect the People's Due Bags!",
         start: "START GAME",
         treasure: "Treasure", level: "Level", kills: "Kills",
-        shoot: "THROW", jump: "JUMP",
+        shoot: "THROW", jump: "JUMP", hammer: "HAMMER",
         die: "YOU'RE DONE!", hit: "aaah", pickup: "YUM!",
         l1Title: "LEVEL 1 COMPLETE!", l1Note: "You gobbled up the bags! Now on to level two.", l1Btn: "GO TO LEVEL 2",
         winTitle: "VICTORY IS YOURS!", winNote: "Our bellies are full, the economy is finished!", winBtn: "PLAY AGAIN",
@@ -125,7 +127,7 @@ const LANGS = {
         desc: "Ramasse les sacs du Droit du Peuple !",
         start: "LANCER LE JEU",
         treasure: "Trésor", level: "Niveau", kills: "Éliminés",
-        shoot: "LANCER", jump: "SAUTER",
+        shoot: "LANCER", jump: "SAUTER", hammer: "MARTEAU",
         die: "CREVÉ !", hit: "aaah", pickup: "MIAM !",
         l1Title: "NIVEAU 1 TERMINÉ !", l1Note: "Tu as englouti les sacs ! Place au deuxième niveau.", l1Btn: "NIVEAU 2",
         winTitle: "LA VICTOIRE EST À VOUS !", winNote: "Nos ventres sont pleins, l'économie est finie !", winBtn: "REJOUER",
@@ -139,7 +141,7 @@ const LANGS = {
         desc: "Verzamel de Volksrecht-zakken!",
         start: "SPEL STARTEN",
         treasure: "Schat", level: "Level", kills: "Gedood",
-        shoot: "GOOIEN", jump: "SPRINGEN",
+        shoot: "GOOIEN", jump: "SPRINGEN", hammer: "MOKER",
         die: "KAPOT!", hit: "aaah", pickup: "LEKKER!",
         l1Title: "LEVEL 1 VOLTOOID!", l1Note: "Je hebt de zakken verslonden! Nu door naar level twee.", l1Btn: "NAAR LEVEL 2",
         winTitle: "DE OVERWINNING IS VAN JOU!", winNote: "Onze buiken zijn vol, de economie is op!", winBtn: "OPNIEUW SPELEN",
@@ -153,7 +155,7 @@ const LANGS = {
         desc: "Sammle die Volksrecht-Säcke!",
         start: "SPIEL STARTEN",
         treasure: "Schatz", level: "Level", kills: "Erledigt",
-        shoot: "WERFEN", jump: "SPRINGEN",
+        shoot: "WERFEN", jump: "SPRINGEN", hammer: "HAMMER",
         die: "KAPUTT!", hit: "aaah", pickup: "LECKER!",
         l1Title: "LEVEL 1 GESCHAFFT!", l1Note: "Du hast die Säcke verschlungen! Weiter zu Level zwei.", l1Btn: "ZU LEVEL 2",
         winTitle: "DER SIEG GEHÖRT DIR!", winNote: "Die Bäuche sind voll, die Wirtschaft ist am Ende!", winBtn: "NOCHMAL SPIELEN",
@@ -167,7 +169,7 @@ const LANGS = {
         desc: "Собирай мешки народного добра!",
         start: "НАЧАТЬ ИГРУ",
         treasure: "Казна", level: "Уровень", kills: "Убито",
-        shoot: "БРОСОК", jump: "ПРЫЖОК",
+        shoot: "БРОСОК", jump: "ПРЫЖОК", hammer: "КУВАЛДА",
         die: "КОНЕЦ!", hit: "aaah", pickup: "ВКУСНО!",
         l1Title: "УРОВЕНЬ 1 ПРОЙДЕН!", l1Note: "Ты проглотил мешки! Теперь второй уровень.", l1Btn: "НА УРОВЕНЬ 2",
         winTitle: "ПОБЕДА ЗА ВАМИ!", winNote: "Животы полны, экономике конец!", winBtn: "ИГРАТЬ СНОВА",
@@ -220,16 +222,17 @@ const player = {
     grounded: false, dir: 1, 
     isDying: false, deathAngle: 0, 
     opacity: 1, legCycle: 0,
-    mouthOpen: 0 
+    mouthOpen: 0,
+    swing: 0, swingHit: false        // balyoz: kalan animasyon karesi, bu vuruşta isabet kontrolü yapıldı mı
 };
 
 const imgPlayer = new Image(); imgPlayer.src = 'recep.jpg';
-const imgEnemy = new Image(); imgEnemy.src = 'emine.jpg';
+const imgEnemy = new Image(); imgEnemy.src = 'halk.jpg';
 
 // Fotoğrafın şeffaf kenarlarını bul ki karakter kutusuna tam otursun (havada durmasın, kaymasın).
 // Dosya bilgisayardan (file://) açıldığında tarayıcı piksel okumaya izin vermeyebilir: o zaman resmin tamamı kullanılır.
 function opaqueBounds(img) {
-    const full = { sx: 0, sy: 0, sw: img.naturalWidth, sh: img.naturalHeight };
+    const full = { sx: 0, sy: 0, sw: img.naturalWidth || img.width, sh: img.naturalHeight || img.height };
     try {
         const c = document.createElement('canvas');
         c.width = full.sw; c.height = full.sh;
@@ -252,9 +255,47 @@ function opaqueBounds(img) {
         return full;
     }
 }
-let enemyCrop = null;
-imgEnemy.onload = () => { enemyCrop = opaqueBounds(imgEnemy); };
-if (imgEnemy.complete && imgEnemy.naturalWidth) enemyCrop = opaqueBounds(imgEnemy);
+// Halk fotoğrafı JPG (şeffaflık yok): kenarlardan başlayıp arka plan rengine yakın pikselleri siler.
+// Piksel okumaya izin verilmezse (file://) orijinal resim kullanılır.
+function removeBackground(img, tolerance = 14) {
+    try {
+        const c = document.createElement('canvas');
+        const W = c.width = img.naturalWidth, H = c.height = img.naturalHeight;
+        const x = c.getContext('2d');
+        x.drawImage(img, 0, 0);
+        const data = x.getImageData(0, 0, W, H), d = data.data;
+        const bg = [d[0], d[1], d[2]];   // sol üst köşe = arka plan rengi
+        // Arka plan nötr gri: rengi bg'ye yakın VE renksiz olan pikseller (koyu saç / mor şort korunur)
+        const isBg = i => {
+            const r = d[i], g = d[i+1], bl = d[i+2];
+            return Math.abs(r - bg[0]) < tolerance && Math.abs(g - bg[1]) < tolerance && Math.abs(bl - bg[2]) < tolerance &&
+                   Math.max(r, g, bl) - Math.min(r, g, bl) <= 5;
+        };
+        const seen = new Uint8Array(W * H), stack = [];
+        for (let X = 0; X < W; X++) stack.push(X, (H - 1) * W + X);
+        for (let Y = 0; Y < H; Y++) stack.push(Y * W, Y * W + W - 1);
+        while (stack.length) {
+            const p = stack.pop();
+            if (seen[p]) continue;
+            seen[p] = 1;
+            if (!isBg(p * 4)) continue;
+            d[p * 4 + 3] = 0;
+            const px = p % W;
+            if (px > 0) stack.push(p - 1);
+            if (px < W - 1) stack.push(p + 1);
+            if (p >= W) stack.push(p - W);
+            if (p < W * (H - 1)) stack.push(p + W);
+        }
+        x.putImageData(data, 0, 0);
+        return c;
+    } catch (e) {
+        return img;
+    }
+}
+let enemySprite = imgEnemy, enemyCrop = null;
+function prepareEnemy() { enemySprite = removeBackground(imgEnemy); enemyCrop = opaqueBounds(enemySprite); }
+imgEnemy.onload = prepareEnemy;
+if (imgEnemy.complete && imgEnemy.naturalWidth) prepareEnemy();
 
 // TTS exponential backoff implementation
 // Aynı anda tek konuşma; geç gelen ses anlamsız olacağı için en fazla 1 kısa tekrar
@@ -414,6 +455,54 @@ function shoot() {
     });
 }
 
+// --- BALYOZ ---
+const SWING_FRAMES = 24, HAMMER_REACH = 190;
+function hammer() {
+    if(!gameStarted || player.isDying || paused || levelCompleted || player.swing > 0) return;
+    player.swing = SWING_FRAMES;
+    player.swingHit = false;
+}
+
+// Animasyon ilerlemesine (0→1) göre balyozun açısı: geri kaldır → öne indir → toparlan
+const HAMMER_IDLE = 0.45, HAMMER_BACK = -1.4, HAMMER_DOWN = 1.9;
+function hammerAngle() {
+    if(player.swing <= 0) return HAMMER_IDLE;
+    const p = 1 - player.swing / SWING_FRAMES;
+    const ease = v => v * v * (3 - 2 * v);
+    if(p < 0.3) return HAMMER_IDLE + (HAMMER_BACK - HAMMER_IDLE) * ease(p / 0.3);
+    if(p < 0.5) return HAMMER_BACK + (HAMMER_DOWN - HAMMER_BACK) * ease((p - 0.3) / 0.2);
+    if(p < 0.75) return HAMMER_DOWN;
+    return HAMMER_DOWN + (HAMMER_IDLE - HAMMER_DOWN) * ease((p - 0.75) / 0.25);
+}
+
+function updateHammer() {
+    if(player.swing <= 0) return;
+    player.swing--;
+    // Balyoz yere indiği anda (ilerleme %50) önündeki halkı ez
+    if(!player.swingHit && 1 - player.swing / SWING_FRAMES >= 0.5) {
+        player.swingHit = true;
+        const cx = player.x + player.w / 2;
+        const minX = Math.min(cx, cx + player.dir * HAMMER_REACH), maxX = Math.max(cx, cx + player.dir * HAMMER_REACH);
+        const headX = cx + player.dir * (HAMMER_REACH - 40), headY = player.y + player.h - 10;
+        for(let i = 0; i < 8; i++) createParticle(headX, headY);   // toz
+        enemies.forEach(en => {
+            if(!en.dead && en.x < maxX && en.x + en.w > minX && en.y < player.y + player.h + 20 && en.y + en.h > player.y - 60) {
+                killEnemy(en);
+            }
+        });
+    }
+}
+
+function killEnemy(en) {
+    if(en.dead) return;
+    en.dead = true;
+    killedEnemies++;
+    createParticle(en.x + en.w/2, en.y, t("hit"), "white", 1.0);
+    speak(t("enemyCry"), "Aoede");
+    $('score').innerText = score += 2000; $('kills').innerText = killedEnemies;
+    if(killedEnemies >= targetKills) setTimeout(completeLevel, 500);
+}
+
 async function die() {
     // Hedef tamamlandıysa (bitiş ekranı gelmek üzere) artık ölünmez
     if(player.isDying || levelCompleted || killedEnemies >= targetKills) return;
@@ -421,7 +510,7 @@ async function die() {
     $('game-container').classList.add('shake');
     $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
     
-    // Emine başarılı vuruş yaptığında GEBER yazısı çıkar
+    // Halk başarılı vuruş yaptığında GEBER yazısı çıkar
     createParticle(player.x + player.w/2, player.y + player.h/2, t("die"), "red", 2.0);
     
     speak(t("ouch"), "Kore");
@@ -466,6 +555,7 @@ function createLevel() {
     levelStartScore = score;
     player.x = 100; player.y = 0; player.vx = 0; player.vy = 0; camX = 0;
     player.isDying = false; player.deathAngle = 0; player.opacity = 1; player.mouthOpen = 0; player.dir = 1;
+    player.swing = 0; player.swingHit = false;
     $('game-container').classList.remove('shake');
     $('kills').innerText = "0";
 
@@ -524,6 +614,7 @@ function update() {
         if(player.y > height + 200) die();
 
         if(player.mouthOpen > 0) player.mouthOpen -= 0.05;
+        updateHammer();
 
         player.grounded = false;
         for(let p of platforms) {
@@ -591,14 +682,8 @@ function update() {
         }
         if(!player.isDying && player.x + 40 < en.x + en.w - 40 && player.x + player.w - 40 > en.x && player.y + player.h > en.y && player.y < en.y + en.h) {
             if(player.vy > 0 && player.y + player.h < en.y + 60) {
-                en.dead = true; 
-                player.vy = -18; 
-                killedEnemies++;
-                // Kahraman Emine'yi öldürürse "aaah" yazısı çıkar
-                createParticle(en.x + en.w/2, en.y, t("hit"), "white", 1.0);
-                speak(t("enemyCry"), "Aoede");
-                $('score').innerText = score += 2000; $('kills').innerText = killedEnemies;
-                if(killedEnemies >= targetKills) setTimeout(completeLevel, 500);
+                player.vy = -18;
+                killEnemy(en);   // üstüne zıplayınca ezilir
             } else die();
         }
     });
@@ -607,14 +692,8 @@ function update() {
         p.x += p.vx; p.vy += GRAVITY * 0.4; p.y += p.vy; p.angle += 0.2; p.life--;
         enemies.forEach(en => {
             if(!en.dead && p.active && p.x > en.x && p.x < en.x + en.w && p.y > en.y && p.y < en.y + en.h) {
-                en.dead = true; 
-                p.active = false; 
-                killedEnemies++;
-                // Kahraman vuruşla öldürürse "aaah" yazısı çıkar
-                createParticle(en.x + en.w/2, en.y, t("hit"), "white", 1.0);
-                speak(t("enemyCry"), "Aoede");
-                $('score').innerText = score += 2000; $('kills').innerText = killedEnemies;
-                if(killedEnemies >= targetKills) setTimeout(completeLevel, 500);
+                p.active = false;
+                killEnemy(en);
             }
         });
     });
@@ -706,6 +785,26 @@ function drawLegs(ctx, cx, topY, h, dir, phase, moving, airborne, style) {
     return { k, drop };
 }
 
+// Balyoz, Recep'in fotoğraf koordinatlarında (100x140, merkez 0,0) eldeki noktadan çizilir
+function drawHammer(ctx, angle) {
+    const L = 130;
+    ctx.save();
+    ctx.translate(40, 35);            // el
+    ctx.rotate(angle);
+    // Sap
+    ctx.fillStyle = "#8b5a2b";
+    ctx.strokeStyle = "#5c3a1a";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(-5, -L, 10, L + 12, 4); ctx.fill(); ctx.stroke();
+    // Demir baş
+    const g = ctx.createLinearGradient(0, -L - 18, 0, -L + 18);
+    g.addColorStop(0, "#9ca3af"); g.addColorStop(0.5, "#4b5563"); g.addColorStop(1, "#1f2937");
+    ctx.fillStyle = g;
+    ctx.strokeStyle = "#111827";
+    ctx.beginPath(); ctx.roundRect(-24, -L - 16, 48, 32, 5); ctx.fill(); ctx.stroke();
+    ctx.restore();
+}
+
 function draw() {
     ctx.clearRect(0,0,width,height);
     ctx.save();
@@ -719,19 +818,21 @@ function draw() {
     items.forEach(it => { if(!it.collected) drawKulHakkiBag(ctx, it.x, it.y, 80); });
     enemies.forEach(en => {
         if(en.dead) return;
-        // Emine'nin fotoğrafı boydan (kendi ayakları var), o yüzden ek bacak yok:
+        // Halk'ın fotoğrafı boydan (kendi ayakları var), o yüzden ek bacak yok:
         // yürürken ayakların üstünde sağa-sola salınır, her adımda hafif yükselir.
         const moving = en.lastSpeed > 0;
         const p = en.walkCycle;
         const sway = moving ? Math.sin(p) * 0.07 + en.dir * 0.03 : 0;  // salınım + yürüme yönüne hafif eğilme
         const bob  = moving ? -Math.abs(Math.cos(p)) * 6 : 0;          // adım ortasında yükselme
         // Kırpılmış fotoğraf kutu yüksekliğine oranını koruyarak sığar, ayaklar zeminde
-        const c = enemyCrop || { sx: 0, sy: 0, sw: imgEnemy.naturalWidth || en.w, sh: imgEnemy.naturalHeight || en.h };
+        const c = enemyCrop || { sx: 0, sy: 0, sw: imgEnemy.naturalWidth, sh: imgEnemy.naturalHeight };
+        if(!c.sw) return;   // resim henüz yüklenmedi
         const dh = en.h, dw = Math.min(en.w, dh * c.sw / c.sh);
         ctx.save();
         ctx.translate(en.x + en.w / 2, en.y + en.h);   // dönme noktası: ayakların ortası
         ctx.rotate(sway);
-        ctx.drawImage(imgEnemy, c.sx, c.sy, c.sw, c.sh, -dw / 2, -dh + bob, dw, dh);
+        if(en.dir === -1) ctx.scale(-1, 1);        // yürüdüğü yöne baksın
+        ctx.drawImage(enemySprite, c.sx, c.sy, c.sw, c.sh, -dw / 2, -dh + bob, dw, dh);
         ctx.restore();
     });
 
@@ -760,6 +861,7 @@ function draw() {
         ctx.fillStyle = "white";
         ctx.fillRect(-10, 30 - 30 * player.mouthOpen, 20, 10 * player.mouthOpen);
     }
+    drawHammer(ctx, hammerAngle());
     ctx.restore();
 
     playerProjectiles.forEach(p => {
@@ -803,7 +905,7 @@ function loop(now) {
 window.onkeydown = e => { 
     let k = e.key.toLowerCase();
     if(k==='a') keys.a=true; if(k==='d') keys.d=true; 
-    if(e.key===' ') jump(); if(e.key==='Enter') shoot(); 
+    if(e.key===' ') jump(); if(e.key==='Enter') shoot(); if(k==='f' && !e.repeat) hammer(); 
 };
 window.onkeyup = e => { 
     let k = e.key.toLowerCase();
@@ -851,6 +953,7 @@ joyWrap.addEventListener('pointercancel', joyEnd);
 
 $('jump-btn').addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
 $('shoot-btn').addEventListener('pointerdown', e => { e.preventDefault(); shoot(); });
+$('hammer-btn').addEventListener('pointerdown', e => { e.preventDefault(); hammer(); });
 // Canvas'ı ekranın gerçek piksel yoğunluğuna göre boyutlandır (Retina/telefonlarda net görüntü).
 // Oyun kodu CSS pikseliyle çalışmaya devam eder; ölçekleme setTransform ile yapılır.
 function resizeCanvas() {

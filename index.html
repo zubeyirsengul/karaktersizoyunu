@@ -105,7 +105,8 @@ const LANGS = {
         winTitle: "ZAFER SİZİN!", winNote: "Karnımız doydu, ekonomi bitti!", winBtn: "TEKRAR OYNA",
         bag: ["KUL", "HAKKI"],
         voices: ["Ham!", "Gelsin paracıklar!", "Yarasın!", "Çok lezzetli!", "Kul hakkı gibisi yok!"],
-        ouch: "Eyvah!", enemyCry: "ANAM"
+        ouch: "Eyvah!", enemyCry: "ANAM",
+        bossName: "ALEVİ", bossIntro: "BÖLÜM SONU CANAVARI!"
     },
     en: {
         title: "OMURGASIZ - Voice Edition",
@@ -119,7 +120,8 @@ const LANGS = {
         winTitle: "VICTORY IS YOURS!", winNote: "Our bellies are full, the economy is finished!", winBtn: "PLAY AGAIN",
         bag: ["PEOPLE'S", "DUE"],
         voices: ["Nom!", "Come to me, money!", "Enjoy!", "So delicious!", "Nothing beats the people's due!"],
-        ouch: "Uh oh!", enemyCry: "MAMA!"
+        ouch: "Uh oh!", enemyCry: "MAMA!",
+        bossName: "ALEVİ", bossIntro: "BOSS FIGHT!"
     },
     fr: {
         title: "OMURGASIZ - Édition Vocale",
@@ -133,7 +135,8 @@ const LANGS = {
         winTitle: "LA VICTOIRE EST À VOUS !", winNote: "Nos ventres sont pleins, l'économie est finie !", winBtn: "REJOUER",
         bag: ["DROIT DU", "PEUPLE"],
         voices: ["Miam !", "Venez, petits sous !", "Bon appétit !", "Délicieux !", "Rien ne vaut le bien du peuple !"],
-        ouch: "Oh non !", enemyCry: "MAMAN !"
+        ouch: "Oh non !", enemyCry: "MAMAN !",
+        bossName: "ALEVİ", bossIntro: "BOSS DE FIN !"
     },
     nl: {
         title: "OMURGASIZ - Spraakeditie",
@@ -147,7 +150,8 @@ const LANGS = {
         winTitle: "DE OVERWINNING IS VAN JOU!", winNote: "Onze buiken zijn vol, de economie is op!", winBtn: "OPNIEUW SPELEN",
         bag: ["VOLKS", "RECHT"],
         voices: ["Hap!", "Kom maar, geldjes!", "Eet smakelijk!", "Heerlijk!", "Niets gaat boven volksrecht!"],
-        ouch: "Oei!", enemyCry: "MAMA!"
+        ouch: "Oei!", enemyCry: "MAMA!",
+        bossName: "ALEVİ", bossIntro: "EINDBAAS!"
     },
     de: {
         title: "OMURGASIZ - Sprachausgabe",
@@ -161,7 +165,8 @@ const LANGS = {
         winTitle: "DER SIEG GEHÖRT DIR!", winNote: "Die Bäuche sind voll, die Wirtschaft ist am Ende!", winBtn: "NOCHMAL SPIELEN",
         bag: ["VOLKS", "RECHT"],
         voices: ["Mampf!", "Her mit dem Geld!", "Guten Appetit!", "So lecker!", "Nichts geht über Volksrecht!"],
-        ouch: "Oh nein!", enemyCry: "MAMA!"
+        ouch: "Oh nein!", enemyCry: "MAMA!",
+        bossName: "ALEVİ", bossIntro: "ENDGEGNER!"
     },
     ru: {
         title: "OMURGASIZ - Голосовая версия",
@@ -175,7 +180,8 @@ const LANGS = {
         winTitle: "ПОБЕДА ЗА ВАМИ!", winNote: "Животы полны, экономике конец!", winBtn: "ИГРАТЬ СНОВА",
         bag: ["НАРОДНОЕ", "ДОБРО"],
         voices: ["Ам!", "Идите сюда, денежки!", "Приятного аппетита!", "Очень вкусно!", "Нет ничего лучше народного добра!"],
-        ouch: "Ой-ой!", enemyCry: "МАМА!"
+        ouch: "Ой-ой!", enemyCry: "МАМА!",
+        bossName: "АЛЕВИ", bossIntro: "БОСС!"
     }
 };
 
@@ -209,6 +215,8 @@ const canvas = $('gameCanvas'), ctx = canvas.getContext('2d');
 let width, height, score = 0, gameStarted = false, camX = 0, paused = false;
 let items = [], platforms = [], enemies = [], projectiles = [], playerProjectiles = [], particles = [];
 let killedEnemies = 0, currentLevel = 1, targetKills = 4, levelCompleted = false, levelStartScore = 0;
+let levelEnding = false;                 // bitiş ekranı gelmek üzere: artık ölünmez
+let boss = null, bossCheckpoint = null;  // 1. bölüm sonu canavarı ALEVİ; ölünce canavardan devam
 const keys = { a: false, d: false };
 
 const GRAVITY = 0.95;
@@ -377,30 +385,75 @@ function drawKulHakkiBag(ctx, x, y, size, angle = 0) {
     ctx.restore();
 }
 
-function drawLuxuryHandbag(ctx, x, y, size, angle = 0) {
+function drawCashRegister(ctx, x, y, size, angle = 0) {
+    const k = size / 55;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
-    
-    // Çanta gövdesi
-    ctx.fillStyle = "#3d0a0a"; 
+    ctx.scale(k, k);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#1f2937";
+    // Para çekmecesi
+    ctx.fillStyle = "#374151";
+    ctx.beginPath(); ctx.roundRect(-30, 8, 60, 18, 3); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#9ca3af";
+    ctx.fillRect(-9, 15, 18, 4);
+    // Eğik tuş paneli
+    ctx.fillStyle = "#d1d5db";
     ctx.beginPath();
-    ctx.roundRect(-size/2, -size/3, size, size*0.8, 5);
+    ctx.moveTo(-28, 8); ctx.lineTo(28, 8); ctx.lineTo(21, -14); ctx.lineTo(-21, -14);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#4b5563";
+    for (let r = 0; r < 3; r++)
+        for (let c = 0; c < 4; c++) ctx.fillRect(-17 + c * 9, -10 + r * 6, 6, 4);
+    // Ekran
+    ctx.fillStyle = "#6b7280";
+    ctx.fillRect(-4, -18, 8, 4);
+    ctx.fillStyle = "#111827";
+    ctx.beginPath(); ctx.roundRect(-16, -32, 32, 15, 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#22c55e";
+    ctx.font = "bold 10px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("₺999", 0, -24);
+    ctx.restore();
+}
+
+// Alttan yuvarlak, ucu yukarı sivrilen tek alev dili (taban: cx, baseY)
+function flameTongue(ctx, cx, baseY, w, h, lean = 0) {
+    ctx.beginPath();
+    ctx.moveTo(cx - w / 2, baseY);
+    ctx.bezierCurveTo(cx - w / 2, baseY - h * 0.5, cx + lean - w * 0.15, baseY - h * 0.7, cx + lean, baseY - h);
+    ctx.bezierCurveTo(cx + lean + w * 0.15, baseY - h * 0.7, cx + w / 2, baseY - h * 0.5, cx + w / 2, baseY);
+    ctx.quadraticCurveTo(cx, baseY + w * 0.35, cx - w / 2, baseY);
     ctx.fill();
-    
-    // Altın detay
-    ctx.fillStyle = "#fbbf24";
-    ctx.beginPath();
-    ctx.arc(0, 0, size/6, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Sap
-    ctx.strokeStyle = "#2d0707";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(0, -size/3, size/3, Math.PI, 0);
-    ctx.stroke();
-    
+}
+
+const FIRE_COLORS = ["#dc2626", "#f97316", "#fde047"];
+
+// ALEVİ'nin attığı alev: havadayken kuyruklu top, yere düşünce bir süre yanan ateş
+function drawFire(ctx, p) {
+    ctx.save();
+    if (p.grounded) {
+        ctx.globalAlpha = Math.min(1, p.life / 30);   // sönerken solar
+        FIRE_COLORS.forEach((col, i) => {
+            const sc = 1 - i * 0.3;
+            ctx.fillStyle = col;
+            for (let j = -1; j <= 1; j++) {
+                flameTongue(ctx, p.x + j * 16 * sc, p.y, 26 * sc,
+                    (34 + 10 * Math.sin(p.life * 0.4 + j * 2 + i)) * sc, Math.sin(p.life * 0.2 + j) * 4);
+            }
+        });
+    } else {
+        ctx.translate(p.x, p.y);
+        ctx.rotate(Math.atan2(p.vy, p.vx) - Math.PI / 2);   // kuyruk hareketin tersine uzar
+        const flick = Math.sin(p.life * 0.6) * 6;
+        FIRE_COLORS.forEach((col, i) => {
+            const sc = 1 - i * 0.3;
+            ctx.fillStyle = col;
+            flameTongue(ctx, 0, 8 * sc, 30 * sc, (55 + flick) * sc);
+        });
+    }
     ctx.restore();
 }
 
@@ -490,6 +543,7 @@ function updateHammer() {
                 killEnemy(en);
             }
         });
+        if(boss && boss.x + 30 < maxX && boss.x + boss.w - 30 > minX) damageBoss(2);
     }
 }
 
@@ -500,12 +554,111 @@ function killEnemy(en) {
     createParticle(en.x + en.w/2, en.y, t("hit"), "white", 1.0);
     speak(t("enemyCry"), "Aoede");
     $('score').innerText = score += 2000; $('kills').innerText = killedEnemies;
-    if(killedEnemies >= targetKills) setTimeout(completeLevel, 500);
+    if(killedEnemies === targetKills) {
+        // 1. bölümde hedef tamamlanınca bölüm sonu canavarı gelir; 2. bölüm direkt biter
+        if(currentLevel === 1) spawnBoss(player.x + 420);
+        else { levelEnding = true; setTimeout(completeLevel, 500); }
+    }
+}
+
+// --- BÖLÜM SONU CANAVARI: ALEVİ ---
+const BOSS_HP = 12, BOSS_ARENA = 700;
+function spawnBoss(x) {
+    const w = 260, h = 340;
+    x = Math.min(x, WORLD_WIDTH - w - 100);
+    boss = { x, y: height - 60 - h, w, h, homeX: x, hp: BOSS_HP, dir: -1, look: -1,
+             timer: 0, charge: 0, attacks: 0, hurt: 0, anim: 0, dying: false, deathT: 0 };
+    enemies = enemies.filter(en => en.dead || Math.abs(en.x - x) > 1500);   // arenada halk kalmasın
+    bossCheckpoint = { score };
+    createParticle(player.x + player.w / 2, player.y - 30, t("bossIntro"), "#f97316", 2.5);
+}
+
+function fireball(x, y, vx, vy) {
+    projectiles.push({ type: 'fire', x, y, vx, vy, active: true, life: 400, angle: 0, grounded: false });
+}
+
+function bossAttack() {
+    const b = boss;
+    b.attacks++;
+    const mx = b.x + b.w / 2, my = b.y + b.h * 0.3;
+    if(b.attacks % 3 === 0) {
+        // Her üçüncü saldırı: oyuncuya doğru üçlü alev
+        const side = Math.sign(player.x + player.w / 2 - mx) || 1;
+        for(let i = 0; i < 3; i++) fireball(mx, my, side * (6 + i * 2.5), -8 + i * 1.5);
+    } else {
+        // Etrafa alev yağmuru
+        const n = 7;
+        for(let i = 0; i < n; i++) {
+            fireball(mx, b.y + 20, -9 + 18 * i / (n - 1) + (Math.random() - 0.5) * 2, -12 - Math.random() * 5);
+        }
+    }
+}
+
+function updateFire(p) {
+    p.life--;
+    if(!p.grounded) {
+        p.vy += 0.35;
+        const prevY = p.y;
+        p.x += p.vx; p.y += p.vy;
+        // Zemine/platforma düşünce orada yanmaya devam et
+        for(const pl of platforms) {
+            if(p.vy > 0 && p.x > pl.x && p.x < pl.x + pl.w && prevY <= pl.y && p.y >= pl.y) {
+                p.grounded = true; p.y = pl.y; p.vx = p.vy = 0; p.life = 150;
+                break;
+            }
+        }
+    }
+    if(player.isDying || !p.active) return;
+    const hit = p.grounded
+        // Yerdeki ateş: üstünden zıplanarak geçilebilir
+        ? p.x > player.x - 5 && p.x < player.x + player.w + 5 && player.y + player.h > p.y - 30
+        : p.x > player.x + 10 && p.x < player.x + player.w - 10 && p.y > player.y && p.y < player.y + player.h;
+    if(hit) die();
+}
+
+function damageBoss(n) {
+    if(!boss || boss.dying || boss.hurt > 0) return;
+    boss.hp = Math.max(0, boss.hp - n);
+    boss.hurt = 30;   // kısa dokunulmazlık (yanıp söner)
+    createParticle(boss.x + boss.w / 2, boss.y + 40, "-" + n, "#fde047", 0.8);
+    if(boss.hp > 0) return;
+    boss.dying = true;
+    levelEnding = true;
+    projectiles = projectiles.filter(p => p.type !== 'fire');
+    $('score').innerText = score += 20000;
+    $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
+    for(let i = 0; i < 30; i++) createParticle(boss.x + Math.random() * boss.w, boss.y + Math.random() * boss.h);
+    speak(t("enemyCry"), "Aoede");
+    setTimeout(completeLevel, 1800);
+}
+
+function updateBoss() {
+    const b = boss;
+    if(!b) return;
+    b.anim++;
+    if(b.dying) { if(++b.deathT > 60) boss = null; return; }
+    if(b.hurt > 0) b.hurt--;
+
+    const dist = (player.x + player.w / 2) - (b.x + b.w / 2);
+    b.look = Math.sign(dist) || b.look;
+    // Saldırı hazırlığında durur; değilse oyuncuya yavaşça yaklaşır (arenasından çıkmaz)
+    if(b.charge <= 0 && Math.abs(dist) > 250) b.x += Math.sign(dist) * 1.3;
+    b.x = Math.max(b.homeX - BOSS_ARENA, Math.min(b.x, b.homeX + BOSS_ARENA));
+
+    if(!player.isDying && Math.abs(dist) < 1400 && b.charge <= 0 && ++b.timer > 110) { b.timer = 0; b.charge = 30; }
+    if(b.charge > 0 && --b.charge === 0) bossAttack();
+
+    // Temas: üstüne zıplayınca hasar, yandan değince ölüm
+    if(!player.isDying && player.x + player.w - 30 > b.x + 40 && player.x + 30 < b.x + b.w - 40 &&
+       player.y + player.h > b.y + 40 && player.y < b.y + b.h) {
+        if(player.vy > 0 && player.y + player.h < b.y + 110) { player.vy = -22; damageBoss(2); }
+        else die();
+    }
 }
 
 async function die() {
-    // Hedef tamamlandıysa (bitiş ekranı gelmek üzere) artık ölünmez
-    if(player.isDying || levelCompleted || killedEnemies >= targetKills) return;
+    // Bölüm bitmek üzereyken artık ölünmez
+    if(player.isDying || levelCompleted || levelEnding) return;
     player.isDying = true;
     $('game-container').classList.add('shake');
     $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
@@ -519,9 +672,17 @@ async function die() {
 }
 
 function restartLevel() {
-    score = levelStartScore;
+    // Canavara ulaşıldıysa halkları tekrar öldürmek gerekmez: doğrudan canavardan devam
+    const cp = bossCheckpoint, start = levelStartScore;
+    score = cp ? cp.score : start;
     $('score').innerText = score;
     createLevel();
+    levelStartScore = start;
+    if(cp) {
+        killedEnemies = targetKills;
+        $('kills').innerText = killedEnemies;
+        spawnBoss(player.x + 420);
+    }
 }
 
 function completeLevel() {
@@ -551,7 +712,8 @@ function completeLevel() {
 
 function createLevel() {
     items = []; enemies = []; projectiles = []; playerProjectiles = []; particles = [];
-    killedEnemies = 0; levelCompleted = false;
+    killedEnemies = 0; levelCompleted = false; levelEnding = false;
+    boss = null; bossCheckpoint = null;
     levelStartScore = score;
     player.x = 100; player.y = 0; player.vx = 0; player.vy = 0; camX = 0;
     player.isDying = false; player.deathAngle = 0; player.opacity = 1; player.mouthOpen = 0; player.dir = 1;
@@ -669,8 +831,8 @@ function update() {
 
         if(Math.abs(en.x - player.x) < 1200 && ++en.timer > en.interval) {
             en.timer = 0;
-            // Çantaların menzili (life) kahramanın mermisinin (150) iki katı: 300
-            projectiles.push({ 
+            // Yazarkasaların menzili (life) kahramanın mermisinin (150) iki katı: 300
+            projectiles.push({ type: 'register', 
                 x: en.x, 
                 y: en.y + 60, 
                 vx: (player.x < en.x ? -10 : 10), 
@@ -696,13 +858,18 @@ function update() {
                 killEnemy(en);
             }
         });
+        if(boss && !boss.dying && p.active && p.x > boss.x + 40 && p.x < boss.x + boss.w - 40 && p.y > boss.y && p.y < boss.y + boss.h) {
+            p.active = false;
+            damageBoss(1);
+        }
     });
     playerProjectiles = playerProjectiles.filter(p => p.active && p.life > 0);
 
     projectiles.forEach(p => {
         p.x += p.vx; 
-        p.vy += 0.25; // Çantaya eklenen yer çekimi (gravity)
-        p.y += p.vy; 
+        if(p.type === 'fire') { updateFire(p); return; }
+        p.vy += 0.25; // Yazarkasaya eklenen yer çekimi (gravity)
+        p.y += p.vy;
         p.angle += 0.1;
         p.life--;
         if(!player.isDying && p.active && Math.hypot(p.x - (player.x + player.w/2), p.y - (player.h/2 + player.y)) < 80) {
@@ -711,6 +878,7 @@ function update() {
         }
     });
     projectiles = projectiles.filter(p => p.active && p.life > 0);
+    updateBoss();
 }
 
 // --- BACAK ANİMASYONU (Recep) ---
@@ -805,6 +973,85 @@ function drawHammer(ctx, angle) {
     ctx.restore();
 }
 
+function drawBoss(ctx, b) {
+    const t0 = b.anim, W = b.w, H = b.h;
+    const charge = b.charge > 0 ? 1 - b.charge / 30 : 0;   // saldırı hazırlığı 0→1
+    ctx.save();
+    ctx.translate(b.x + W / 2, b.y + H - W * 0.17);   // alevin yuvarlak altı zemine otursun
+    const shrink = b.dying ? Math.max(0, 1 - b.deathT / 60) : 1;
+    ctx.scale(shrink, shrink);
+    if(b.hurt > 0 && Math.floor(b.hurt / 4) % 2 === 0) ctx.globalAlpha = 0.45;
+
+    ctx.shadowColor = "#f97316";
+    ctx.shadowBlur = 40;
+    // Kollar: saldırıdan önce havaya kalkar
+    [-1, 1].forEach(side => {
+        ctx.save();
+        ctx.translate(side * W * 0.36, -H * 0.42);
+        ctx.rotate(side * (1.1 - charge * 0.9 + Math.sin(t0 * 0.1 + side) * 0.1));
+        ctx.fillStyle = "#ea580c"; flameTongue(ctx, 0, 0, W * 0.24, H * 0.38);
+        ctx.fillStyle = "#fde047"; flameTongue(ctx, 0, 0, W * 0.11, H * 0.24);
+        ctx.restore();
+    });
+    // Gövde: içten dışa sarı → kırmızı alev katmanları ve titreyen taç
+    [["#b91c1c", 1.0], ["#ea580c", 0.8], ["#f59e0b", 0.6], ["#fde047", 0.38]].forEach(([col, f], li) => {
+        ctx.fillStyle = col;
+        flameTongue(ctx, 0, 0, W * f, H * f * (0.95 + 0.05 * Math.sin(t0 * 0.2 + li)), Math.sin(t0 * 0.07 + li) * 10 * f);
+        for(const i of [-2, -1, 1, 2]) {
+            flameTongue(ctx, i * W * f * 0.2, -H * 0.05, W * f * 0.35,
+                H * f * (0.55 + 0.12 * Math.sin(t0 * 0.25 + i * 1.7 + li)), Math.sin(t0 * 0.1 + i) * 12);
+        }
+    });
+    ctx.shadowBlur = 0;
+
+    // Yüz
+    const fy = -H * 0.45, ex = W * 0.14;
+    [-1, 1].forEach(side => {
+        ctx.fillStyle = "#fffbeb";
+        ctx.beginPath(); ctx.ellipse(side * ex, fy, 17, 13, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#111";
+        ctx.beginPath(); ctx.arc(side * ex + b.look * 6, fy + 2, 6, 0, Math.PI * 2); ctx.fill();
+        // Çatık kaşlar
+        ctx.strokeStyle = "#7f1d1d"; ctx.lineWidth = 7; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(side * (ex + 22), fy - 26); ctx.lineTo(side * (ex - 14), fy - 13); ctx.stroke();
+    });
+    // Ağız: saldırırken açılır, dişler zikzak
+    const mh = 10 + charge * 26, my = fy + 48;
+    ctx.fillStyle = "#450a0a";
+    ctx.beginPath(); ctx.ellipse(0, my, 38, mh, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#fffbeb";
+    ctx.beginPath();
+    ctx.moveTo(-32, my - mh * 0.4);
+    for(let i = 0; i <= 8; i++) ctx.lineTo(-32 + i * 8, my - mh * 0.4 + (i % 2 ? 10 : 0));
+    ctx.lineTo(32, my - mh * 0.75); ctx.lineTo(-32, my - mh * 0.75);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    if(!b.dying) {
+        ctx.font = "bold 34px Arial";
+        ctx.textAlign = "center";
+        ctx.lineWidth = 5; ctx.strokeStyle = "#000";
+        ctx.strokeText(t("bossName"), b.x + W / 2, b.y - 20);
+        ctx.fillStyle = "#fde047";
+        ctx.fillText(t("bossName"), b.x + W / 2, b.y - 20);
+    }
+}
+
+// Ekranın üstünde canavarın can barı
+function drawBossBar(ctx, b) {
+    const w = Math.min(500, width - 40), x = (width - w) / 2, y = 95;
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillRect(x - 4, y - 4, w + 8, 26);
+    ctx.fillStyle = "#dc2626";
+    ctx.fillRect(x, y, w * b.hp / BOSS_HP, 18);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(t("bossName") + "  " + b.hp + " / " + BOSS_HP, width / 2, y + 9);
+    ctx.textBaseline = "alphabetic";
+}
+
 function draw() {
     ctx.clearRect(0,0,width,height);
     ctx.save();
@@ -835,6 +1082,7 @@ function draw() {
         ctx.drawImage(enemySprite, c.sx, c.sy, c.sw, c.sh, -dw / 2, -dh + bob, dw, dh);
         ctx.restore();
     });
+    if(boss) drawBoss(ctx, boss);
 
     ctx.save();
     ctx.translate(player.x + player.w/2, player.y + player.h/2);
@@ -869,7 +1117,8 @@ function draw() {
     });
     
     projectiles.forEach(p => {
-        drawLuxuryHandbag(ctx, p.x, p.y, 55, p.angle);
+        if(p.type === 'fire') drawFire(ctx, p);
+        else drawCashRegister(ctx, p.x, p.y, 55, p.angle);
     });
 
     particles.forEach(p => {
@@ -886,6 +1135,8 @@ function draw() {
     });
 
     ctx.restore();
+    ctx.globalAlpha = 1;
+    if(boss && !boss.dying) drawBossBar(ctx, boss);
 }
 
 // Sabit adımlı döngü: oyun mantığı her ekranda saniyede 60 kez çalışır
@@ -976,6 +1227,7 @@ window.onresize = () => {
     if(dy === 0) return;
     [platforms, items, enemies, projectiles, playerProjectiles, particles].forEach(list => list.forEach(o => o.y += dy));
     player.y += dy;
+    if(boss) boss.y += dy;
 };
 </script>
 </body>

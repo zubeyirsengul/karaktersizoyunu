@@ -224,7 +224,7 @@ const WORLD_WIDTH = 40000;
 
 // Oyuncu Özellikleri
 const player = { 
-    x: 100, y: 0, w: 100, h: 180,   // 140 fotoğraf + bacaklar
+    x: 100, y: 0, w: 100, h: 180,   // 120 kafa + 60 bacak
     vx: 0, vy: 0, 
     speed: 7, jumpPower: -22, 
     grounded: false, dir: 1, 
@@ -236,6 +236,33 @@ const player = {
 
 const imgPlayer = new Image(); imgPlayer.src = 'recep.jpg';
 const imgEnemy = new Image(); imgEnemy.src = 'halk.jpg';
+
+// Recep'in resminden sadece kafa alınır (gövdesi bacaklarla çakışmasın).
+// Koordinatlar recep.jpg (194x259) piksellerinde: x,y,w,h = kafanın kutusu;
+// clip = çene hattını izleyen kesim (soldaki ceket ve alttaki atkı dışarıda kalır).
+const RECEP_HEAD = {
+    x: 36, y: 8, w: 120, h: 162,
+    neckX: 115,                 // bacakların bağlandığı nokta (çenenin altı)
+    mouthX: 122, mouthY: 146,   // ağız açılma efekti
+    handX: 150, handY: 156,     // balyozu tutan el
+    clip: [[0,0],[194,0],[194,150],[150,152],[142,158],[132,163],[120,164],[108,168],[98,165],
+           [88,160],[78,157],[68,154],[64,145],[63,132],[55,128],[0,128]]
+};
+let headCanvas = null;
+function prepareHead() {
+    const H = RECEP_HEAD, c = document.createElement('canvas');
+    c.width = H.w; c.height = H.h;
+    const x = c.getContext('2d');
+    x.translate(-H.x, -H.y);
+    x.beginPath();
+    H.clip.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py));
+    x.closePath();
+    x.clip();
+    x.drawImage(imgPlayer, 0, 0);
+    headCanvas = c;
+}
+imgPlayer.onload = prepareHead;
+if (imgPlayer.complete && imgPlayer.naturalWidth) prepareHead();
 
 // Fotoğrafın şeffaf kenarlarını bul ki karakter kutusuna tam otursun (havada durmasın, kaymasın).
 // Dosya bilgisayardan (file://) açıldığında tarayıcı piksel okumaya izin vermeyebilir: o zaman resmin tamamı kullanılır.
@@ -883,10 +910,10 @@ function update() {
 
 // --- BACAK ANİMASYONU (Recep) ---
 // Her bacak iki parçalı: kalça → diz → ayak bileği, ucunda ayakkabı.
-// photoW/photoH: fotoğrafın asıl en-boyu (oran korunur); ratio: bacak boyu / kutu yüksekliği
+// photoH: kafa resminin asıl yüksekliği (oran korunur); ratio: bacak boyu / kutu yüksekliği
 const PLAYER_LEGS = {
-    photoW: 100, photoH: 140,
-    ratio: 0.27, width: 14, swing: 0.65,          // bacak boyu, kalınlık, adım açısı
+    photoH: RECEP_HEAD.h,
+    ratio: 0.333, width: 14, swing: 0.65,         // bacak boyu, kalınlık, adım açısı
     front: "#475569", back: "#334155",            // füme takım pantolon (arka bacak daha koyu)
     shoe: "#111111"
 };
@@ -935,7 +962,7 @@ function drawLeg(ctx, hipX, hipY, j, width, color, shoe) {
 function drawLegs(ctx, cx, topY, h, dir, phase, moving, airborne, style) {
     const legSpace = h * style.ratio;
     const k = (h - legSpace) / style.photoH;        // fotoğraf kalan alana orantılı sığar
-    const hipY = h - legSpace - style.width * 0.6;  // kalça fotoğrafın alt kenarının hemen arkasında
+    const hipY = h - legSpace - style.width * 0.6;  // kalça çenenin hemen arkasında
     const len = h - style.width * 0.7 - hipY;       // ayakkabı tabanı tam zemine değsin
     const pose = legPose(phase, moving, airborne, style.swing);
     const hips = [3, -3];
@@ -953,11 +980,12 @@ function drawLegs(ctx, cx, topY, h, dir, phase, moving, airborne, style) {
     return { k, drop };
 }
 
-// Balyoz, Recep'in fotoğraf koordinatlarında (100x140, merkez 0,0) eldeki noktadan çizilir
-function drawHammer(ctx, angle) {
+// Balyoz, oyuncunun merkezine göre piksel koordinatında (hx, hy) eldeki noktadan çizilir
+function drawHammer(ctx, hx, hy, angle) {
     const L = 130;
     ctx.save();
-    ctx.translate(40, 35);            // el
+    ctx.translate(hx, hy);            // el
+    ctx.scale(0.94, 0.94);
     ctx.rotate(angle);
     // Sap
     ctx.fillStyle = "#8b5a2b";
@@ -970,6 +998,10 @@ function drawHammer(ctx, angle) {
     ctx.fillStyle = g;
     ctx.strokeStyle = "#111827";
     ctx.beginPath(); ctx.roundRect(-24, -L - 16, 48, 32, 5); ctx.fill(); ctx.stroke();
+    // Sapı tutan yumruk
+    ctx.fillStyle = "#e8b48f";
+    ctx.strokeStyle = "#7c4a2d";
+    ctx.beginPath(); ctx.arc(0, -4, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     ctx.restore();
 }
 
@@ -1093,23 +1125,23 @@ function draw() {
     const playerMoving = player.grounded && Math.abs(player.vx) > 1;
     const body = drawLegs(ctx, 0, -player.h/2, player.h, 1, player.legCycle, playerMoving, !player.grounded, PLAYER_LEGS);
 
-    // Fotoğraf ve ağız, asıl 100x140 koordinatlarında çizilir; ölçek/kaydırma burada yapılır
-    const PW = PLAYER_LEGS.photoW, PH = PLAYER_LEGS.photoH;
-    ctx.translate(0, -player.h/2 + body.drop);
-    ctx.scale(body.k, body.k);
-    ctx.translate(0, PH/2);
-
-    ctx.drawImage(imgPlayer, -PW/2, -PH/2, PW, PH);
-
+    // Kafa, kaynak resim pikselleriyle çizilir; boyun noktası bacakların tam üstüne gelir
+    const H = RECEP_HEAD, k = body.k, top = -player.h/2 + body.drop;
+    ctx.save();
+    ctx.translate(-(H.neckX - H.x) * k, top);
+    ctx.scale(k, k);
+    if(headCanvas) ctx.drawImage(headCanvas, 0, 0);
     if(player.mouthOpen > 0.1) {
+        const mx = H.mouthX - H.x, my = H.mouthY - H.y, m = player.mouthOpen;
         ctx.fillStyle = "black";
         ctx.beginPath();
-        ctx.ellipse(0, 30, 35 * player.mouthOpen, 45 * player.mouthOpen, 0, 0, Math.PI * 2);
+        ctx.ellipse(mx, my, 15 * m, 19 * m, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "white";
-        ctx.fillRect(-10, 30 - 30 * player.mouthOpen, 20, 10 * player.mouthOpen);
+        ctx.fillRect(mx - 5, my - 15 * m, 10, 5 * m);
     }
-    drawHammer(ctx, hammerAngle());
+    ctx.restore();
+    drawHammer(ctx, (H.handX - H.neckX) * k, top + (H.handY - H.y) * k, hammerAngle());
     ctx.restore();
 
     playerProjectiles.forEach(p => {

@@ -18,4 +18,4 @@
   - Lisans: CC0. Kırpıldı, ses seviyesi eşitlendi, MP3'e dönüştürüldü.
 
 ## Grafikler
-- Recep'in gövdesi ve "DİN" yazılı kalkanı, tabancalı 17/25 polisi, kalkanlı çevik kuvvet, keskin nişancı, platformlar ve çukurlar, bölüm sonu canavarları (ALEVİ, KURT, FETÖ), bölüm sonu kapısı, başörtülü teyzeler, 1 dolar, bölüm arka planları ve Kaçak Saray'lı açılış sahnesi kodla (canvas) çizilmiştir, harici dosya kullanılmaz.
+- Recep'in gövdesi ve "DİN" yazılı kalkanı, tabancalı 17/25 polisi, kalkanlı çevik kuvvet, keskin nişancı, platformlar ve çukurlar, bölüm sonu canavarları (ALEVİ, KURT, FETÖ), bölüm sonu kapısı, başörtülü teyzeler, güç küreleri, 1 dolar, bölüm arka planları ve Kaçak Saray'lı açılış sahnesi kodla (canvas) çizilmiştir, harici dosya kullanılmaz.

@@ -19,6 +19,8 @@
         #status { top: 20px; left: 20px; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px #000; }
         #level-display { top: 20px; left: 50%; transform: translateX(-50%); font-size: 28px; font-weight: bold; color: var(--gold); }
         #kill-count { top: 60px; left: 20px; font-size: 18px; color: #ff4d4d; font-weight: bold; }
+        #hearts { top: 88px; left: 18px; font-size: 26px; letter-spacing: 2px; }
+        #pause-btn { position: absolute; top: 16px; right: 16px; z-index: 40; width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--gold); background: rgba(0,0,0,0.45); color: var(--gold); font-size: 22px; cursor: pointer; display: none; }
         
         #ui-layer { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
         #joystick-wrapper { position: absolute; bottom: 50px; left: 50px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); pointer-events: auto; display: flex; justify-content: center; align-items: center; }
@@ -82,6 +84,8 @@
     <div id="status" class="ui"><span data-i18n="treasure">Hazine</span>: <span id="score">0</span></div>
     <div id="level-display" class="ui"><span data-i18n="level">Seviye</span>: <span id="current-level">1</span></div>
     <div id="kill-count" class="ui"><span data-i18n="kills">Leş</span>: <span id="kills">0</span> / <span id="target-kills">7</span></div>
+    <div id="hearts" class="ui"></div>
+    <button id="pause-btn" type="button" aria-label="pause">⏸</button>
     
     <div id="ui-layer">
         <div id="joystick-wrapper"><div id="joystick-stick"></div></div>
@@ -108,7 +112,7 @@ const LANGS = {
         note: "\"Bu omurgasız bir yüzükle çıkmıştı yollara..\"",
         desc: "Kul Hakkı Torbalarını Topla!",
         start: "OYUNU BAŞLAT",
-        treasure: "Hazine", level: "Seviye", kills: "Leş",
+        treasure: "Hazine", level: "Seviye", kills: "Leş", pausedTitle: "DURAKLATILDI", pausedHint: "Devam etmek için ESC, P ya da ⏸",
         shoot: "FIRLAT", jump: "ZIPLA", hammer: "BALYOZ", shield: "KALKAN",
         die: "GEBER!", hit: "aaah", pickup: "MİS!",
         l1Title: "BÖLÜM 1 TAMAM!", l1Note: "Torbaları mideye indirdin! Şimdi sıra ikinci bölümde.", l1Btn: "2. BÖLÜME GEÇ",
@@ -126,7 +130,7 @@ const LANGS = {
         note: "\"This spineless one set out on the road with a ring..\"",
         desc: "Collect the People's Due Bags!",
         start: "START GAME",
-        treasure: "Treasure", level: "Level", kills: "Kills",
+        treasure: "Treasure", level: "Level", kills: "Kills", pausedTitle: "PAUSED", pausedHint: "Press ESC, P or ⏸ to continue",
         shoot: "THROW", jump: "JUMP", hammer: "HAMMER", shield: "SHIELD",
         die: "YOU'RE DONE!", hit: "aaah", pickup: "YUM!",
         l1Title: "LEVEL 1 COMPLETE!", l1Note: "You gobbled up the bags! Now on to level two.", l1Btn: "GO TO LEVEL 2",
@@ -144,7 +148,7 @@ const LANGS = {
         note: "« Cet invertébré avait pris la route avec une bague.. »",
         desc: "Ramasse les sacs du Droit du Peuple !",
         start: "LANCER LE JEU",
-        treasure: "Trésor", level: "Niveau", kills: "Éliminés",
+        treasure: "Trésor", level: "Niveau", kills: "Éliminés", pausedTitle: "PAUSE", pausedHint: "ESC, P ou ⏸ pour continuer",
         shoot: "LANCER", jump: "SAUTER", hammer: "MARTEAU", shield: "BOUCLIER",
         die: "CREVÉ !", hit: "aaah", pickup: "MIAM !",
         l1Title: "NIVEAU 1 TERMINÉ !", l1Note: "Tu as englouti les sacs ! Place au deuxième niveau.", l1Btn: "NIVEAU 2",
@@ -162,7 +166,7 @@ const LANGS = {
         note: "\"Deze ruggengraatloze was met een ring op pad gegaan..\"",
         desc: "Verzamel de Volksrecht-zakken!",
         start: "SPEL STARTEN",
-        treasure: "Schat", level: "Level", kills: "Gedood",
+        treasure: "Schat", level: "Level", kills: "Gedood", pausedTitle: "GEPAUZEERD", pausedHint: "Druk op ESC, P of ⏸ om verder te gaan",
         shoot: "GOOIEN", jump: "SPRINGEN", hammer: "MOKER", shield: "SCHILD",
         die: "KAPOT!", hit: "aaah", pickup: "LEKKER!",
         l1Title: "LEVEL 1 VOLTOOID!", l1Note: "Je hebt de zakken verslonden! Nu door naar level twee.", l1Btn: "NAAR LEVEL 2",
@@ -180,7 +184,7 @@ const LANGS = {
         note: "„Dieser Rückgratlose war mit einem Ring losgezogen..“",
         desc: "Sammle die Volksrecht-Säcke!",
         start: "SPIEL STARTEN",
-        treasure: "Schatz", level: "Level", kills: "Erledigt",
+        treasure: "Schatz", level: "Level", kills: "Erledigt", pausedTitle: "PAUSE", pausedHint: "ESC, P oder ⏸ zum Weiterspielen",
         shoot: "WERFEN", jump: "SPRINGEN", hammer: "HAMMER", shield: "SCHILD",
         die: "KAPUTT!", hit: "aaah", pickup: "LECKER!",
         l1Title: "LEVEL 1 GESCHAFFT!", l1Note: "Du hast die Säcke verschlungen! Weiter zu Level zwei.", l1Btn: "ZU LEVEL 2",
@@ -198,7 +202,7 @@ const LANGS = {
         note: "«Этот бесхребетный отправился в путь с кольцом..»",
         desc: "Собирай мешки народного добра!",
         start: "НАЧАТЬ ИГРУ",
-        treasure: "Казна", level: "Уровень", kills: "Убито",
+        treasure: "Казна", level: "Уровень", kills: "Убито", pausedTitle: "ПАУЗА", pausedHint: "Нажмите ESC, P или ⏸, чтобы продолжить",
         shoot: "БРОСОК", jump: "ПРЫЖОК", hammer: "КУВАЛДА", shield: "ЩИТ",
         die: "КОНЕЦ!", hit: "aaah", pickup: "ВКУСНО!",
         l1Title: "УРОВЕНЬ 1 ПРОЙДЕН!", l1Note: "Ты проглотил мешки! Теперь второй уровень.", l1Btn: "НА УРОВЕНЬ 2",
@@ -248,6 +252,7 @@ let levelEnding = false;                 // bitiş ekranı gelmek üzere: artık
 let boss = null, bossCheckpoint = null;  // 1. bölüm sonu canavarı ALEVİ; ölünce canavardan devam
 const keys = { a: false, d: false, s: false };
 let shieldHeld = false;   // dokunmatik KALKAN butonu basılı mı
+let userPaused = false;   // oyuncunun duraklatması (bölüm sonu ekranından ayrı)
 
 const GRAVITY = 0.95;
 const WORLD_WIDTH = 40000;
@@ -262,6 +267,7 @@ const player = {
     opacity: 1, legCycle: 0,
     mouthOpen: 0,
     shield: false,                   // kalkan kalkık mı
+    hp: 3, maxHp: 3, invuln: 0,      // can; vurulduktan sonra kısa dokunulmazlık (kare)
     swing: 0, swingHit: false        // balyoz: kalan animasyon karesi, bu vuruşta isabet kontrolü yapıldı mı
 };
 
@@ -549,14 +555,14 @@ function createParticle(x, y, text = null, color = "white", duration = 1.0) {
 }
 
 function jump() { 
-    if(player.grounded && !player.isDying && !paused && !levelCompleted) { 
+    if(player.grounded && !player.isDying && !paused && !userPaused && !levelCompleted) { 
         player.vy = player.jumpPower; 
         player.grounded = false; 
     } 
 }
 
 function shoot() {
-    if(!gameStarted || player.isDying || paused || levelCompleted || player.shield) return;
+    if(!gameStarted || player.isDying || paused || userPaused || levelCompleted || player.shield) return;
     playerProjectiles.push({ 
         x: player.x + (player.dir === 1 ? player.w : 0), 
         y: player.y + player.h / 2, 
@@ -568,7 +574,7 @@ function shoot() {
 // --- BALYOZ ---
 const SWING_FRAMES = 24, HAMMER_REACH = 190;
 function hammer() {
-    if(!gameStarted || player.isDying || paused || levelCompleted || player.swing > 0 || player.shield) return;
+    if(!gameStarted || player.isDying || paused || userPaused || levelCompleted || player.swing > 0 || player.shield) return;
     player.swing = SWING_FRAMES;
     player.swingHit = false;
 }
@@ -608,12 +614,15 @@ function updateHammer() {
 // Gerçek ses kayıtları: çığlıklar, canavar karşılamaları ve teyzeler (oyunun yapımcısının kendi sesi),
 // darbeler (Independent.nu, CC0), FETÖ'nün burun çekme + tükürük sesi (tools/feto_ses.py ile üretildi)
 const SFX_FILES = {
-    cry: ['sfx/ahh.mp3', 'sfx/uufff.mp3'],                 // polis ölümü
+    cry: ['sfx/uufff.mp3'],                                // polis ölümü
     hit: [1, 2, 3, 4, 5].map(i => `sfx/hit${i}.mp3`),
     greet_alevi: ['sfx/yaali.mp3'],                         // canavarların karşılama sesleri
     greet_kurt: ['sfx/kro.mp3'],
     greet_feto: ['sfx/feto_greet.mp3'],
-    granny: ['sfx/gotununkili.mp3']                         // canavar ölünce gelen teyzeler
+    granny: ['sfx/gotununkili.mp3'],                        // canavar ölünce gelen teyzeler
+    // Recep'in replikleri (kayıt yoksa yapay sese, Gemini, düşer)
+    voice_pickup: ['sfx/voice/gelsin.mp3', 'sfx/voice/kulhakki.mp3'],   // torba toplayınca
+    voice_ouch: ['sfx/ahh.mp3']                                         // vurulunca ve ölünce
 };
 let audioCtx = null;
 const sfxBuffers = Object.fromEntries(Object.keys(SFX_FILES).map(k => [k, []])), sfxLast = {};
@@ -677,7 +686,6 @@ function killEnemy(en) {
     en.fallDir = Math.sign(en.x + en.w / 2 - (player.x + player.w / 2)) || 1;
     enemyDeathSound(en);
     createParticle(en.x + en.w/2, en.y, isPolice ? t("policeCry") : t("hit"), isPolice ? "#60a5fa" : "white", 1.0);
-    if(isPolice) speak(t("policeCry"), "Charon");
     $('score').innerText = score += isPolice ? 3000 : 2000; $('kills').innerText = killedEnemies;
     if(killedEnemies === targetKills) {
         // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: ALEVİ, 2: KURT, 3: FETÖ)
@@ -1111,9 +1119,31 @@ function updateWave(p) {
     if(Math.abs(p.x - (player.x + player.w / 2)) < 40 && player.y + player.h > p.y - 45) die();
 }
 
-async function die() {
+// --- CAN SİSTEMİ ---
+// Vurulunca bir can gider, Recep kısa süre yanıp söner ve dokunulmaz olur; canlar bitince ölür.
+function updateHearts() {
+    $('hearts').textContent = '❤️'.repeat(Math.max(0, player.hp)) + '🖤'.repeat(Math.max(0, player.maxHp - player.hp));
+}
+function die() {
+    if(player.isDying || levelCompleted || levelEnding || player.invuln > 0) return;
+    player.hp--;
+    updateHearts();
+    if(player.hp <= 0) { killPlayer(); return; }
+    player.invuln = 90;
+    player.vy = -9;                                   // hafifçe havaya ve geriye savrulur
+    player.vx = -player.dir * 9;
+    player.knock = 12;
+    playSfx('hit', { rate: 1.1, vol: 0.8 });
+    createParticle(player.x + player.w / 2, player.y, "-1 ❤️", "#ef4444", 1.0);
+    $('game-container').classList.remove('shake'); void $('game-container').offsetWidth;
+    $('game-container').classList.add('shake');
+    if(!playSfx('voice_ouch')) speak(t("ouch"), "Kore");
+}
+
+async function killPlayer() {
     // Bölüm bitmek üzereyken artık ölünmez
     if(player.isDying || levelCompleted || levelEnding) return;
+    player.hp = 0; updateHearts();
     player.isDying = true;
     $('game-container').classList.add('shake');
     $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
@@ -1121,7 +1151,7 @@ async function die() {
     // Vurulunca GEBER yazısı çıkar
     createParticle(player.x + player.w/2, player.y + player.h/2, t("die"), "red", 2.0);
     
-    speak(t("ouch"), "Kore");
+    if(!playSfx('voice_ouch')) speak(t("ouch"), "Kore");
     // Sayfayı yenilemek yerine bulunulan bölümü baştan başlat
     setTimeout(restartLevel, 2500);
 }
@@ -1190,6 +1220,7 @@ function createLevel() {
     player.x = 100; player.y = 0; player.vx = 0; player.vy = 0; camX = 0;
     player.isDying = false; player.deathAngle = 0; player.opacity = 1; player.mouthOpen = 0; player.dir = 1;
     player.swing = 0; player.swingHit = false;
+    player.hp = player.maxHp; player.invuln = 0; player.knock = 0; updateHearts();
     $('game-container').classList.remove('shake');
     $('kills').innerText = "0";
 
@@ -1218,12 +1249,14 @@ function createLevel() {
 }
 
 function update() {
-    if(!gameStarted || paused) return;
+    if(!gameStarted || paused || userPaused) return;
 
     if(!player.isDying) {
         let moveDir = (keys.a ? -1 : (keys.d ? 1 : joyDir));
         player.shield = keys.s || shieldHeld;
-        player.vx = moveDir ? moveDir * player.speed * (player.shield ? 0.5 : 1) : player.vx * 0.85;   // kalkanla yavaş yürür
+        if(player.invuln > 0) player.invuln--;
+        if(player.knock > 0) { player.knock--; player.vx *= 0.9; }   // vurulunca kısa süre geri savrulur
+        else player.vx = moveDir ? moveDir * player.speed * (player.shield ? 0.5 : 1) : player.vx * 0.85;   // kalkanla yavaş yürür
         if(moveDir) player.dir = moveDir;
         // Adım hızı yürüme hızına bağlı: ayaklar yerde kaymaz
         if(player.grounded) player.legCycle += Math.abs(player.vx) * 0.06;
@@ -1235,7 +1268,7 @@ function update() {
         // Harita sınırları: zeminin dışına çıkılmasın
         player.x = Math.max(0, Math.min(player.x, WORLD_WIDTH - player.w));
         // Bir şekilde aşağı düşülürse öl
-        if(player.y > height + 200) die();
+        if(player.y > height + 200) killPlayer();   // uçuruma düşmek can sormaz
 
         if(player.mouthOpen > 0) player.mouthOpen -= 0.05;
         updateHammer();
@@ -1262,7 +1295,7 @@ function update() {
             $('score').innerText = score;
             $('sfx-pickup').currentTime = 0; $('sfx-pickup').play().catch(()=>{});
             player.mouthOpen = 1.0; 
-            speak(t("voices")[Math.floor(Math.random()*t("voices").length)], "Kore");
+            if(!playSfx('voice_pickup')) speak(t("voices")[Math.floor(Math.random()*t("voices").length)], "Kore");
             createParticle(it.x, it.y, t("pickup"), "#22c55e", 0.8);
         }
     });
@@ -2315,7 +2348,7 @@ function draw() {
 
     ctx.save();
     ctx.translate(player.x + player.w/2, player.y + player.h/2);
-    ctx.globalAlpha = player.opacity;
+    ctx.globalAlpha = player.opacity * (player.invuln > 0 && Math.floor(player.invuln / 5) % 2 ? 0.3 : 1);
     if(player.isDying) ctx.rotate(player.deathAngle);
     if(player.dir === -1 && !player.isDying) ctx.scale(-1, 1);
 
@@ -2356,6 +2389,13 @@ function draw() {
     ctx.globalAlpha = 1;
     if(boss && !boss.dying) drawBossBar(ctx, boss);
     drawGateHint(ctx);
+    if(userPaused) {
+        ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, width, height);
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "#fbbf24"; ctx.font = "bold 56px Arial"; ctx.fillText(t("pausedTitle"), width / 2, height / 2 - 20);
+        ctx.fillStyle = "#fff"; ctx.font = "20px Arial"; ctx.fillText(t("pausedHint"), width / 2, height / 2 + 30);
+        ctx.textBaseline = "alphabetic";
+    }
     if(screenFlash > 0) { ctx.fillStyle = `rgba(255,255,255,${screenFlash})`; ctx.fillRect(0, 0, width, height); }
 }
 
@@ -2373,8 +2413,24 @@ function loop(now) {
     requestAnimationFrame(loop);
 }
 
-window.onkeydown = e => { 
+// --- DURAKLATMA ---
+function setUserPause(on) {
+    if(!gameStarted || paused || levelCompleted) on = false;   // bölüm sonu ekranındayken duraklatma yok
+    if(userPaused === on) return;
+    userPaused = on;
+    keys.a = keys.d = keys.s = false; shieldHeld = false;
+    const m = $('bg-music');
+    if(on) m.pause(); else m.play().catch(()=>{});
+    $('pause-btn').textContent = on ? '▶' : '⏸';
+}
+$('pause-btn').addEventListener('click', () => setUserPause(!userPaused));
+// Başka sekmeye geçince oyun kendiliğinden durur
+document.addEventListener('visibilitychange', () => { if(document.hidden) setUserPause(true); });
+
+window.onkeydown = e => {
     let k = e.key.toLowerCase();
+    if(e.key === 'Escape' || k === 'p') { setUserPause(!userPaused); return; }
+    if(userPaused) return;
     if(k==='a') keys.a=true; if(k==='d') keys.d=true; if(k==='s' || e.key==='ArrowDown') keys.s=true;
     if(e.key===' ') jump(); if(e.key==='Enter') shoot(); if(k==='f' && !e.repeat) hammer(); 
 };
@@ -2590,6 +2646,7 @@ $('start-button').onclick = () => {
     removeIntro();
     $('overlay-screen').style.display = 'none';
     gameStarted = true;
+    $('pause-btn').style.display = 'block';
     resizeCanvas();
     createLevel();
     requestAnimationFrame(loop);

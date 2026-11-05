@@ -28,6 +28,7 @@
         .btn { width: 100px; height: 100px; background: rgba(251,191,36,0.6); border: 4px solid var(--gold); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; text-align: center; font-size: 14px; color: white; text-shadow: 1px 1px 2px black; }
         .shoot-btn { background: rgba(34,197,94,0.6); border-color: #22c55e; }
         .hammer-btn { position: absolute; bottom: 170px; right: 50px; pointer-events: auto; background: rgba(239,68,68,0.6); border-color: #ef4444; }
+        .shield-btn { position: absolute; bottom: 170px; right: 170px; pointer-events: auto; background: rgba(22,101,52,0.7); border-color: #fbbf24; }
         /* Dokunmatik cihazlarda klavye ipuçlarını gizle */
         @media (hover: none) and (pointer: coarse) { .key-hint { display: none; } }
         
@@ -89,6 +90,7 @@
             <div class="btn" id="jump-btn"><span data-i18n="jump">ZIPLA</span> <span class="key-hint">(Space)</span></div>
         </div>
         <div class="btn hammer-btn" id="hammer-btn"><span data-i18n="hammer">BALYOZ</span> <span class="key-hint">(F)</span></div>
+        <div class="btn shield-btn" id="shield-btn"><span data-i18n="shield">KALKAN</span> <span class="key-hint">(S)</span></div>
     </div>
     <canvas id="gameCanvas"></canvas>
 </div>
@@ -107,7 +109,7 @@ const LANGS = {
         desc: "Kul Hakkı Torbalarını Topla!",
         start: "OYUNU BAŞLAT",
         treasure: "Hazine", level: "Seviye", kills: "Leş",
-        shoot: "FIRLAT", jump: "ZIPLA", hammer: "BALYOZ",
+        shoot: "FIRLAT", jump: "ZIPLA", hammer: "BALYOZ", shield: "KALKAN",
         die: "GEBER!", hit: "aaah", pickup: "MİS!",
         l1Title: "BÖLÜM 1 TAMAM!", l1Note: "Torbaları mideye indirdin! Şimdi sıra ikinci bölümde.", l1Btn: "2. BÖLÜME GEÇ",
         winTitle: "ZAFER SİZİN!", winNote: "Karnımız doydu, ekonomi bitti!", winBtn: "TEKRAR OYNA",
@@ -124,7 +126,7 @@ const LANGS = {
         desc: "Collect the People's Due Bags!",
         start: "START GAME",
         treasure: "Treasure", level: "Level", kills: "Kills",
-        shoot: "THROW", jump: "JUMP", hammer: "HAMMER",
+        shoot: "THROW", jump: "JUMP", hammer: "HAMMER", shield: "SHIELD",
         die: "YOU'RE DONE!", hit: "aaah", pickup: "YUM!",
         l1Title: "LEVEL 1 COMPLETE!", l1Note: "You gobbled up the bags! Now on to level two.", l1Btn: "GO TO LEVEL 2",
         winTitle: "VICTORY IS YOURS!", winNote: "Our bellies are full, the economy is finished!", winBtn: "PLAY AGAIN",
@@ -141,7 +143,7 @@ const LANGS = {
         desc: "Ramasse les sacs du Droit du Peuple !",
         start: "LANCER LE JEU",
         treasure: "Trésor", level: "Niveau", kills: "Éliminés",
-        shoot: "LANCER", jump: "SAUTER", hammer: "MARTEAU",
+        shoot: "LANCER", jump: "SAUTER", hammer: "MARTEAU", shield: "BOUCLIER",
         die: "CREVÉ !", hit: "aaah", pickup: "MIAM !",
         l1Title: "NIVEAU 1 TERMINÉ !", l1Note: "Tu as englouti les sacs ! Place au deuxième niveau.", l1Btn: "NIVEAU 2",
         winTitle: "LA VICTOIRE EST À VOUS !", winNote: "Nos ventres sont pleins, l'économie est finie !", winBtn: "REJOUER",
@@ -158,7 +160,7 @@ const LANGS = {
         desc: "Verzamel de Volksrecht-zakken!",
         start: "SPEL STARTEN",
         treasure: "Schat", level: "Level", kills: "Gedood",
-        shoot: "GOOIEN", jump: "SPRINGEN", hammer: "MOKER",
+        shoot: "GOOIEN", jump: "SPRINGEN", hammer: "MOKER", shield: "SCHILD",
         die: "KAPOT!", hit: "aaah", pickup: "LEKKER!",
         l1Title: "LEVEL 1 VOLTOOID!", l1Note: "Je hebt de zakken verslonden! Nu door naar level twee.", l1Btn: "NAAR LEVEL 2",
         winTitle: "DE OVERWINNING IS VAN JOU!", winNote: "Onze buiken zijn vol, de economie is op!", winBtn: "OPNIEUW SPELEN",
@@ -175,7 +177,7 @@ const LANGS = {
         desc: "Sammle die Volksrecht-Säcke!",
         start: "SPIEL STARTEN",
         treasure: "Schatz", level: "Level", kills: "Erledigt",
-        shoot: "WERFEN", jump: "SPRINGEN", hammer: "HAMMER",
+        shoot: "WERFEN", jump: "SPRINGEN", hammer: "HAMMER", shield: "SCHILD",
         die: "KAPUTT!", hit: "aaah", pickup: "LECKER!",
         l1Title: "LEVEL 1 GESCHAFFT!", l1Note: "Du hast die Säcke verschlungen! Weiter zu Level zwei.", l1Btn: "ZU LEVEL 2",
         winTitle: "DER SIEG GEHÖRT DIR!", winNote: "Die Bäuche sind voll, die Wirtschaft ist am Ende!", winBtn: "NOCHMAL SPIELEN",
@@ -192,7 +194,7 @@ const LANGS = {
         desc: "Собирай мешки народного добра!",
         start: "НАЧАТЬ ИГРУ",
         treasure: "Казна", level: "Уровень", kills: "Убито",
-        shoot: "БРОСОК", jump: "ПРЫЖОК", hammer: "КУВАЛДА",
+        shoot: "БРОСОК", jump: "ПРЫЖОК", hammer: "КУВАЛДА", shield: "ЩИТ",
         die: "КОНЕЦ!", hit: "aaah", pickup: "ВКУСНО!",
         l1Title: "УРОВЕНЬ 1 ПРОЙДЕН!", l1Note: "Ты проглотил мешки! Теперь второй уровень.", l1Btn: "НА УРОВЕНЬ 2",
         winTitle: "ПОБЕДА ЗА ВАМИ!", winNote: "Животы полны, экономике конец!", winBtn: "ИГРАТЬ СНОВА",
@@ -238,7 +240,8 @@ let items = [], platforms = [], enemies = [], projectiles = [], playerProjectile
 let killedEnemies = 0, currentLevel = 1, targetKills = 4, levelCompleted = false, levelStartScore = 0;
 let levelEnding = false;                 // bitiş ekranı gelmek üzere: artık ölünmez
 let boss = null, bossCheckpoint = null;  // 1. bölüm sonu canavarı ALEVİ; ölünce canavardan devam
-const keys = { a: false, d: false };
+const keys = { a: false, d: false, s: false };
+let shieldHeld = false;   // dokunmatik KALKAN butonu basılı mı
 
 const GRAVITY = 0.95;
 const WORLD_WIDTH = 40000;
@@ -252,11 +255,11 @@ const player = {
     isDying: false, deathAngle: 0, 
     opacity: 1, legCycle: 0,
     mouthOpen: 0,
+    shield: false,                   // kalkan kalkık mı
     swing: 0, swingHit: false        // balyoz: kalan animasyon karesi, bu vuruşta isabet kontrolü yapıldı mı
 };
 
 const imgPlayer = new Image(); imgPlayer.src = 'recep.jpg';
-const imgEnemy = new Image(); imgEnemy.src = 'halk.jpg';
 
 // Recep'in resminden sadece kafa alınır (gövdesi bacaklarla çakışmasın).
 // Koordinatlar recep.jpg (194x259) piksellerinde: x,y,w,h = kafanın kutusu;
@@ -284,74 +287,6 @@ function prepareHead() {
 }
 imgPlayer.onload = prepareHead;
 if (imgPlayer.complete && imgPlayer.naturalWidth) prepareHead();
-
-// Fotoğrafın şeffaf kenarlarını bul ki karakter kutusuna tam otursun (havada durmasın, kaymasın).
-// Dosya bilgisayardan (file://) açıldığında tarayıcı piksel okumaya izin vermeyebilir: o zaman resmin tamamı kullanılır.
-function opaqueBounds(img) {
-    const full = { sx: 0, sy: 0, sw: img.naturalWidth || img.width, sh: img.naturalHeight || img.height };
-    try {
-        const c = document.createElement('canvas');
-        c.width = full.sw; c.height = full.sh;
-        const x = c.getContext('2d');
-        x.drawImage(img, 0, 0);
-        const d = x.getImageData(0, 0, c.width, c.height).data;
-        let top = -1, bot = -1, left = c.width, right = -1;
-        for (let y = 0; y < c.height; y++) {
-            for (let X = 0; X < c.width; X++) {
-                if (d[(y * c.width + X) * 4 + 3] > 40) {
-                    if (top < 0) top = y;
-                    bot = y;
-                    if (X < left) left = X;
-                    if (X > right) right = X;
-                }
-            }
-        }
-        return top < 0 ? full : { sx: left, sy: top, sw: right - left + 1, sh: bot - top + 1 };
-    } catch (e) {
-        return full;
-    }
-}
-// Halk fotoğrafı JPG (şeffaflık yok): kenarlardan başlayıp arka plan rengine yakın pikselleri siler.
-// Piksel okumaya izin verilmezse (file://) orijinal resim kullanılır.
-function removeBackground(img, tolerance = 14) {
-    try {
-        const c = document.createElement('canvas');
-        const W = c.width = img.naturalWidth, H = c.height = img.naturalHeight;
-        const x = c.getContext('2d');
-        x.drawImage(img, 0, 0);
-        const data = x.getImageData(0, 0, W, H), d = data.data;
-        const bg = [d[0], d[1], d[2]];   // sol üst köşe = arka plan rengi
-        // Arka plan nötr gri: rengi bg'ye yakın VE renksiz olan pikseller (koyu saç / mor şort korunur)
-        const isBg = i => {
-            const r = d[i], g = d[i+1], bl = d[i+2];
-            return Math.abs(r - bg[0]) < tolerance && Math.abs(g - bg[1]) < tolerance && Math.abs(bl - bg[2]) < tolerance &&
-                   Math.max(r, g, bl) - Math.min(r, g, bl) <= 5;
-        };
-        const seen = new Uint8Array(W * H), stack = [];
-        for (let X = 0; X < W; X++) stack.push(X, (H - 1) * W + X);
-        for (let Y = 0; Y < H; Y++) stack.push(Y * W, Y * W + W - 1);
-        while (stack.length) {
-            const p = stack.pop();
-            if (seen[p]) continue;
-            seen[p] = 1;
-            if (!isBg(p * 4)) continue;
-            d[p * 4 + 3] = 0;
-            const px = p % W;
-            if (px > 0) stack.push(p - 1);
-            if (px < W - 1) stack.push(p + 1);
-            if (p >= W) stack.push(p - W);
-            if (p < W * (H - 1)) stack.push(p + W);
-        }
-        x.putImageData(data, 0, 0);
-        return c;
-    } catch (e) {
-        return img;
-    }
-}
-let enemySprite = imgEnemy, enemyCrop = null;
-function prepareEnemy() { enemySprite = removeBackground(imgEnemy); enemyCrop = opaqueBounds(enemySprite); }
-imgEnemy.onload = prepareEnemy;
-if (imgEnemy.complete && imgEnemy.naturalWidth) prepareEnemy();
 
 // TTS exponential backoff implementation
 // Aynı anda tek konuşma; geç gelen ses anlamsız olacağı için en fazla 1 kısa tekrar
@@ -433,62 +368,8 @@ function drawKulHakkiBag(ctx, x, y, size, angle = 0) {
     ctx.restore();
 }
 
-function drawCashRegister(ctx, x, y, size, angle = 0) {
-    const k = size / 55;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(angle);
-    ctx.scale(k, k);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#1f2937";
-    // Para çekmecesi
-    ctx.fillStyle = "#374151";
-    ctx.beginPath(); ctx.roundRect(-30, 8, 60, 18, 3); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "#9ca3af";
-    ctx.fillRect(-9, 15, 18, 4);
-    // Eğik tuş paneli
-    ctx.fillStyle = "#d1d5db";
-    ctx.beginPath();
-    ctx.moveTo(-28, 8); ctx.lineTo(28, 8); ctx.lineTo(21, -14); ctx.lineTo(-21, -14);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "#4b5563";
-    for (let r = 0; r < 3; r++)
-        for (let c = 0; c < 4; c++) ctx.fillRect(-17 + c * 9, -10 + r * 6, 6, 4);
-    // Ekran
-    ctx.fillStyle = "#6b7280";
-    ctx.fillRect(-4, -18, 8, 4);
-    ctx.fillStyle = "#111827";
-    ctx.beginPath(); ctx.roundRect(-16, -32, 32, 15, 2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "#22c55e";
-    ctx.font = "bold 10px monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("₺999", 0, -24);
-    ctx.restore();
-}
-
-// 17/25 polisinin fırlattığı kelepçe: zincirle bağlı iki halka
-function drawHandcuffs(ctx, x, y, size, angle = 0) {
-    const k = size / 50;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(angle);
-    ctx.scale(k, k);
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#e5e7eb"; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke();      // zincir
-    for (const s of [-1, 1]) {
-        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 6;
-        ctx.beginPath(); ctx.arc(s * 17, 0, 11, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeStyle = "#f1f5f9"; ctx.lineWidth = 2;                      // parlama
-        ctx.beginPath(); ctx.arc(s * 17, 0, 11, -2.4, -1.2); ctx.stroke();
-        ctx.fillStyle = "#64748b"; ctx.fillRect(s * 8 - 3, -4, 6, 8);        // kilit
-    }
-    ctx.restore();
-}
-
 // --- 17/25 POLİSİ ---
-// Lacivert üniformalı, kasketli, coplu polis. Koordinat: ayakların ortası, sağa bakar.
+// Lacivert üniformalı, kasketli, tabancalı polis. Koordinat: ayakların ortası, sağa bakar.
 const POLICE_LEGS = {
     photoH: 1, ratio: 0.36, width: 13, swing: 0.6,
     front: "#1e3a8a", back: "#172554", shoe: "#0a0a0a"
@@ -561,12 +442,22 @@ function drawPolice(ctx, en) {
     ctx.fillStyle = "#facc15"; ctx.fillRect(-16, 10, 34, 3);     // şerit
     ctx.beginPath(); ctx.arc(4, 6, 4, 0, Math.PI * 2); ctx.fill(); // kasket arması
 
-    // Ön kol + cop
-    ctx.save(); ctx.translate(-12, 56); ctx.rotate(swing);
+    // Ön kol + tabanca: oyuncu yakındaysa kol öne uzanır ve nişan alır
+    const aim = en.aim || 0;
+    ctx.save(); ctx.translate(-12, 56); ctx.rotate(swing * (1 - aim) - Math.PI / 2 * aim);
     ctx.strokeStyle = "#1e3a8a"; ctx.lineWidth = 13;
     ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 44); ctx.stroke();
-    ctx.strokeStyle = "#111"; ctx.lineWidth = 6;
-    ctx.beginPath(); ctx.moveTo(-4, 50); ctx.lineTo(26, 30); ctx.stroke();
+    ctx.strokeStyle = "#0b0b0b"; ctx.lineWidth = 1.5;
+    ctx.fillStyle = "#374151"; ctx.fillRect(-16, 42, 13, 10); ctx.strokeRect(-16, 42, 13, 10);   // kabza
+    ctx.fillStyle = "#9ca3af"; ctx.fillRect(-5, 38, 11, 34); ctx.strokeRect(-5, 38, 11, 34);     // gövde ve namlu
+    ctx.fillStyle = "#e5e7eb"; ctx.fillRect(3, 40, 2, 30);                                       // parlama
+    ctx.fillStyle = "#0b0b0b"; ctx.fillRect(-1.5, 70, 4, 3);                                     // namlu ağzı
+    if (en.flash > 0) {                                                // ateş anında namlu alevi
+        ctx.fillStyle = "#fde047";
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) { const r = i % 2 ? 5 : 14, a = i * Math.PI / 5; ctx.lineTo(0.5 + Math.sin(a) * r * 0.7, 82 + Math.cos(a) * r); }
+        ctx.closePath(); ctx.fill();
+    }
     ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.arc(0, 48, 6.5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
     ctx.restore();
@@ -659,7 +550,7 @@ function jump() {
 }
 
 function shoot() {
-    if(!gameStarted || player.isDying || paused || levelCompleted) return;
+    if(!gameStarted || player.isDying || paused || levelCompleted || player.shield) return;
     playerProjectiles.push({ 
         x: player.x + (player.dir === 1 ? player.w : 0), 
         y: player.y + player.h / 2, 
@@ -671,7 +562,7 @@ function shoot() {
 // --- BALYOZ ---
 const SWING_FRAMES = 24, HAMMER_REACH = 190;
 function hammer() {
-    if(!gameStarted || player.isDying || paused || levelCompleted || player.swing > 0) return;
+    if(!gameStarted || player.isDying || paused || levelCompleted || player.swing > 0 || player.shield) return;
     player.swing = SWING_FRAMES;
     player.swingHit = false;
 }
@@ -691,7 +582,7 @@ function hammerAngle() {
 function updateHammer() {
     if(player.swing <= 0) return;
     player.swing--;
-    // Balyoz yere indiği anda (ilerleme %50) önündeki halkı ez
+    // Balyoz yere indiği anda (ilerleme %50) önündeki polisi ez
     if(!player.swingHit && 1 - player.swing / SWING_FRAMES >= 0.5) {
         player.swingHit = true;
         const cx = player.x + player.w / 2;
@@ -795,7 +686,7 @@ function spawnBoss(x) {
     boss = { kind, T, x, y: height - 60 - h, w, h, homeX: x, hp: T.hp, dir: -1, look: -1,
              timer: 0, charge: 0, attacks: 0, hurt: 0, anim: 0, dying: false, deathT: 0,
              state: 'walk', stateT: 0, vx: 0, vy: 0, run: 0, crouch: 0, recover: 0 };
-    enemies = enemies.filter(en => en.dead || Math.abs(en.x - x) > 1500);   // arenada halk kalmasın
+    enemies = enemies.filter(en => en.dead || Math.abs(en.x - x) > 1500);   // arenada polis kalmasın
     bossCheckpoint = { score };
     createParticle(player.x + player.w / 2, player.y - 30, t("bossIntro"), "#f97316", 2.5);
 }
@@ -840,7 +731,7 @@ function updateFire(p) {
         // Yerdeki ateş: üstünden zıplanarak geçilebilir
         ? p.x > player.x - 5 && p.x < player.x + player.w + 5 && player.y + player.h > p.y - 30
         : p.x > player.x + 10 && p.x < player.x + player.w - 10 && p.y > player.y && p.y < player.y + player.h;
-    if(hit) die();
+    if(hit) { if(!p.grounded && shieldBlocks(p)) blockProjectile(p); else die(); }
 }
 
 function damageBoss(n) {
@@ -852,7 +743,7 @@ function damageBoss(n) {
     if(boss.hp > 0) return;
     boss.dying = true;
     levelEnding = true;
-    projectiles = projectiles.filter(p => p.type === 'register');   // canavarın saldırıları silinir
+    projectiles = projectiles.filter(p => p.type === 'bullet');   // canavarın saldırıları silinir
     $('score').innerText = score += 20000;
     $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
     for(let i = 0; i < 30; i++) createParticle(boss.x + Math.random() * boss.w, boss.y + Math.random() * boss.h);
@@ -989,7 +880,7 @@ function updateOneDollar(p) {
         if(p.y > height - 72) { p.y = height - 72; p.vx = 0; p.landed = true; p.life = Math.min(p.life, 90); }
     } else p.vx = 0;
     if(player.isDying || !p.active || p.landed) return;
-    if(p.x > player.x + 15 && p.x < player.x + player.w - 15 && p.y > player.y && p.y < player.y + player.h) { p.active = false; die(); }
+    if(p.x > player.x + 15 && p.x < player.x + player.w - 15 && p.y > player.y && p.y < player.y + player.h) { if(shieldBlocks(p)) blockProjectile(p); else { p.active = false; die(); } }
 }
 
 // Şok dalgası zeminde ilerler; üstünden zıplanarak kaçılır
@@ -1007,7 +898,7 @@ async function die() {
     $('game-container').classList.add('shake');
     $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
     
-    // Halk başarılı vuruş yaptığında GEBER yazısı çıkar
+    // Vurulunca GEBER yazısı çıkar
     createParticle(player.x + player.w/2, player.y + player.h/2, t("die"), "red", 2.0);
     
     speak(t("ouch"), "Kore");
@@ -1016,7 +907,7 @@ async function die() {
 }
 
 function restartLevel() {
-    // Canavara ulaşıldıysa halkları tekrar öldürmek gerekmez: doğrudan canavardan devam
+    // Canavara ulaşıldıysa polisleri tekrar öldürmek gerekmez: doğrudan canavardan devam
     const cp = bossCheckpoint, start = levelStartScore;
     score = cp ? cp.score : start;
     $('score').innerText = score;
@@ -1051,13 +942,13 @@ function completeLevel() {
 }
 
 // --- BÖLÜMLER ---
-// platforms: [x, zeminden yükseklik, genişlik, kalınlık]; police(i): i. düşman polis mi
+// platforms: [x, zeminden yükseklik, genişlik, kalınlık]; fire: polislerin ateş aralığı (kare)
 const LEVELS = {
-    1: { target: 4, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, police: i => i % 3 === 1,
+    1: { target: 4, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, fire: 170,
          platforms: [[600, 180, 200, 120], [1200, 250, 300, 50], [1800, 150, 150, 100], [2300, 350, 400, 50]] },
-    2: { target: 6, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, police: i => i % 2 === 1,
+    2: { target: 6, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150,
          platforms: [[400, 150, 150, 40], [800, 300, 150, 40], [1200, 450, 200, 40], [1600, 300, 300, 40]] },
-    3: { target: 8, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, police: i => i % 3 !== 0,
+    3: { target: 8, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125,
          platforms: [[500, 170, 180, 40], [850, 290, 180, 40], [1250, 400, 260, 40], [1700, 260, 200, 40], [2200, 180, 300, 40]] }
 };
 const MAX_LEVEL = 3;
@@ -1091,13 +982,13 @@ function createLevel() {
 
     for(let i=0; i<20; i++) {
         const homeX = 1500 + i * 1500;
-        // 17/25 polisleri: 1. bölümde her 3 düşmandan biri, 2. bölümde yarısı, 3. bölümde 3'te 2'si
-        const police = LEVELS[currentLevel].police(i);
-        const w = police ? 120 : 160, h = police ? 200 : 210;
+        // Bütün düşmanlar 17/25 polisi; bölüm ilerledikçe daha sık ateş eder
+        const w = 120, h = 200;
         enemies.push({
-            kind: police ? 'police' : 'halk',
+            kind: 'police',
             x: homeX, y: height - 60 - h, w, h,   // alt kenar zeminde
-            timer: 0, interval: police ? 150 : 200, dead: false,
+            timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire, dead: false,
+            aim: 0, flash: 0,
             homeX: homeX,                          // Devriye merkezi
             dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
             speed: LEVELS[currentLevel].speed,     // bölüm ilerledikçe hızlanır
@@ -1111,7 +1002,8 @@ function update() {
 
     if(!player.isDying) {
         let moveDir = (keys.a ? -1 : (keys.d ? 1 : joyDir));
-        player.vx = moveDir ? moveDir * player.speed : player.vx * 0.85;
+        player.shield = keys.s || shieldHeld;
+        player.vx = moveDir ? moveDir * player.speed * (player.shield ? 0.5 : 1) : player.vx * 0.85;   // kalkanla yavaş yürür
         if(moveDir) player.dir = moveDir;
         // Adım hızı yürüme hızına bağlı: ayaklar yerde kaymaz
         if(player.grounded) player.legCycle += Math.abs(player.vx) * 0.06;
@@ -1179,18 +1071,19 @@ function update() {
         en.walkCycle += speed * 0.08;   // Adım hızı yürüme hızına bağlı
         en.lastSpeed = speed;           // Çizimde "yürüyor mu / duruyor mu" için
 
-        if(Math.abs(en.x - player.x) < 1200 && ++en.timer > en.interval) {
+        // Polis: oyuncu yakındaysa ve ona dönükse nişan alır, ardından ateş eder
+        const toPlayer = (player.x + player.w / 2) - (en.x + en.w / 2);
+        const near = !player.isDying && Math.abs(toPlayer) < 900;
+        const facing = Math.sign(toPlayer) === en.dir;
+        en.aim += ((near && facing ? 1 : 0) - en.aim) * 0.12;
+        if(en.flash > 0) en.flash--;
+        if(near && ++en.timer > en.interval && en.aim > 0.8) {
             en.timer = 0;
-            // Yazarkasaların menzili (life) kahramanın mermisinin (150) iki katı: 300
-            projectiles.push({ type: en.kind === 'police' ? 'cuffs' : 'register',
-                x: en.x, 
-                y: en.y + 60, 
-                vx: (player.x < en.x ? -10 : 10), 
-                vy: -12, // Başlangıç yukarı hızı (yer çekimi etkisi için)
-                active: true, 
-                life: 300, 
-                angle: 0 
-            });
+            en.flash = 6;
+            projectiles.push({ type: 'bullet', x: en.x + en.w / 2 + en.dir * 60, y: en.y + 57,
+                               vx: en.dir * 11, vy: 0, active: true, life: 140, angle: 0 });
+            const pan = (en.x + en.w / 2 - camX - width / 2) / (width / 2);
+            playGunshot(pan, Math.max(0.15, 0.6 - Math.abs(toPlayer) / 2000));
         }
         if(!player.isDying && player.x + 40 < en.x + en.w - 40 && player.x + player.w - 40 > en.x && player.y + player.h > en.y && player.y < en.y + en.h) {
             if(player.vy > 0 && player.y + player.h < en.y + 60) {
@@ -1220,28 +1113,176 @@ function update() {
         if(p.type === 'fire') { updateFire(p); return; }
         if(p.type === 'wave') { updateWave(p); return; }
         if(p.type === 'dollar1') { updateOneDollar(p); return; }
-        p.vy += 0.25; // Yazarkasaya eklenen yer çekimi (gravity)
-        p.y += p.vy;
-        p.angle += 0.1;
-        p.life--;
-        if(!player.isDying && p.active && Math.hypot(p.x - (player.x + player.w/2), p.y - (player.h/2 + player.y)) < 80) {
-            p.active = false;
-            die();
-        }
+        if(p.type === 'bullet') updateBullet(p);
     });
     projectiles = projectiles.filter(p => p.active && p.life > 0);
     updateBoss();
 }
 
-// --- BACAK ANİMASYONU (Recep) ---
+// --- BACAK ANİMASYONU (Recep ve polisler) ---
 // Her bacak iki parçalı: kalça → diz → ayak bileği, ucunda ayakkabı.
 // photoH: kafa resminin asıl yüksekliği (oran korunur); ratio: bacak boyu / kutu yüksekliği
 const PLAYER_LEGS = {
-    photoH: RECEP_HEAD.h,
-    ratio: 0.333, width: 14, swing: 0.65,         // bacak boyu, kalınlık, adım açısı
+    photoH: 1,
+    ratio: 0.36, width: 13, swing: 0.65,          // bacak boyu, kalınlık, adım açısı
     front: "#475569", back: "#334155",            // füme takım pantolon (arka bacak daha koyu)
     shoe: "#111111"
 };
+
+// --- RECEP: fotoğraftan kafa + takım elbiseli gövde, kollar, bacaklar ---
+// Koordinat: ayakların ortası (0,0), sağa bakar. Ön elde balyoz, arka elde "DİN" yazılı kalkan.
+const RECEP_K = 0.45;                         // kafa fotoğrafının ölçeği
+const RECEP_CHIN = 164 - RECEP_HEAD.y;        // fotoğrafta çenenin alt ucu (kafa kutusuna göre)
+
+// Kalkan: altın kenarlı yeşil kalkan, üstünde DİN yazısı. dir: karakter aynalandıysa yazı ters dönmesin
+function drawShield(ctx, x, y, s, dir = 1) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s * dir, s);
+    ctx.beginPath();
+    ctx.moveTo(-23, -29); ctx.lineTo(23, -29); ctx.lineTo(23, 4);
+    ctx.quadraticCurveTo(22, 22, 0, 31); ctx.quadraticCurveTo(-22, 22, -23, 4);
+    ctx.closePath();
+    const g = ctx.createLinearGradient(-23, -29, 23, 31);
+    g.addColorStop(0, "#166534"); g.addColorStop(1, "#052e16");
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 4; ctx.stroke();
+    ctx.strokeStyle = "rgba(253,230,138,0.6)"; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-18, -24); ctx.lineTo(18, -24); ctx.lineTo(18, 3);
+    ctx.quadraticCurveTo(17, 18, 0, 25); ctx.quadraticCurveTo(-17, 18, -18, 3);
+    ctx.closePath(); ctx.stroke();
+    ctx.font = "bold 17px Georgia, serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.lineWidth = 3; ctx.strokeStyle = "#052e16"; ctx.strokeText("DİN", 0, 1);
+    ctx.fillStyle = "#fde68a"; ctx.fillText("DİN", 0, 1);
+    ctx.restore();
+}
+
+// o: { h, phase, moving, airborne, mouthOpen, hammerAngle, shield, dir }
+function drawRecep(ctx, o) {
+    const h = o.h, st = PLAYER_LEGS;
+    const SUIT = "#334155", SUIT_D = "#1e293b", SKIN = "#e8b48f";
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    const legs = drawLegs(ctx, 0, -h, h, 1, o.phase, o.moving, o.airborne, st);
+    const top = -h + legs.drop;
+    const hipY = top + h - h * st.ratio - st.width * 0.6;
+    const shY = hipY - 50;
+
+    // Arka kol: kalkan yanda asılı (kalkan kalkıkken en son, önde çizilir)
+    const bsx = -10, bsy = shY + 8;
+    if (!o.shield) {
+        const sw = o.moving ? Math.sin(o.phase) * 5 : 0;
+        const hx = bsx - 6 + sw, hy = bsy + 34;
+        ctx.strokeStyle = SUIT_D; ctx.lineWidth = 11;
+        ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(bsx - 4 + sw / 2, bsy + 17); ctx.lineTo(hx, hy); ctx.stroke();
+        drawShield(ctx, hx - 6, hy - 2, 0.72, o.dir);
+        ctx.fillStyle = SKIN; ctx.beginPath(); ctx.arc(hx, hy - 10, 5.5, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Gövde: ceket, gömlek, kravat, düğmeler
+    ctx.fillStyle = SUIT;
+    ctx.beginPath();
+    ctx.moveTo(-22, shY + 3); ctx.quadraticCurveTo(0, shY - 6, 24, shY + 3);
+    ctx.lineTo(19, hipY + 4); ctx.lineTo(-17, hipY + 4);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#f8fafc";
+    ctx.beginPath(); ctx.moveTo(-1, shY); ctx.lineTo(16, shY); ctx.lineTo(8, shY + 22); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#1e3a8a";
+    ctx.beginPath(); ctx.moveTo(6, shY + 2); ctx.lineTo(10, shY + 2); ctx.lineTo(11, shY + 28); ctx.lineTo(8, shY + 33); ctx.lineTo(5, shY + 28); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = SUIT_D; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-1, shY); ctx.lineTo(8, shY + 24); ctx.lineTo(16, shY); ctx.stroke();
+    ctx.fillStyle = "#0f172a";
+    [36, 44].forEach(dy => { ctx.beginPath(); ctx.arc(9, shY + dy, 1.8, 0, Math.PI * 2); ctx.fill(); });
+
+    // Kafa (fotoğraf): çene, yakanın hemen üstüne oturur
+    const H = RECEP_HEAD, k = RECEP_K;
+    ctx.save();
+    ctx.translate(6 - (H.neckX - H.x) * k, shY + 8 - RECEP_CHIN * k);
+    ctx.scale(k, k);
+    if (headCanvas) ctx.drawImage(headCanvas, 0, 0);
+    if (o.mouthOpen > 0.1) {
+        const mx = H.mouthX - H.x, my = H.mouthY - H.y, m = o.mouthOpen;
+        ctx.fillStyle = "black";
+        ctx.beginPath(); ctx.ellipse(mx, my, 15 * m, 19 * m, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "white"; ctx.fillRect(mx - 5, my - 15 * m, 10, 5 * m);
+    }
+    ctx.restore();
+
+    // Ön kol + balyoz: kol, balyozun açısına göre kalkar/iner
+    const ang = o.hammerAngle;
+    const armA = ang <= HAMMER_IDLE
+        ? 0.5 + (HAMMER_IDLE - ang) / (HAMMER_IDLE - HAMMER_BACK) * 2.9    // geri kaldırırken kol yukarı
+        : 0.5 + (ang - HAMMER_IDLE) / (HAMMER_DOWN - HAMMER_IDLE) * 0.8;   // indirirken kol öne
+    const sx = 8, sy = shY + 7;
+    const ex = sx + Math.sin(armA + 0.3) * 18, ey = sy + Math.cos(armA + 0.3) * 18;
+    const hx = ex + Math.sin(armA - 0.3) * 18, hy = ey + Math.cos(armA - 0.3) * 18;
+    ctx.strokeStyle = SUIT; ctx.lineWidth = 11;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.lineTo(hx, hy); ctx.stroke();
+    drawHammer(ctx, hx, hy, ang);
+
+    // Kalkan siper: arka kol öne uzanır, kalkan yüzü ve gövdeyi kapatır
+    if (o.shield) {
+        ctx.strokeStyle = SUIT_D; ctx.lineWidth = 11;
+        ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(10, bsy + 14); ctx.lineTo(26, shY + 4); ctx.stroke();
+        drawShield(ctx, 32, shY - 6, 1.3, o.dir);
+    }
+}
+
+// --- KALKAN İLE KORUNMA ---
+// Kalkan kalkıkken oyuncunun baktığı yönden gelen mermi, alev ve dolarlar durur.
+function shieldBlocks(p) {
+    if (!player.shield || player.isDying) return false;
+    // Hızlı gidenlerde (mermi) yönüne, yavaş düşenlerde (dolar, alev) konumuna bakılır
+    if (Math.abs(p.vx || 0) > 2) return p.vx * player.dir < 0;
+    return (p.x - (player.x + player.w / 2)) * player.dir > -5;
+}
+function blockProjectile(p) {
+    p.active = false;
+    for (let i = 0; i < 6; i++) {
+        particles.push({ x: p.x, y: p.y, vx: -player.dir * (2 + Math.random() * 4), vy: (Math.random() - 0.5) * 6,
+                         life: 0.35, maxLife: 0.35, size: 3 + Math.random() * 3, text: null, color: "#fde047" });
+    }
+    playSfx('hit', { rate: 1.8, vol: 0.45 });
+}
+
+// --- POLİS MERMİSİ ---
+function updateBullet(p) {
+    p.life--;
+    if (player.isDying || !p.active) return;
+    if (p.x > player.x + 20 && p.x < player.x + player.w - 20 && p.y > player.y && p.y < player.y + player.h) {
+        if (shieldBlocks(p)) blockProjectile(p); else { p.active = false; die(); }
+    }
+}
+function drawBullet(ctx, p) {
+    const d = Math.sign(p.vx) || 1;
+    const g = ctx.createLinearGradient(p.x - d * 36, p.y, p.x, p.y);
+    g.addColorStop(0, "rgba(253,224,71,0)"); g.addColorStop(1, "rgba(253,224,71,0.85)");
+    ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(p.x - d * 36, p.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    ctx.fillStyle = "#facc15";
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, 6, 3, 0, 0, Math.PI * 2); ctx.fill();
+}
+
+// Silah sesi: Web Audio ile üretilen kısa, boğuk patlama (dosya gerekmez)
+let gunBuffer = null;
+function playGunshot(pan = 0, vol = 0.5) {
+    if (!audioCtx) return;
+    if (!gunBuffer) {
+        const n = Math.floor(audioCtx.sampleRate * 0.28);
+        gunBuffer = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+        const d = gunBuffer.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 5);
+    }
+    const src = audioCtx.createBufferSource(); src.buffer = gunBuffer;
+    const lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200;
+    const g = audioCtx.createGain(); g.gain.value = vol;
+    src.connect(lp); lp.connect(g);
+    if (audioCtx.createStereoPanner) {
+        const pn = audioCtx.createStereoPanner(); pn.pan.value = Math.max(-1, Math.min(1, pan));
+        g.connect(pn); pn.connect(audioCtx.destination);
+    } else g.connect(audioCtx.destination);
+    src.start();
+}
 
 // Faza göre bir bacağın açıları: a = uyluk açısı (0 = dik, + = ileri), bend = diz bükümü
 function legPose(phase, moving, airborne, swing) {
@@ -1675,25 +1716,6 @@ function drawBossBar(ctx, b) {
     ctx.textBaseline = "alphabetic";
 }
 
-function drawHalk(ctx, en) {
-    // Halk'ın fotoğrafı boydan (kendi ayakları var), o yüzden ek bacak yok:
-    // yürürken ayakların üstünde sağa-sola salınır, her adımda hafif yükselir.
-    const moving = en.lastSpeed > 0;
-    const p = en.walkCycle;
-    const sway = moving ? Math.sin(p) * 0.07 + en.dir * 0.03 : 0;  // salınım + yürüme yönüne hafif eğilme
-    const bob  = moving ? -Math.abs(Math.cos(p)) * 6 : 0;          // adım ortasında yükselme
-    // Kırpılmış fotoğraf kutu yüksekliğine oranını koruyarak sığar, ayaklar zeminde
-    const c = enemyCrop || { sx: 0, sy: 0, sw: imgEnemy.naturalWidth, sh: imgEnemy.naturalHeight };
-    if(!c.sw) return;   // resim henüz yüklenmedi
-    const dh = en.h, dw = Math.min(en.w, dh * c.sw / c.sh);
-    ctx.save();
-    ctx.translate(en.x + en.w / 2, en.y + en.h);   // dönme noktası: ayakların ortası
-    ctx.rotate(sway);
-    if(en.dir === -1) ctx.scale(-1, 1);        // yürüdüğü yöne baksın
-    ctx.drawImage(enemySprite, c.sx, c.sy, c.sw, c.sh, -dw / 2, -dh + bob, dw, dh);
-    ctx.restore();
-}
-
 // --- ARKA PLAN: bölüme göre paralaks katmanlar ---
 // 1: gündüz, yeşil tepeler ve ağaçlar · 2: bozkırda gün batımı, yurtlar · 3: gece şehri, projektörler
 const THEMES = {
@@ -1963,58 +1985,63 @@ function drawFeto(ctx, b) {
     ctx.fillStyle = "#111827";
     for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(hunch + 16 - i * 6, shY + 70 + i * 22, 3.5, 0, Math.PI * 2); ctx.fill(); }
 
-    // Boyun + kafa (iri, karikatür)
+    // Boyun + kafa: önden bakan, simetrik yaşlı adam yüzü
     const hx = hunch + 22, hy = shY - 44;
-    ctx.fillStyle = "#d9ae86"; ctx.fillRect(hx - 14, hy + 30, 26, 20);
+    ctx.fillStyle = "#d9ae86"; ctx.fillRect(hx - 13, hy + 30, 26, 20);
     ctx.save();
     ctx.translate(hx, hy);
-    // Kulak
-    ctx.fillStyle = "#e8c4a0";
-    ctx.beginPath(); ctx.ellipse(-30, 4, 10, 16, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = "#b08968"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(-30, 4, 6, -1.2, 1.4); ctx.stroke();
-    // Kafa (dazlak)
-    ctx.fillStyle = "#e8c4a0";
-    ctx.beginPath(); ctx.ellipse(4, 0, 40, 46, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "rgba(255,255,255,0.45)";                       // kafa parlaması
-    ctx.beginPath(); ctx.ellipse(-6, -32, 14, 7, -0.3, 0, Math.PI * 2); ctx.fill();
-    // Yanlardaki ve arkadaki beyaz saçlar
+    const SKIN = "#e8c4a0", LINE = "#b08968";
+    // Kulaklar
+    [-1, 1].forEach(s => {
+        ctx.fillStyle = SKIN; ctx.beginPath(); ctx.ellipse(s * 38, 4, 8, 14, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = LINE; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(s * 38, 4, 4, 8, 0, 0, Math.PI * 2); ctx.stroke();
+    });
+    // Kafa (dazlak) ve parlaması
+    ctx.fillStyle = SKIN; ctx.beginPath(); ctx.ellipse(0, 0, 36, 46, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.45)"; ctx.beginPath(); ctx.ellipse(-8, -32, 13, 6, -0.3, 0, Math.PI * 2); ctx.fill();
+    // Kulakların üstünde beyaz saçlar
     ctx.fillStyle = "#e5e7eb";
-    [[-36, -12, 9], [-40, 0, 10], [-38, 14, 9], [-32, 24, 8], [-22, -26, 8]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); });
+    [-1, 1].forEach(s => [[34, -16, 8], [38, -5, 8], [36, 8, 6]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(s * x, y, r, 0, Math.PI * 2); ctx.fill(); }));
     // Alın kırışıkları
-    ctx.strokeStyle = "#b08968"; ctx.lineWidth = 2;
-    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(4, -30 + i * 7); ctx.quadraticCurveTo(20, -34 + i * 7, 36, -28 + i * 7); ctx.stroke(); }
-    // Gür beyaz kaşlar (kızınca çatılır)
-    [[16, -12], [36, -10]].forEach(([x, y], i) => {
-        const tilt = angry ? (i === 0 ? 0.35 : -0.35) : (i === 0 ? -0.2 : 0.2);
-        ctx.save(); ctx.translate(x, y); ctx.rotate(tilt);
+    ctx.strokeStyle = LINE; ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(-16, -30 + i * 6); ctx.quadraticCurveTo(0, -34 + i * 6, 16, -30 + i * 6); ctx.stroke(); }
+    // Gür beyaz kaşlar: normalde dış uçları sarkık, kızınca iç uçları çatılır
+    [-1, 1].forEach(s => {
+        ctx.save(); ctx.translate(s * 15, -13); ctx.rotate(s * (angry ? 0.3 : -0.15));
         ctx.fillStyle = "#f3f4f6"; ctx.strokeStyle = "#9ca3af"; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.ellipse(0, 0, 12, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(0, 0, 12, 4.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.strokeStyle = "#d1d5db";
-        for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(k * 4, -2); ctx.lineTo(k * 4 + 3, -7); ctx.stroke(); }
+        for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(k * 4, -2); ctx.lineTo(k * 4 + s * 2, -7); ctx.stroke(); }
         ctx.restore();
     });
-    // Gözler (sarkık göz kapakları, torbalar)
-    [[16, -2], [36, -1]].forEach(([x, y]) => {
-        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.ellipse(x, y, 6, 4, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.arc(x + 2, y + 0.5, 2.6, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#d9ae86"; ctx.fillRect(x - 7, y - 5, 14, angry ? 1.5 : 3.5);    // göz kapağı
-        ctx.strokeStyle = "#b08968"; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.arc(x, y + 4, 6, 0.3, Math.PI - 0.3); ctx.stroke();          // göz altı torbası
+    // Gözler: göz kapakları sarkık, altında torbalar; bakış oyuncuya
+    [-1, 1].forEach(s => {
+        const x = s * 15, y = -2;
+        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.ellipse(x, y, 6.5, 4.2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.arc(x + 1.5, y + 0.5, 2.7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#d9ae86"; ctx.fillRect(x - 7, y - 5, 14, angry ? 1.5 : 3.5);
+        ctx.strokeStyle = LINE; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(x, y + 4, 6, 0.35, Math.PI - 0.35); ctx.stroke();
     });
-    // Büyük burun
-    ctx.fillStyle = "#e0b48f"; ctx.strokeStyle = "#a47552"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(38, -2); ctx.quadraticCurveTo(54, 12, 46, 18); ctx.quadraticCurveTo(38, 20, 34, 14); ctx.closePath(); ctx.fill(); ctx.stroke();
-    // Ağız ve sarkık yanaklar
-    ctx.strokeStyle = "#8a5a3c"; ctx.lineWidth = 2.5;
+    // Burun: yüzün ortasında, iri
+    ctx.fillStyle = "#e0b48f"; ctx.strokeStyle = "#a47552"; ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(-4, 0); ctx.quadraticCurveTo(-10, 13, -8, 17); ctx.quadraticCurveTo(0, 22, 8, 17); ctx.quadraticCurveTo(10, 13, 4, 0);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#8a5a3c";
+    [-1, 1].forEach(s => { ctx.beginPath(); ctx.ellipse(s * 4, 17.5, 2.2, 1.4, 0, 0, Math.PI * 2); ctx.fill(); });
+    // Yanak çizgileri (yaşlılık) ve ağız
+    ctx.strokeStyle = LINE; ctx.lineWidth = 2;
+    [-1, 1].forEach(s => { ctx.beginPath(); ctx.moveTo(s * 11, 16); ctx.quadraticCurveTo(s * 17, 28, s * 14, 40); ctx.stroke(); });
     if (angry) {
         ctx.fillStyle = "#4a1d0f";
-        ctx.beginPath(); ctx.ellipse(30, 30, 9, 4 + Math.max(slam, toss) * 7, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(0, 30, 9, 3 + Math.max(slam, toss) * 7, 0, 0, Math.PI * 2); ctx.fill();
     } else {
-        ctx.beginPath(); ctx.moveTo(20, 32); ctx.quadraticCurveTo(30, 27, 40, 31); ctx.stroke();
+        ctx.strokeStyle = "#8a5a3c"; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(-10, 32); ctx.quadraticCurveTo(0, 27, 10, 32); ctx.stroke();
     }
-    ctx.beginPath(); ctx.moveTo(14, 18); ctx.quadraticCurveTo(12, 34, 22, 42); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(44, 24); ctx.quadraticCurveTo(46, 36, 38, 42); ctx.stroke();
+    ctx.strokeStyle = LINE; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, 44, 7, 0.4, Math.PI - 0.4); ctx.stroke();   // çene kıvrımı
     ctx.restore();
 
     // Bastonlu kol (önde): baston normalde yere dayalı, saldırıda havaya kalkar, sonra yere iner
@@ -2053,7 +2080,7 @@ function draw() {
         if(en.dead && en.deathT >= DEATH_FRAMES) return;
         ctx.save();
         if(en.dead) applyDeathPose(ctx, en);
-        if(en.kind === 'police') drawPolice(ctx, en); else drawHalk(ctx, en);
+        drawPolice(ctx, en);
         ctx.restore();
     });
     if(boss) drawBoss(ctx, boss);
@@ -2065,25 +2092,10 @@ function draw() {
     if(player.dir === -1 && !player.isDying) ctx.scale(-1, 1);
 
     const playerMoving = player.grounded && Math.abs(player.vx) > 1;
-    const body = drawLegs(ctx, 0, -player.h/2, player.h, 1, player.legCycle, playerMoving, !player.grounded, PLAYER_LEGS);
-
-    // Kafa, kaynak resim pikselleriyle çizilir; boyun noktası bacakların tam üstüne gelir
-    const H = RECEP_HEAD, k = body.k, top = -player.h/2 + body.drop;
-    ctx.save();
-    ctx.translate(-(H.neckX - H.x) * k, top);
-    ctx.scale(k, k);
-    if(headCanvas) ctx.drawImage(headCanvas, 0, 0);
-    if(player.mouthOpen > 0.1) {
-        const mx = H.mouthX - H.x, my = H.mouthY - H.y, m = player.mouthOpen;
-        ctx.fillStyle = "black";
-        ctx.beginPath();
-        ctx.ellipse(mx, my, 15 * m, 19 * m, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "white";
-        ctx.fillRect(mx - 5, my - 15 * m, 10, 5 * m);
-    }
-    ctx.restore();
-    drawHammer(ctx, (H.handX - H.neckX) * k, top + (H.handY - H.y) * k, hammerAngle());
+    ctx.translate(0, player.h / 2);   // çizim orijini: ayakların ortası
+    drawRecep(ctx, { h: player.h, phase: player.legCycle, moving: playerMoving, airborne: !player.grounded,
+                     mouthOpen: player.mouthOpen, hammerAngle: hammerAngle(), shield: player.shield,
+                     dir: player.dir === -1 && !player.isDying ? -1 : 1 });
     ctx.restore();
 
     playerProjectiles.forEach(p => {
@@ -2093,9 +2105,8 @@ function draw() {
     projectiles.forEach(p => {
         if(p.type === 'fire') drawFire(ctx, p);
         else if(p.type === 'wave') drawWave(ctx, p);
-        else if(p.type === 'cuffs') drawHandcuffs(ctx, p.x, p.y, 50, p.angle);
         else if(p.type === 'dollar1') drawOneDollar(ctx, p.x, p.y, p.angle);
-        else drawCashRegister(ctx, p.x, p.y, 55, p.angle);
+        else if(p.type === 'bullet') drawBullet(ctx, p);
     });
 
     particles.forEach(p => {
@@ -2134,17 +2145,17 @@ function loop(now) {
 
 window.onkeydown = e => { 
     let k = e.key.toLowerCase();
-    if(k==='a') keys.a=true; if(k==='d') keys.d=true; 
+    if(k==='a') keys.a=true; if(k==='d') keys.d=true; if(k==='s' || e.key==='ArrowDown') keys.s=true;
     if(e.key===' ') jump(); if(e.key==='Enter') shoot(); if(k==='f' && !e.repeat) hammer(); 
 };
 window.onkeyup = e => { 
     let k = e.key.toLowerCase();
-    if(k==='a') keys.a=false; if(k==='d') keys.d=false; 
+    if(k==='a') keys.a=false; if(k==='d') keys.d=false; if(k==='s' || e.key==='ArrowDown') keys.s=false;
 };
 
 // --- AÇILIŞ SAHNESİ (kodla çizilir; YouTube'a ya da video dosyasına bağlanmaz) ---
 // Ankara'da alacakaranlık: tepede ışıl ışıl Kaçak Saray, kul hakkı torbaları saraya uçar, gökten dolar yağar.
-// Önde elinde torbayla Recep yürür, peşinde 17/25 polisleri; ters yönden halk ve bastonlu FETÖ geçer.
+// Önde balyozlu, kalkanlı Recep yürür, peşinde 17/25 polisleri; ters yönden polisler ve bastonlu FETÖ geçer.
 // Tarayıcılar sesli otomatik oynatmaya izin vermez: müzik açılış ekranına ilk dokunuşta ya da SESİ AÇ ile başlar.
 const introCanvas = $('intro-canvas'), ictx = introCanvas.getContext('2d');
 let introW = 0, introH = 0, introRAF = null, introSky = null;
@@ -2232,16 +2243,6 @@ function drawPalace(c, cx, by, s, time) {
     drawTurkishFlag(c, cx + 250 * s, by - 176 * s, s * 0.8, time + 2);
 }
 
-function drawRecepFigure(c, cx, groundY, h, phase) {
-    const body = drawLegs(c, cx, groundY - h, h, 1, phase, true, false, PLAYER_LEGS);
-    const H = RECEP_HEAD, k = body.k, top = groundY - h + body.drop;
-    if (headCanvas) {
-        c.save(); c.translate(cx - (H.neckX - H.x) * k, top); c.scale(k, k);
-        c.drawImage(headCanvas, 0, 0); c.restore();
-    }
-    return { x: cx + (H.handX - H.neckX) * k, y: top + (H.handY - H.y) * k };
-}
-
 function drawIntro(now) {
     const c = ictx, W = introW, H = introH, time = (now - introT0) / 1000;
     if (!introSky) {
@@ -2304,13 +2305,14 @@ function drawIntro(now) {
     c.save(); c.translate(0, gy); c.scale(cs, cs);
     const span = W / cs + 900, pos = (sp, off) => ((time * sp + off) % span + span) % span - 450;
     const rx = pos(130, 950);   // sayfa açılınca Recep ve polisler ekranda başlasın
-    const hand = drawRecepFigure(c, rx, 0, 180, rx * 0.06);
-    drawKulHakkiBag(c, hand.x + 18, hand.y + 24, 56, Math.sin(time * 5) * 0.15);
+    c.save(); c.translate(rx, 0);
+    drawRecep(c, { h: 180, phase: rx * 0.06, moving: true, airborne: false, mouthOpen: 0, hammerAngle: HAMMER_IDLE, shield: false, dir: 1 });
+    c.restore();
     [[rx - 280, 1.7], [rx - 450, 0.4]].forEach(([x, ph]) =>
         drawPolice(c, { x: x - 60, y: -200, w: 120, h: 200, dir: 1, walkCycle: x * 0.05 + ph, lastSpeed: 1 }));
     [[700, 0], [1050, 2]].forEach(([off, ph]) => {
         const x = span - 900 - pos(70, off);
-        drawHalk(c, { x: x - 80, y: -210, w: 160, h: 210, dir: -1, walkCycle: time * 4 + ph, lastSpeed: 1 });
+        drawPolice(c, { x: x - 60, y: -200, w: 120, h: 200, dir: -1, walkCycle: time * 4 + ph, lastSpeed: 1 });
     });
     const fx = span - 900 - pos(45, 1500);
     drawFeto(c, { x: fx - 90, y: -290, w: 180, h: 290, look: -1, run: fx * 0.03, state: 'walk', stateT: 0, recover: 0, hurt: 0, dying: false, deathT: 0 });
@@ -2396,6 +2398,9 @@ joyWrap.addEventListener('pointercancel', joyEnd);
 $('jump-btn').addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
 $('shoot-btn').addEventListener('pointerdown', e => { e.preventDefault(); shoot(); });
 $('hammer-btn').addEventListener('pointerdown', e => { e.preventDefault(); hammer(); });
+// Kalkan: buton basılı tutulduğu sürece kalkık kalır
+$('shield-btn').addEventListener('pointerdown', e => { e.preventDefault(); shieldHeld = true; $('shield-btn').setPointerCapture(e.pointerId); });
+['pointerup', 'pointercancel'].forEach(ev => $('shield-btn').addEventListener(ev, () => { shieldHeld = false; }));
 // Canvas'ı ekranın gerçek piksel yoğunluğuna göre boyutlandır (Retina/telefonlarda net görüntü).
 // Oyun kodu CSS pikseliyle çalışmaya devam eder; ölçekleme setTransform ile yapılır.
 function resizeCanvas() {

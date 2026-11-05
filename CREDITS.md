@@ -1,7 +1,7 @@
 # Krediler
 
 ## Müzik
-- **chiptune_level1.mp3** (1. bölüm) ve **chiptune_level3.mp3** (3. bölüm): "Level 1" ve "Level 3" — Juhani Junkala, *Retro Game Music Pack (5 Chiptunes – Action)*
+- **intro_title.mp3** (açılış ekranı), **chiptune_level1.mp3** (1. bölüm) ve **chiptune_level3.mp3** (3. bölüm): "Title Screen", "Level 1" ve "Level 3" — Juhani Junkala, *Retro Game Music Pack (5 Chiptunes – Action)*
   - Kaynak: https://opengameart.org/content/5-chiptunes-action
   - Lisans: CC0 (kamu malı). Orijinal WAV, 128 kbps MP3'e dönüştürüldü.
 - **bozkir_dortnal.mp3** (2. bölüm): "Bozkır Dörtnal" — bu oyun için bestelenmiş özgün parça.
@@ -15,4 +15,4 @@
   - Lisans: CC0. Kırpıldı, ses seviyesi eşitlendi, MP3'e dönüştürüldü.
 
 ## Grafikler
-- 17/25 polisi, kelepçe, bölüm sonu canavarları (ALEVİ, KURT, FETÖ), 1 dolar ve bölüm arka planları kodla (canvas) çizilmiştir, harici dosya kullanılmaz.
+- 17/25 polisi, kelepçe, bölüm sonu canavarları (ALEVİ, KURT, FETÖ), 1 dolar, bölüm arka planları ve Kaçak Saray'lı açılış sahnesi kodla (canvas) çizilmiştir, harici dosya kullanılmaz.

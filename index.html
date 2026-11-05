@@ -21,6 +21,25 @@
         #kill-count { top: 60px; left: 20px; font-size: 18px; color: #ff4d4d; font-weight: bold; }
         #hearts { top: 88px; left: 18px; font-size: 26px; letter-spacing: 2px; }
         #best-hud { color: var(--gold); font-size: 18px; }
+        #help-btn { position: absolute; top: 16px; right: 72px; z-index: 40; width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--gold); background: rgba(0,0,0,0.45); color: var(--gold); font-size: 22px; cursor: pointer; display: none; }
+        #howto-btn { margin-bottom: 16px; }
+        /* Nasıl oynanır: ortada kaydırılabilir panel */
+        #howto { position: absolute; inset: 0; z-index: 1100; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.75); padding: 16px; box-sizing: border-box; }
+        #howto-panel { background: #111827; color: #f3f4f6; border: 2px solid var(--gold); border-radius: 16px; max-width: 720px; width: 100%; max-height: 100%; overflow-y: auto; padding: 20px 24px; box-sizing: border-box; text-align: left; font-size: 16px; line-height: 1.45; }
+        #howto-panel h2 { margin: 0 0 8px; color: var(--gold); text-align: center; font-size: 30px; }
+        #howto-panel h3 { margin: 18px 0 6px; color: var(--gold); font-size: 19px; border-bottom: 1px solid rgba(251,191,36,0.3); padding-bottom: 4px; }
+        #howto-panel table { width: 100%; border-collapse: collapse; }
+        #howto-panel th { text-align: left; color: #9ca3af; font-weight: normal; font-size: 14px; padding: 4px 6px; }
+        #howto-panel td { padding: 5px 6px; border-top: 1px solid rgba(255,255,255,0.08); }
+        #howto-panel kbd { background: #374151; border: 1px solid #4b5563; border-radius: 6px; padding: 1px 7px; font-family: inherit; font-size: 14px; white-space: nowrap; }
+        #howto-panel ol { margin: 4px 0; padding-left: 22px; }
+        .howto-note { color: #d1d5db; font-size: 15px; margin: 6px 0 0; }
+        .howto-list { list-style: none; margin: 0; padding: 0; }
+        .howto-list li { margin: 6px 0; }
+        .howto-ico { display: inline-block; width: 30px; font-size: 20px; }
+        .howto-powers { display: flex; flex-wrap: wrap; gap: 8px; }
+        .howto-powers span { background: #1f2937; border: 1px solid #374151; border-radius: 999px; padding: 4px 12px; }
+        #howto-ok { display: block; margin: 20px auto 4px; padding: 14px 48px; font-size: 22px; }
         .best-line { color: var(--gold); font-size: 20px; font-weight: bold; margin: 0 0 16px; min-height: 1em; }
         #pause-btn { position: absolute; top: 16px; right: 16px; z-index: 40; width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--gold); background: rgba(0,0,0,0.45); color: var(--gold); font-size: 22px; cursor: pointer; display: none; }
 
@@ -81,14 +100,17 @@
             <button class="lang-btn" data-lang="ru">RU</button>
         </div>
         <button id="sound-btn" class="lang-btn" type="button"></button>
+        <button id="howto-btn" class="lang-btn" type="button">❓ NASIL OYNANIR?</button>
         <button id="start-button" class="primary-btn" data-i18n="start">OYUNU BAŞLAT</button>
     </div>
+    <div id="howto"><div id="howto-panel"></div></div>
 
     <div id="status" class="ui"><span data-i18n="treasure">Hazine</span>: <span id="score">0</span><span id="best-hud"></span></div>
     <div id="level-display" class="ui"><span data-i18n="level">Seviye</span>: <span id="current-level">1</span></div>
     <div id="kill-count" class="ui"><span data-i18n="kills">Leş</span>: <span id="kills">0</span> / <span id="target-kills">7</span></div>
     <div id="hearts" class="ui"></div>
     <button id="pause-btn" type="button" aria-label="pause">⏸</button>
+    <button id="help-btn" type="button" aria-label="help">❓</button>
 
     <div id="ui-layer">
         <div id="joystick-wrapper"><div id="joystick-stick"></div></div>
@@ -243,6 +265,7 @@ function applyLang(newLang) {
     document.querySelectorAll('.lang-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
     updateSoundBtn();
     try { updateBestUi(); } catch (e) {}   // rekor satırı da dile göre (yüklenirken henüz tanımlı olmayabilir)
+    try { renderHowto(); } catch (e) {}
 }
 document.querySelectorAll('.lang-btn[data-lang]').forEach(b => b.addEventListener('click', () => applyLang(b.dataset.lang)));
 applyLang(lang);
@@ -2799,6 +2822,7 @@ document.addEventListener('visibilitychange', () => { if(document.hidden) { setU
 
 window.onkeydown = e => {
     let k = e.key.toLowerCase();
+    if($('howto').style.display === 'flex') { if(e.key === 'Escape' || e.key === 'Enter') closeHowto(); return; }
     if(e.key === 'Escape' || k === 'p') { setUserPause(!userPaused); return; }
     if(userPaused) return;
     if(k==='a') keys.a=true; if(k==='d') keys.d=true; if(k==='s' || e.key==='ArrowDown') keys.s=true;
@@ -3011,17 +3035,148 @@ $('overlay-screen').addEventListener('pointerdown', e => {
     setIntroSound(true);
 });
 
-$('start-button').onclick = () => {
+// --- NASIL OYNANIR ---
+// Açılış ekranındaki butonla ya da oyun sırasında ❓ ile açılır; ilk oyunda kendiliğinden gösterilir.
+const HOWTO = {
+    tr: { title: "NASIL OYNANIR?", btn: "❓ NASIL OYNANIR?", ok: "ANLADIM",
+          hControls: "Kontroller", cAction: "Hareket", cKeys: "Klavye", cTouch: "Dokunmatik",
+          controls: [["Yürü", "A / D", "Joystick"], ["Zıpla", "Boşluk", "ZIPLA"], ["Para fırlat", "Enter", "FIRLAT"],
+                     ["Balyoz", "F", "BALYOZ"], ["Kalkan (basılı tut)", "S / ↓", "KALKAN"], ["Duraklat", "ESC / P", "⏸"]],
+          hGoal: "Amaç",
+          goal: ["7 polisi alt et.", "Açılan kapıdan geç.", "Bölüm sonu canavarını yen. 3 bölümü bitir!"],
+          goalNote: "Kul hakkı torbalarını toplayıp puan kazan. 3 canın var; çukura düşmek doğrudan öldürür.",
+          hEnemies: "Düşmanlar",
+          enemies: [["👮", "17/25 polisi", "Tabancayla ateş eder. Zıpla ya da kalkanı kaldır."],
+                    ["🛡️", "Çevik kuvvet", "Önden atılan para işlemez. Kafasına zıpla, arkasından vur ya da balyozla."],
+                    ["🎯", "Keskin nişancı", "Kırmızı lazer dolunca ateş eder. Yer değiştir ya da kalkanı kaldır."],
+                    ["👹", "Bölüm sonu canavarı", "Kafasına zıpla, para at, balyozla vur."]],
+          hPowers: "Güçler",
+          powers: [["⚡", "Hız"], ["⏫", "Çift zıplama"], ["🔨", "Dev balyoz"], ["❤️", "+1 can"], ["⭐", "Dokunulmazlık"]] },
+    en: { title: "HOW TO PLAY", btn: "❓ HOW TO PLAY", ok: "GOT IT",
+          hControls: "Controls", cAction: "Action", cKeys: "Keyboard", cTouch: "Touch",
+          controls: [["Walk", "A / D", "Joystick"], ["Jump", "Space", "JUMP"], ["Throw money", "Enter", "THROW"],
+                     ["Hammer", "F", "HAMMER"], ["Shield (hold)", "S / ↓", "SHIELD"], ["Pause", "ESC / P", "⏸"]],
+          hGoal: "Goal",
+          goal: ["Take down 7 police officers.", "Go through the gate that opens.", "Beat the boss. Finish all 3 levels!"],
+          goalNote: "Collect the people's due bags for points. You have 3 lives; falling into a pit kills you instantly.",
+          hEnemies: "Enemies",
+          enemies: [["👮", "17/25 police", "Shoots with a pistol. Jump or raise your shield."],
+                    ["🛡️", "Riot police", "Money thrown from the front bounces off. Jump on his head, hit him from behind or use the hammer."],
+                    ["🎯", "Sniper", "Fires when the red laser fills up. Move or raise your shield."],
+                    ["👹", "Boss", "Jump on its head, throw money, hit it with the hammer."]],
+          hPowers: "Power-ups",
+          powers: [["⚡", "Speed"], ["⏫", "Double jump"], ["🔨", "Giant hammer"], ["❤️", "+1 life"], ["⭐", "Invincibility"]] },
+    fr: { title: "COMMENT JOUER", btn: "❓ COMMENT JOUER", ok: "COMPRIS",
+          hControls: "Commandes", cAction: "Action", cKeys: "Clavier", cTouch: "Tactile",
+          controls: [["Marcher", "A / D", "Joystick"], ["Sauter", "Espace", "SAUTER"], ["Lancer de l'argent", "Entrée", "LANCER"],
+                     ["Marteau", "F", "MARTEAU"], ["Bouclier (maintenir)", "S / ↓", "BOUCLIER"], ["Pause", "ÉCHAP / P", "⏸"]],
+          hGoal: "Objectif",
+          goal: ["Neutralise 7 policiers.", "Passe par la porte qui s'ouvre.", "Bats le boss. Termine les 3 niveaux !"],
+          goalNote: "Ramasse les sacs pour gagner des points. Tu as 3 vies ; tomber dans un trou tue directement.",
+          hEnemies: "Ennemis",
+          enemies: [["👮", "Police 17/25", "Tire au pistolet. Saute ou lève ton bouclier."],
+                    ["🛡️", "CRS", "L'argent lancé de face rebondit. Saute sur sa tête, frappe-le de dos ou au marteau."],
+                    ["🎯", "Tireur d'élite", "Tire quand le laser rouge est plein. Bouge ou lève ton bouclier."],
+                    ["👹", "Boss", "Saute sur sa tête, lance de l'argent, frappe-le au marteau."]],
+          hPowers: "Bonus",
+          powers: [["⚡", "Vitesse"], ["⏫", "Double saut"], ["🔨", "Marteau géant"], ["❤️", "+1 vie"], ["⭐", "Invincibilité"]] },
+    nl: { title: "HOE TE SPELEN", btn: "❓ HOE TE SPELEN", ok: "BEGREPEN",
+          hControls: "Besturing", cAction: "Actie", cKeys: "Toetsenbord", cTouch: "Aanraken",
+          controls: [["Lopen", "A / D", "Joystick"], ["Springen", "Spatie", "SPRINGEN"], ["Geld gooien", "Enter", "GOOIEN"],
+                     ["Moker", "F", "MOKER"], ["Schild (ingedrukt)", "S / ↓", "SCHILD"], ["Pauze", "ESC / P", "⏸"]],
+          hGoal: "Doel",
+          goal: ["Schakel 7 agenten uit.", "Ga door de poort die opengaat.", "Versla de eindbaas. Speel alle 3 levels uit!"],
+          goalNote: "Verzamel zakken voor punten. Je hebt 3 levens; in een kuil vallen is direct dood.",
+          hEnemies: "Vijanden",
+          enemies: [["👮", "17/25-agent", "Schiet met een pistool. Spring of houd je schild omhoog."],
+                    ["🛡️", "ME", "Geld van voren ketst af. Spring op zijn hoofd, raak hem van achteren of met de moker."],
+                    ["🎯", "Sluipschutter", "Schiet als de rode laser vol is. Beweeg of houd je schild omhoog."],
+                    ["👹", "Eindbaas", "Spring op zijn hoofd, gooi geld, sla met de moker."]],
+          hPowers: "Power-ups",
+          powers: [["⚡", "Snelheid"], ["⏫", "Dubbele sprong"], ["🔨", "Reuzenhamer"], ["❤️", "+1 leven"], ["⭐", "Onkwetsbaar"]] },
+    de: { title: "SPIELANLEITUNG", btn: "❓ SPIELANLEITUNG", ok: "VERSTANDEN",
+          hControls: "Steuerung", cAction: "Aktion", cKeys: "Tastatur", cTouch: "Touch",
+          controls: [["Laufen", "A / D", "Joystick"], ["Springen", "Leertaste", "SPRINGEN"], ["Geld werfen", "Enter", "WERFEN"],
+                     ["Hammer", "F", "HAMMER"], ["Schild (halten)", "S / ↓", "SCHILD"], ["Pause", "ESC / P", "⏸"]],
+          hGoal: "Ziel",
+          goal: ["Schalte 7 Polizisten aus.", "Geh durch das Tor, das sich öffnet.", "Besiege den Endgegner. Schaffe alle 3 Level!"],
+          goalNote: "Sammle Säcke für Punkte. Du hast 3 Leben; ein Sturz in eine Grube ist sofort tödlich.",
+          hEnemies: "Gegner",
+          enemies: [["👮", "17/25-Polizist", "Schießt mit der Pistole. Spring oder heb den Schild."],
+                    ["🛡️", "Bereitschaftspolizei", "Geld von vorne prallt ab. Spring auf den Kopf, triff von hinten oder mit dem Hammer."],
+                    ["🎯", "Scharfschütze", "Schießt, wenn der rote Laser voll ist. Beweg dich oder heb den Schild."],
+                    ["👹", "Endgegner", "Spring auf den Kopf, wirf Geld, schlag mit dem Hammer."]],
+          hPowers: "Power-ups",
+          powers: [["⚡", "Tempo"], ["⏫", "Doppelsprung"], ["🔨", "Riesenhammer"], ["❤️", "+1 Leben"], ["⭐", "Unverwundbar"]] },
+    ru: { title: "КАК ИГРАТЬ", btn: "❓ КАК ИГРАТЬ", ok: "ПОНЯТНО",
+          hControls: "Управление", cAction: "Действие", cKeys: "Клавиатура", cTouch: "Сенсор",
+          controls: [["Идти", "A / D", "Джойстик"], ["Прыжок", "Пробел", "ПРЫЖОК"], ["Бросить деньги", "Enter", "БРОСОК"],
+                     ["Кувалда", "F", "КУВАЛДА"], ["Щит (удерживать)", "S / ↓", "ЩИТ"], ["Пауза", "ESC / P", "⏸"]],
+          hGoal: "Цель",
+          goal: ["Одолей 7 полицейских.", "Пройди через открывшиеся ворота.", "Победи босса. Пройди все 3 уровня!"],
+          goalNote: "Собирай мешки ради очков. У тебя 3 жизни; падение в яму убивает сразу.",
+          hEnemies: "Враги",
+          enemies: [["👮", "Полиция 17/25", "Стреляет из пистолета. Прыгай или подними щит."],
+                    ["🛡️", "ОМОН", "Деньги спереди отскакивают. Прыгни на голову, ударь сзади или кувалдой."],
+                    ["🎯", "Снайпер", "Стреляет, когда красный лазер заполнится. Двигайся или подними щит."],
+                    ["👹", "Босс", "Прыгай на голову, бросай деньги, бей кувалдой."]],
+          hPowers: "Бонусы",
+          powers: [["⚡", "Скорость"], ["⏫", "Двойной прыжок"], ["🔨", "Гигантский молот"], ["❤️", "+1 жизнь"], ["⭐", "Неуязвимость"]] }
+};
+let howtoThenStart = false;   // ilk oyunda: ekran kapanınca oyun başlar
+function renderHowto() {
+    const H = HOWTO[lang] || HOWTO.en;
+    $('howto-btn').textContent = H.btn;
+    $('howto-panel').innerHTML = `
+        <h2>${H.title}</h2>
+        <h3>${H.hControls}</h3>
+        <table><tr><th>${H.cAction}</th><th>${H.cKeys}</th><th>${H.cTouch}</th></tr>
+        ${H.controls.map(([a, k, tch]) => `<tr><td>${a}</td><td><kbd>${k}</kbd></td><td>${tch}</td></tr>`).join('')}</table>
+        <h3>${H.hGoal}</h3>
+        <ol>${H.goal.map(g => `<li>${g}</li>`).join('')}</ol>
+        <p class="howto-note">${H.goalNote}</p>
+        <h3>${H.hEnemies}</h3>
+        <ul class="howto-list">${H.enemies.map(([i, n, d]) => `<li><span class="howto-ico">${i}</span><b>${n}</b> — ${d}</li>`).join('')}</ul>
+        <h3>${H.hPowers}</h3>
+        <div class="howto-powers">${H.powers.map(([i, n]) => `<span>${i} ${n}</span>`).join('')}</div>
+        <button id="howto-ok" class="primary-btn" type="button">${H.ok}</button>`;
+    $('howto-ok').onclick = closeHowto;
+}
+function openHowto(thenStart = false) {
+    howtoThenStart = thenStart;
+    if (gameStarted && !levelCompleted) setUserPause(true);   // oyun sırasında açılırsa oyun durur
+    renderHowto();
+    $('howto').style.display = 'flex';
+    $('howto-panel').scrollTop = 0;
+}
+function closeHowto() {
+    $('howto').style.display = 'none';
+    try { localStorage.setItem('omurgasizHowto', '1'); } catch (e) {}
+    if (howtoThenStart) { howtoThenStart = false; startGame(); }
+}
+const howtoSeen = () => { try { return localStorage.getItem('omurgasizHowto') === '1'; } catch (e) { return true; } };
+$('howto-btn').addEventListener('click', () => openHowto(false));
+$('help-btn').addEventListener('click', () => openHowto(false));
+$('howto').addEventListener('click', e => { if (e.target === $('howto')) closeHowto(); });   // panelin dışına tıklayınca kapanır
+renderHowto();
+
+function startGame() {
     initAudio();   // tarayıcılar sesi ancak bir tıklamayla başlatmaya izin verir
     removeIntro();
     $('overlay-screen').style.display = 'none';
     gameStarted = true;
     $('pause-btn').style.display = 'block';
+    $('help-btn').style.display = 'block';
     resizeCanvas();
     createLevel();
     requestAnimationFrame(loop);
     const bgMusic = $('bg-music');
     bgMusic.volume = 0.1; bgMusic.play().catch(()=>{});
+}
+$('start-button').onclick = () => {
+    initAudio();
+    if (!howtoSeen()) openHowto(true);   // ilk kez oynayana önce kurallar
+    else startGame();
 };
 
 // --- JOYSTICK ---

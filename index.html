@@ -93,7 +93,7 @@
     <canvas id="gameCanvas"></canvas>
 </div>
 
-<audio id="bg-music" loop><source src="pixel_spy_vs_spy.mp3" type="audio/mpeg"></audio>
+<audio id="bg-music" loop><source src="chiptune_level1.mp3" type="audio/mpeg"></audio>
 <audio id="sfx-explosion"><source src="explosion.wav" type="audio/wav"></audio>
 <audio id="sfx-pickup"><source src="pickupCoin.wav" type="audio/wav"></audio>
 
@@ -113,7 +113,7 @@ const LANGS = {
         bag: ["KUL", "HAKKI"],
         voices: ["Ham!", "Gelsin paracıklar!", "Yarasın!", "Çok lezzetli!", "Kul hakkı gibisi yok!"],
         ouch: "Eyvah!", enemyCry: "ANAM",
-        bossName: "ALEVİ", bossIntro: "BÖLÜM SONU CANAVARI!", kurtName: "KURT",
+        bossName: "ALEVİ", bossIntro: "BÖLÜM SONU CANAVARI!", kurtName: "KURT", policeCry: "DOSYA KAPANDI!",
         soundOn: "🔊 SESİ AÇ", soundOff: "🔇 SESİ KAPAT"
     },
     en: {
@@ -129,7 +129,7 @@ const LANGS = {
         bag: ["PEOPLE'S", "DUE"],
         voices: ["Nom!", "Come to me, money!", "Enjoy!", "So delicious!", "Nothing beats the people's due!"],
         ouch: "Uh oh!", enemyCry: "MAMA!",
-        bossName: "ALEVİ", bossIntro: "BOSS FIGHT!", kurtName: "KURT",
+        bossName: "ALEVİ", bossIntro: "BOSS FIGHT!", kurtName: "KURT", policeCry: "CASE CLOSED!",
         soundOn: "🔊 SOUND ON", soundOff: "🔇 SOUND OFF"
     },
     fr: {
@@ -145,7 +145,7 @@ const LANGS = {
         bag: ["DROIT DU", "PEUPLE"],
         voices: ["Miam !", "Venez, petits sous !", "Bon appétit !", "Délicieux !", "Rien ne vaut le bien du peuple !"],
         ouch: "Oh non !", enemyCry: "MAMAN !",
-        bossName: "ALEVİ", bossIntro: "BOSS DE FIN !", kurtName: "KURT",
+        bossName: "ALEVİ", bossIntro: "BOSS DE FIN !", kurtName: "KURT", policeCry: "AFFAIRE CLASSÉE !",
         soundOn: "🔊 ACTIVER LE SON", soundOff: "🔇 COUPER LE SON"
     },
     nl: {
@@ -161,7 +161,7 @@ const LANGS = {
         bag: ["VOLKS", "RECHT"],
         voices: ["Hap!", "Kom maar, geldjes!", "Eet smakelijk!", "Heerlijk!", "Niets gaat boven volksrecht!"],
         ouch: "Oei!", enemyCry: "MAMA!",
-        bossName: "ALEVİ", bossIntro: "EINDBAAS!", kurtName: "KURT",
+        bossName: "ALEVİ", bossIntro: "EINDBAAS!", kurtName: "KURT", policeCry: "ZAAK GESLOTEN!",
         soundOn: "🔊 GELUID AAN", soundOff: "🔇 GELUID UIT"
     },
     de: {
@@ -177,7 +177,7 @@ const LANGS = {
         bag: ["VOLKS", "RECHT"],
         voices: ["Mampf!", "Her mit dem Geld!", "Guten Appetit!", "So lecker!", "Nichts geht über Volksrecht!"],
         ouch: "Oh nein!", enemyCry: "MAMA!",
-        bossName: "ALEVİ", bossIntro: "ENDGEGNER!", kurtName: "KURT",
+        bossName: "ALEVİ", bossIntro: "ENDGEGNER!", kurtName: "KURT", policeCry: "FALL ABGESCHLOSSEN!",
         soundOn: "🔊 TON AN", soundOff: "🔇 TON AUS"
     },
     ru: {
@@ -193,7 +193,7 @@ const LANGS = {
         bag: ["НАРОДНОЕ", "ДОБРО"],
         voices: ["Ам!", "Идите сюда, денежки!", "Приятного аппетита!", "Очень вкусно!", "Нет ничего лучше народного добра!"],
         ouch: "Ой-ой!", enemyCry: "МАМА!",
-        bossName: "АЛЕВИ", bossIntro: "БОСС!", kurtName: "КУРТ",
+        bossName: "АЛЕВИ", bossIntro: "БОСС!", kurtName: "КУРТ", policeCry: "ДЕЛО ЗАКРЫТО!",
         soundOn: "🔊 ВКЛЮЧИТЬ ЗВУК", soundOff: "🔇 ВЫКЛЮЧИТЬ ЗВУК"
     }
 };
@@ -460,6 +460,118 @@ function drawCashRegister(ctx, x, y, size, angle = 0) {
     ctx.restore();
 }
 
+// 17/25 polisinin fırlattığı kelepçe: zincirle bağlı iki halka
+function drawHandcuffs(ctx, x, y, size, angle = 0) {
+    const k = size / 50;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.scale(k, k);
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#e5e7eb"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke();      // zincir
+    for (const s of [-1, 1]) {
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.arc(s * 17, 0, 11, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = "#f1f5f9"; ctx.lineWidth = 2;                      // parlama
+        ctx.beginPath(); ctx.arc(s * 17, 0, 11, -2.4, -1.2); ctx.stroke();
+        ctx.fillStyle = "#64748b"; ctx.fillRect(s * 8 - 3, -4, 6, 8);        // kilit
+    }
+    ctx.restore();
+}
+
+// --- 17/25 POLİSİ ---
+// Lacivert üniformalı, kasketli, coplu polis. Koordinat: ayakların ortası, sağa bakar.
+const POLICE_LEGS = {
+    photoH: 1, ratio: 0.36, width: 13, swing: 0.6,
+    front: "#1e3a8a", back: "#172554", shoe: "#0a0a0a"
+};
+function drawPolice(ctx, en) {
+    const h = en.h, moving = en.lastSpeed > 0;
+    ctx.save();
+    ctx.translate(en.x + en.w / 2, en.y + en.h);
+    ctx.save();
+    if (en.dir === -1) ctx.scale(-1, 1);
+    const legs = drawLegs(ctx, 0, -h, h, 1, en.walkCycle, moving, false, POLICE_LEGS);
+    const bodyH = h * (1 - POLICE_LEGS.ratio);
+    ctx.translate(0, -h + legs.drop);
+    const s = bodyH / 128;                 // gövde 128 birimlik ızgarada çizilir
+    ctx.scale(s, s);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+
+    // Arka kol
+    const swing = moving ? Math.sin(en.walkCycle) * 0.5 : 0.1;
+    const arm = (ang, col) => {
+        ctx.save(); ctx.translate(-12, 56); ctx.rotate(ang);
+        ctx.strokeStyle = col; ctx.lineWidth = 13;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 44); ctx.stroke();
+        ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.arc(0, 48, 6.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    };
+    arm(-swing, "#172554");
+
+    // Gövde (gömlek + ceket)
+    ctx.fillStyle = "#1e40af"; ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.roundRect(-27, 50, 54, 72, 10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#93c5fd";                                   // yaka
+    ctx.beginPath(); ctx.moveTo(-10, 50); ctx.lineTo(0, 62); ctx.lineTo(10, 50); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, 62); ctx.lineTo(0, 110); ctx.stroke();
+    ctx.fillStyle = "#facc15";                                   // düğmeler
+    for (let b = 0; b < 3; b++) { ctx.beginPath(); ctx.arc(4, 72 + b * 13, 2.2, 0, Math.PI * 2); ctx.fill(); }
+    // Rozet (yıldız)
+    ctx.save(); ctx.translate(16, 64); ctx.fillStyle = "#fbbf24";
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) { const r = i % 2 ? 3 : 7, a = -Math.PI / 2 + i * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+    ctx.closePath(); ctx.fill(); ctx.restore();
+    // Göğüs yazısı
+    // Göğüs yazısı: isim plakası, sola bakarken de ters görünmesin
+    ctx.save(); ctx.translate(9, 84); if (en.dir === -1) ctx.scale(-1, 1);
+    ctx.fillStyle = "#0f172a"; ctx.beginPath(); ctx.roundRect(-17, -7, 34, 14, 3); ctx.fill();
+    ctx.fillStyle = "white"; ctx.font = "bold 10px monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("17/25", 0, 0.5);
+    ctx.restore();
+    // Kemer
+    ctx.fillStyle = "#111827"; ctx.fillRect(-27, 110, 54, 9);
+    ctx.fillStyle = "#d4d4d8"; ctx.fillRect(-5, 111, 10, 7);
+
+    // Kafa
+    ctx.fillStyle = "#f2c79b"; ctx.strokeStyle = "#7c4a24"; ctx.lineWidth = 2;
+    ctx.fillRect(-6, 40, 12, 12);                                // boyun
+    ctx.beginPath(); ctx.ellipse(2, 28, 18, 20, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#111";                                      // göz + kaş (çatık)
+    ctx.beginPath(); ctx.arc(11, 26, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = "#111";
+    ctx.beginPath(); ctx.moveTo(5, 19); ctx.lineTo(16, 22); ctx.stroke();
+    ctx.fillStyle = "#3f2a1d";                                   // bıyık
+    ctx.beginPath(); ctx.ellipse(12, 37, 9, 3.5, 0.1, 0, Math.PI * 2); ctx.fill();
+    // Kasket
+    ctx.fillStyle = "#1e3a8a"; ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-18, 16); ctx.lineTo(-14, 0); ctx.lineTo(18, 0); ctx.lineTo(20, 16); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#0f172a";                                   // siperlik
+    ctx.beginPath(); ctx.ellipse(16, 16, 15, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#facc15"; ctx.fillRect(-16, 10, 34, 3);     // şerit
+    ctx.beginPath(); ctx.arc(4, 6, 4, 0, Math.PI * 2); ctx.fill(); // kasket arması
+
+    // Ön kol + cop
+    ctx.save(); ctx.translate(-12, 56); ctx.rotate(swing);
+    ctx.strokeStyle = "#1e3a8a"; ctx.lineWidth = 13;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 44); ctx.stroke();
+    ctx.strokeStyle = "#111"; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(-4, 50); ctx.lineTo(26, 30); ctx.stroke();
+    ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.arc(0, 48, 6.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.restore();
+
+    // İsim etiketi (aynalanmaz)
+    const tagY = -h + legs.drop - 16;
+    ctx.font = "bold 22px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.lineWidth = 4; ctx.strokeStyle = "#0f172a"; ctx.strokeText("17/25", 0, tagY);
+    ctx.fillStyle = "#60a5fa"; ctx.fillText("17/25", 0, tagY);
+    ctx.restore();
+}
+
 // Alttan yuvarlak, ucu yukarı sivrilen tek alev dili (taban: cx, baseY)
 function flameTongue(ctx, cx, baseY, w, h, lean = 0) {
     ctx.beginPath();
@@ -592,9 +704,10 @@ function killEnemy(en) {
     if(en.dead) return;
     en.dead = true;
     killedEnemies++;
-    createParticle(en.x + en.w/2, en.y, t("hit"), "white", 1.0);
-    speak(t("enemyCry"), "Aoede");
-    $('score').innerText = score += 2000; $('kills').innerText = killedEnemies;
+    const isPolice = en.kind === 'police';
+    createParticle(en.x + en.w/2, en.y, isPolice ? t("policeCry") : t("hit"), isPolice ? "#60a5fa" : "white", 1.0);
+    speak(isPolice ? t("policeCry") : t("enemyCry"), isPolice ? "Charon" : "Aoede");
+    $('score').innerText = score += isPolice ? 3000 : 2000; $('kills').innerText = killedEnemies;
     if(killedEnemies === targetKills) {
         // Hedef tamamlanınca bölüm sonu canavarı gelir (1: ALEVİ, 2: KURT)
         spawnBoss(player.x + 420);
@@ -805,6 +918,9 @@ function completeLevel() {
             currentLevel = 2; targetKills = 6;
             $('current-level').innerText = "2"; $('target-kills').innerText = "6";
             $('overlay-screen').style.display = 'none'; paused = false;
+            // 2. bölümün kendi müziği: özgün bozkır chiptune'u (tools/bozkir.py ile üretildi)
+            const bgMusic = $('bg-music');
+            bgMusic.src = 'bozkir_dortnal.mp3'; bgMusic.play().catch(()=>{});
             createLevel();
         };
     } else {
@@ -851,9 +967,13 @@ function createLevel() {
 
     for(let i=0; i<20; i++) {
         const homeX = 1500 + i * 1500;
+        // 17/25 polisleri: 1. bölümde her 3 düşmandan biri, 2. bölümde her 2 düşmandan biri
+        const police = currentLevel === 1 ? i % 3 === 1 : i % 2 === 1;
+        const w = police ? 120 : 160, h = police ? 200 : 210;
         enemies.push({
-            x: homeX, y: height - 60 - 210, w: 160, h: 210,   // alt kenar zeminde
-            timer: 0, interval: 200, dead: false,
+            kind: police ? 'police' : 'halk',
+            x: homeX, y: height - 60 - h, w, h,   // alt kenar zeminde
+            timer: 0, interval: police ? 150 : 200, dead: false,
             homeX: homeX,                          // Devriye merkezi
             dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
             speed: currentLevel === 1 ? 1.5 : 2.5, // 2. bölümde daha hızlı
@@ -938,7 +1058,7 @@ function update() {
         if(Math.abs(en.x - player.x) < 1200 && ++en.timer > en.interval) {
             en.timer = 0;
             // Yazarkasaların menzili (life) kahramanın mermisinin (150) iki katı: 300
-            projectiles.push({ type: 'register', 
+            projectiles.push({ type: en.kind === 'police' ? 'cuffs' : 'register',
                 x: en.x, 
                 y: en.y + 60, 
                 vx: (player.x < en.x ? -10 : 10), 
@@ -1304,6 +1424,7 @@ function draw() {
     items.forEach(it => { if(!it.collected) drawKulHakkiBag(ctx, it.x, it.y, 80); });
     enemies.forEach(en => {
         if(en.dead) return;
+        if(en.kind === 'police') { drawPolice(ctx, en); return; }
         // Halk'ın fotoğrafı boydan (kendi ayakları var), o yüzden ek bacak yok:
         // yürürken ayakların üstünde sağa-sola salınır, her adımda hafif yükselir.
         const moving = en.lastSpeed > 0;
@@ -1358,6 +1479,7 @@ function draw() {
     projectiles.forEach(p => {
         if(p.type === 'fire') drawFire(ctx, p);
         else if(p.type === 'wave') drawWave(ctx, p);
+        else if(p.type === 'cuffs') drawHandcuffs(ctx, p.x, p.y, 50, p.angle);
         else drawCashRegister(ctx, p.x, p.y, 55, p.angle);
     });
 
@@ -1521,4 +1643,4 @@ window.onresize = () => {
 };
 </script>
 </body>
-</html>
+</html>

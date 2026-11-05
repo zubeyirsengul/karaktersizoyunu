@@ -114,6 +114,7 @@ const LANGS = {
         voices: ["Ham!", "Gelsin paracıklar!", "Yarasın!", "Çok lezzetli!", "Kul hakkı gibisi yok!"],
         ouch: "Eyvah!", enemyCry: "ANAM",
         bossName: "ALEVİ", bossIntro: "BÖLÜM SONU CANAVARI!", kurtName: "KURT", policeCry: "DOSYA KAPANDI!",
+        l2Title: "BÖLÜM 2 TAMAM!", l2Note: "Kurt da gitti! Son durak: sandık başı.", l2Btn: "3. BÖLÜME GEÇ", sandikName: "SANDIK",
         soundOn: "🔊 SESİ AÇ", soundOff: "🔇 SESİ KAPAT"
     },
     en: {
@@ -130,6 +131,7 @@ const LANGS = {
         voices: ["Nom!", "Come to me, money!", "Enjoy!", "So delicious!", "Nothing beats the people's due!"],
         ouch: "Uh oh!", enemyCry: "MAMA!",
         bossName: "ALEVİ", bossIntro: "BOSS FIGHT!", kurtName: "KURT", policeCry: "CASE CLOSED!",
+        l2Title: "LEVEL 2 COMPLETE!", l2Note: "The wolf is gone! Last stop: the ballot box.", l2Btn: "GO TO LEVEL 3", sandikName: "BALLOT BOX",
         soundOn: "🔊 SOUND ON", soundOff: "🔇 SOUND OFF"
     },
     fr: {
@@ -146,6 +148,7 @@ const LANGS = {
         voices: ["Miam !", "Venez, petits sous !", "Bon appétit !", "Délicieux !", "Rien ne vaut le bien du peuple !"],
         ouch: "Oh non !", enemyCry: "MAMAN !",
         bossName: "ALEVİ", bossIntro: "BOSS DE FIN !", kurtName: "KURT", policeCry: "AFFAIRE CLASSÉE !",
+        l2Title: "NIVEAU 2 TERMINÉ !", l2Note: "Le loup est parti ! Dernier arrêt : l'urne.", l2Btn: "NIVEAU 3", sandikName: "URNE",
         soundOn: "🔊 ACTIVER LE SON", soundOff: "🔇 COUPER LE SON"
     },
     nl: {
@@ -162,6 +165,7 @@ const LANGS = {
         voices: ["Hap!", "Kom maar, geldjes!", "Eet smakelijk!", "Heerlijk!", "Niets gaat boven volksrecht!"],
         ouch: "Oei!", enemyCry: "MAMA!",
         bossName: "ALEVİ", bossIntro: "EINDBAAS!", kurtName: "KURT", policeCry: "ZAAK GESLOTEN!",
+        l2Title: "LEVEL 2 VOLTOOID!", l2Note: "De wolf is weg! Laatste halte: de stembus.", l2Btn: "NAAR LEVEL 3", sandikName: "STEMBUS",
         soundOn: "🔊 GELUID AAN", soundOff: "🔇 GELUID UIT"
     },
     de: {
@@ -178,6 +182,7 @@ const LANGS = {
         voices: ["Mampf!", "Her mit dem Geld!", "Guten Appetit!", "So lecker!", "Nichts geht über Volksrecht!"],
         ouch: "Oh nein!", enemyCry: "MAMA!",
         bossName: "ALEVİ", bossIntro: "ENDGEGNER!", kurtName: "KURT", policeCry: "FALL ABGESCHLOSSEN!",
+        l2Title: "LEVEL 2 GESCHAFFT!", l2Note: "Der Wolf ist weg! Letzte Station: die Wahlurne.", l2Btn: "ZU LEVEL 3", sandikName: "WAHLURNE",
         soundOn: "🔊 TON AN", soundOff: "🔇 TON AUS"
     },
     ru: {
@@ -194,6 +199,7 @@ const LANGS = {
         voices: ["Ам!", "Идите сюда, денежки!", "Приятного аппетита!", "Очень вкусно!", "Нет ничего лучше народного добра!"],
         ouch: "Ой-ой!", enemyCry: "МАМА!",
         bossName: "АЛЕВИ", bossIntro: "БОСС!", kurtName: "КУРТ", policeCry: "ДЕЛО ЗАКРЫТО!",
+        l2Title: "УРОВЕНЬ 2 ПРОЙДЕН!", l2Note: "Волк повержен! Последняя остановка: урна.", l2Btn: "НА УРОВЕНЬ 3", sandikName: "УРНА",
         soundOn: "🔊 ВКЛЮЧИТЬ ЗВУК", soundOff: "🔇 ВЫКЛЮЧИТЬ ЗВУК"
     }
 };
@@ -700,16 +706,76 @@ function updateHammer() {
     }
 }
 
+// --- SES EFEKTLERİ (Web Audio) ---
+// Gerçek ses kayıtları: çığlıklar (oyunun yapımcısının kendi sesi), darbeler (Independent.nu, CC0)
+const SFX_FILES = {
+    cry: [1, 2, 3, 4, 5].map(i => `sfx/cry${i}.mp3`),
+    hit: [1, 2, 3, 4, 5].map(i => `sfx/hit${i}.mp3`)
+};
+let audioCtx = null;
+const sfxBuffers = { cry: [], hit: [] }, sfxLast = {};
+function initAudio() {
+    if (audioCtx) { if (audioCtx.resume) audioCtx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioCtx = new AC();
+    for (const [kind, list] of Object.entries(SFX_FILES)) list.forEach((url, i) =>
+        fetch(url).then(r => r.arrayBuffer()).then(b => audioCtx.decodeAudioData(b))
+            .then(buf => { sfxBuffers[kind][i] = buf; }).catch(() => {}));
+}
+// Rastgele bir kayıt çalar (aynısı art arda gelmez); rate: perde/hız, pan: sol-sağ konum
+function playSfx(kind, { rate = 1, vol = 1, delay = 0, pan = 0 } = {}) {
+    if (!audioCtx) return;
+    const list = sfxBuffers[kind].map((b, i) => [b, i]).filter(([b, i]) => b && (i !== sfxLast[kind] || sfxBuffers[kind].length < 2));
+    if (!list.length) return;
+    const [buf, idx] = list[Math.floor(Math.random() * list.length)];
+    sfxLast[kind] = idx;
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate;
+    const gain = audioCtx.createGain();
+    gain.gain.value = vol;
+    src.connect(gain);
+    if (audioCtx.createStereoPanner) {
+        const panner = audioCtx.createStereoPanner();
+        panner.pan.value = Math.max(-1, Math.min(1, pan));
+        gain.connect(panner); panner.connect(audioCtx.destination);
+    } else gain.connect(audioCtx.destination);
+    src.start(audioCtx.currentTime + delay);
+}
+// Düşman ölümü: önce darbe, hemen ardından çığlık. Polisin sesi daha kalın, ses ekrandaki konumuna göre sağdan/soldan gelir.
+function enemyDeathSound(en) {
+    const pan = (en.x + en.w / 2 - camX - width / 2) / (width / 2);
+    playSfx('hit', { rate: 0.9 + Math.random() * 0.2, vol: 0.9, pan });
+    const rate = en.kind === 'police' ? 0.76 + Math.random() * 0.08 : 0.92 + Math.random() * 0.2;
+    playSfx('cry', { rate, vol: 0.85, delay: 0.05, pan });
+}
+
+// Ölen düşman yere yığılır ve kaybolur
+const DEATH_FRAMES = 50;
+function applyDeathPose(ctx, en) {
+    const k = Math.min(1, en.deathT / 16);
+    const px = en.x + en.w / 2, py = en.y + en.h;
+    ctx.translate(px, py - en.w * 0.35 * k - Math.sin(k * Math.PI) * 18);
+    ctx.rotate(en.fallDir * k * k * Math.PI / 2);
+    ctx.translate(-px, -py);
+    ctx.globalAlpha = Math.max(0, Math.min(1, (DEATH_FRAMES - en.deathT) / 15));
+}
+
 function killEnemy(en) {
     if(en.dead) return;
     en.dead = true;
     killedEnemies++;
     const isPolice = en.kind === 'police';
+    // Devrilme animasyonu: oyuncudan uzağa doğru yere yığılır
+    en.deathT = 0; en.lastSpeed = 0;
+    en.fallDir = Math.sign(en.x + en.w / 2 - (player.x + player.w / 2)) || 1;
+    enemyDeathSound(en);
     createParticle(en.x + en.w/2, en.y, isPolice ? t("policeCry") : t("hit"), isPolice ? "#60a5fa" : "white", 1.0);
-    speak(isPolice ? t("policeCry") : t("enemyCry"), isPolice ? "Charon" : "Aoede");
+    if(isPolice) speak(t("policeCry"), "Charon");
     $('score').innerText = score += isPolice ? 3000 : 2000; $('kills').innerText = killedEnemies;
     if(killedEnemies === targetKills) {
-        // Hedef tamamlanınca bölüm sonu canavarı gelir (1: ALEVİ, 2: KURT)
+        // Hedef tamamlanınca bölüm sonu canavarı gelir (1: ALEVİ, 2: KURT, 3: SANDIK)
         spawnBoss(player.x + 420);
     }
 }
@@ -718,10 +784,11 @@ function killEnemy(en) {
 // Her canavar: boyut, can, arena genişliği, isim, üstüne basılabilen derinlik, hareket ve çizim
 const BOSS_TYPES = {
     alevi: { w: 260, h: 340, hp: 12, arena: 700, nameKey: "bossName", stomp: 110, update: updateAlevi, draw: drawAlevi },
-    kurt:  { w: 300, h: 190, hp: 16, arena: 900, nameKey: "kurtName", stomp: 70,  update: updateKurt,  draw: drawKurt }
+    kurt:  { w: 300, h: 190, hp: 16, arena: 900, nameKey: "kurtName", stomp: 70,  update: updateKurt,  draw: drawKurt },
+    sandik:{ w: 240, h: 290, hp: 20, arena: 900, nameKey: "sandikName", stomp: 80, update: updateSandik, draw: drawSandik }
 };
 function spawnBoss(x) {
-    const kind = currentLevel === 1 ? 'alevi' : 'kurt';
+    const kind = LEVELS[currentLevel].boss;
     const T = BOSS_TYPES[kind], w = T.w, h = T.h;
     x = Math.min(x, WORLD_WIDTH - w - 100);
     boss = { kind, T, x, y: height - 60 - h, w, h, homeX: x, hp: T.hp, dir: -1, look: -1,
@@ -779,6 +846,7 @@ function damageBoss(n) {
     if(!boss || boss.dying || boss.hurt > 0) return;
     boss.hp = Math.max(0, boss.hp - n);
     boss.hurt = 30;   // kısa dokunulmazlık (yanıp söner)
+    playSfx('hit', { rate: 0.8 + Math.random() * 0.2, vol: 0.7 });
     createParticle(boss.x + boss.w / 2, boss.y + 40, "-" + n, "#fde047", 0.8);
     if(boss.hp > 0) return;
     boss.dying = true;
@@ -787,7 +855,8 @@ function damageBoss(n) {
     $('score').innerText = score += 20000;
     $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
     for(let i = 0; i < 30; i++) createParticle(boss.x + Math.random() * boss.w, boss.y + Math.random() * boss.h);
-    speak(t("enemyCry"), "Aoede");
+    playSfx('hit', { rate: 0.6, vol: 1 });
+    playSfx('cry', { rate: 0.55, vol: 1, delay: 0.08 });   // canavar: kalın, uzun çığlık
     setTimeout(completeLevel, 1800);
 }
 
@@ -867,6 +936,74 @@ function updateKurt(b) {
     b.crouch += ((b.state === 'crouch' ? 1 : 0) - b.crouch) * 0.25;
 }
 
+// SANDIK: zıplaya zıplaya yaklaşır; kapağını açıp oy pusulası yağdırır, her üçüncü saldırıda
+// havaya sıçrayıp inişte iki yana şok dalgası gönderir
+function updateSandik(b) {
+    const groundY = height - 60 - b.h;
+    const dist = (player.x + player.w / 2) - (b.x + b.w / 2);
+    b.look = Math.sign(dist) || b.look;
+    switch(b.state) {
+        case 'walk':
+            b.dir = Math.sign(dist) || b.dir;
+            if(Math.abs(dist) > 260) { b.x += b.dir * 1.8; b.run += 0.12; }
+            if(!player.isDying && Math.abs(dist) < 1400 && ++b.timer > 90) {
+                b.timer = 0;
+                b.attacks++;
+                b.next = b.attacks % 3 === 0 ? 'leap' : 'volley';
+                b.state = 'crouch';
+                b.stateT = b.next === 'leap' ? 30 : 36;
+                createParticle(b.x + b.w / 2, b.y - 50, b.next === 'leap' ? "HOP!" : "OY!", "#fde047", 1.0);
+            }
+            break;
+        case 'crouch':
+            if(--b.stateT <= 0) {
+                if(b.next === 'volley') { ballotVolley(b); b.state = 'walk'; }
+                else {
+                    b.state = 'leap'; b.vy = -20;
+                    const air = 2 * 20 / 0.9;
+                    b.vx = Math.max(-11, Math.min(11, dist / air));
+                }
+            }
+            break;
+        case 'leap':
+            b.vy += 0.9; b.x += b.vx; b.y += b.vy;
+            if(b.y >= groundY) {
+                b.y = groundY; b.state = 'walk'; b.timer = 20;
+                const cx = b.x + b.w / 2;
+                [-1, 1].forEach(d => projectiles.push({ type: 'wave', x: cx + d * b.w * 0.3, y: height - 60, vx: d * 8, active: true, life: 85, angle: 0 }));
+                for(let i = 0; i < 12; i++) createParticle(cx + (Math.random() - 0.5) * b.w, height - 70);
+                playSfx('hit', { rate: 0.5, vol: 0.8 });
+            }
+            break;
+    }
+    if(b.state !== 'leap') b.y = groundY;
+    b.x = Math.max(b.homeX - b.T.arena, Math.min(b.x, b.homeX + b.T.arena, WORLD_WIDTH - b.w));
+    b.crouch += ((b.state === 'crouch' ? 1 : 0) - b.crouch) * 0.25;
+}
+
+function ballotVolley(b) {
+    const mx = b.x + b.w / 2, my = b.y + 10;
+    const side = Math.sign(player.x + player.w / 2 - mx) || 1;
+    for(let i = 0; i < 6; i++) {
+        projectiles.push({ type: 'ballot', x: mx, y: my, vx: side * (2 + i * 1.6), vy: -10 - Math.random() * 3,
+                           active: true, life: 420, angle: 0, phase: Math.random() * 6, landed: false });
+    }
+}
+
+// Oy pusulası: yükselip yaprak gibi sallanarak süzülür; yere düşünce zararsızdır
+function updateBallot(p) {
+    p.life--;
+    if(!p.landed) {
+        p.vy = Math.min(p.vy + 0.3, 2.2);
+        p.vx *= 0.985;
+        const sway = Math.sin(p.life * 0.08 + p.phase);
+        p.x += sway * 1.2; p.y += p.vy; p.angle = sway * 0.6;
+        if(p.y > height - 72) { p.y = height - 72; p.vx = 0; p.landed = true; p.life = Math.min(p.life, 90); }
+    } else p.vx = 0;
+    if(player.isDying || !p.active || p.landed) return;
+    if(p.x > player.x + 15 && p.x < player.x + player.w - 15 && p.y > player.y && p.y < player.y + player.h) { p.active = false; die(); }
+}
+
 // Şok dalgası zeminde ilerler; üstünden zıplanarak kaçılır
 function updateWave(p) {
     p.x += p.vx;
@@ -909,20 +1046,13 @@ function completeLevel() {
     levelCompleted = true;
     $('lang-picker').hidden = true; // Dil sadece başlangıç ekranında seçilir
     paused = true;
-    
-    if (currentLevel === 1) {
-        $('overlay-title').innerText = t("l1Title");
-        $('overlay-note').innerText = t("l1Note");
-        $('start-button').innerText = t("l1Btn");
-        $('start-button').onclick = () => {
-            currentLevel = 2; targetKills = 6;
-            $('current-level').innerText = "2"; $('target-kills').innerText = "6";
-            $('overlay-screen').style.display = 'none'; paused = false;
-            // 2. bölümün kendi müziği: özgün bozkır chiptune'u (tools/bozkir.py ile üretildi)
-            const bgMusic = $('bg-music');
-            bgMusic.src = 'bozkir_dortnal.mp3'; bgMusic.play().catch(()=>{});
-            createLevel();
-        };
+
+    if (currentLevel < MAX_LEVEL) {
+        const n = currentLevel;
+        $('overlay-title').innerText = t(`l${n}Title`);
+        $('overlay-note').innerText = t(`l${n}Note`);
+        $('start-button').innerText = t(`l${n}Btn`);
+        $('start-button').onclick = () => goToLevel(n + 1);
     } else {
         $('overlay-title').innerText = t("winTitle");
         $('overlay-note').innerText = t("winNote");
@@ -930,6 +1060,27 @@ function completeLevel() {
         $('start-button').onclick = () => location.reload();
     }
     $('overlay-screen').style.display = 'flex';
+}
+
+// --- BÖLÜMLER ---
+// platforms: [x, zeminden yükseklik, genişlik, kalınlık]; police(i): i. düşman polis mi
+const LEVELS = {
+    1: { target: 4, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, police: i => i % 3 === 1,
+         platforms: [[600, 180, 200, 120], [1200, 250, 300, 50], [1800, 150, 150, 100], [2300, 350, 400, 50]] },
+    2: { target: 6, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, police: i => i % 2 === 1,
+         platforms: [[400, 150, 150, 40], [800, 300, 150, 40], [1200, 450, 200, 40], [1600, 300, 300, 40]] },
+    3: { target: 8, music: 'chiptune_level3.mp3', boss: 'sandik', speed: 3.2, police: i => i % 3 !== 0,
+         platforms: [[500, 170, 180, 40], [850, 290, 180, 40], [1250, 400, 260, 40], [1700, 260, 200, 40], [2200, 180, 300, 40]] }
+};
+const MAX_LEVEL = 3;
+
+function goToLevel(n) {
+    currentLevel = n; targetKills = LEVELS[n].target;
+    $('current-level').innerText = n; $('target-kills').innerText = targetKills;
+    $('overlay-screen').style.display = 'none'; paused = false;
+    const bgMusic = $('bg-music');
+    bgMusic.src = LEVELS[n].music; bgMusic.play().catch(()=>{});
+    createLevel();
 }
 
 function createLevel() {
@@ -943,23 +1094,8 @@ function createLevel() {
     $('game-container').classList.remove('shake');
     $('kills').innerText = "0";
 
-    if (currentLevel === 1) {
-        platforms = [
-            {x: 0, y: height-60, w: 40000, h: 500},
-            {x: 600, y: height-180, w: 200, h: 120},
-            {x: 1200, y: height-250, w: 300, h: 50}, 
-            {x: 1800, y: height-150, w: 150, h: 100},
-            {x: 2300, y: height-350, w: 400, h: 50}
-        ];
-    } else {
-        platforms = [
-            {x: 0, y: height-60, w: 40000, h: 500},
-            {x: 400, y: height-150, w: 150, h: 40},
-            {x: 800, y: height-300, w: 150, h: 40},
-            {x: 1200, y: height-450, w: 200, h: 40},
-            {x: 1600, y: height-300, w: 300, h: 40}
-        ];
-    }
+    platforms = [{x: 0, y: height-60, w: 40000, h: 500},
+                 ...LEVELS[currentLevel].platforms.map(([x, up, w, h]) => ({ x, y: height - up, w, h }))];
 
     for(let i=0; i<40; i++) {
         items.push({ x: 800 + i * 700, y: height - 150 - (Math.random() * 250), collected: false });
@@ -967,8 +1103,8 @@ function createLevel() {
 
     for(let i=0; i<20; i++) {
         const homeX = 1500 + i * 1500;
-        // 17/25 polisleri: 1. bölümde her 3 düşmandan biri, 2. bölümde her 2 düşmandan biri
-        const police = currentLevel === 1 ? i % 3 === 1 : i % 2 === 1;
+        // 17/25 polisleri: 1. bölümde her 3 düşmandan biri, 2. bölümde yarısı, 3. bölümde 3'te 2'si
+        const police = LEVELS[currentLevel].police(i);
         const w = police ? 120 : 160, h = police ? 200 : 210;
         enemies.push({
             kind: police ? 'police' : 'halk',
@@ -976,7 +1112,7 @@ function createLevel() {
             timer: 0, interval: police ? 150 : 200, dead: false,
             homeX: homeX,                          // Devriye merkezi
             dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
-            speed: currentLevel === 1 ? 1.5 : 2.5, // 2. bölümde daha hızlı
+            speed: LEVELS[currentLevel].speed,     // bölüm ilerledikçe hızlanır
             walkCycle: Math.random() * Math.PI * 2
         });
     }
@@ -1032,7 +1168,7 @@ function update() {
     });
 
     enemies.forEach(en => {
-        if(en.dead) return;
+        if(en.dead) { if(en.deathT < DEATH_FRAMES) en.deathT++; return; }
 
         // --- Düşman hareketi ---
         const PATROL_RANGE = 250, CHASE_RANGE = 400, CHASE_DIST = 700;
@@ -1095,6 +1231,7 @@ function update() {
         p.x += p.vx; 
         if(p.type === 'fire') { updateFire(p); return; }
         if(p.type === 'wave') { updateWave(p); return; }
+        if(p.type === 'ballot') { updateBallot(p); return; }
         p.vy += 0.25; // Yazarkasaya eklenen yer çekimi (gravity)
         p.y += p.vy;
         p.angle += 0.1;
@@ -1411,35 +1548,315 @@ function drawBossBar(ctx, b) {
     ctx.textBaseline = "alphabetic";
 }
 
+function drawHalk(ctx, en) {
+    // Halk'ın fotoğrafı boydan (kendi ayakları var), o yüzden ek bacak yok:
+    // yürürken ayakların üstünde sağa-sola salınır, her adımda hafif yükselir.
+    const moving = en.lastSpeed > 0;
+    const p = en.walkCycle;
+    const sway = moving ? Math.sin(p) * 0.07 + en.dir * 0.03 : 0;  // salınım + yürüme yönüne hafif eğilme
+    const bob  = moving ? -Math.abs(Math.cos(p)) * 6 : 0;          // adım ortasında yükselme
+    // Kırpılmış fotoğraf kutu yüksekliğine oranını koruyarak sığar, ayaklar zeminde
+    const c = enemyCrop || { sx: 0, sy: 0, sw: imgEnemy.naturalWidth, sh: imgEnemy.naturalHeight };
+    if(!c.sw) return;   // resim henüz yüklenmedi
+    const dh = en.h, dw = Math.min(en.w, dh * c.sw / c.sh);
+    ctx.save();
+    ctx.translate(en.x + en.w / 2, en.y + en.h);   // dönme noktası: ayakların ortası
+    ctx.rotate(sway);
+    if(en.dir === -1) ctx.scale(-1, 1);        // yürüdüğü yöne baksın
+    ctx.drawImage(enemySprite, c.sx, c.sy, c.sw, c.sh, -dw / 2, -dh + bob, dw, dh);
+    ctx.restore();
+}
+
+// --- ARKA PLAN: bölüme göre paralaks katmanlar ---
+// 1: gündüz, yeşil tepeler ve ağaçlar · 2: bozkırda gün batımı, yurtlar · 3: gece şehri, projektörler
+const THEMES = {
+    1: { sky: ["#38bdf8", "#7dd3fc", "#e0f2fe", "#fef9c3"], sun: { x: 0.8, y: 0.17, r: 44, c: "#fde68a", glow: "rgba(253,224,71,0.35)" },
+         clouds: "rgba(255,255,255,0.92)",
+         ground: ["#7a4a24", "#3b2412"], grass: "#4caf2f", grassDark: "#2e6b1c" },
+    2: { sky: ["#1e1b4b", "#831843", "#ea580c", "#fcd34d"], sun: { x: 0.3, y: 0.6, r: 70, c: "#fdba74", glow: "rgba(251,146,60,0.45)" },
+         clouds: "rgba(253,186,116,0.5)",
+         ground: ["#8a5a2b", "#4a2f15"], grass: "#b5a642", grassDark: "#7c6f2a" },
+    3: { sky: ["#020617", "#0f172a", "#1e3a8a"], moon: { x: 0.82, y: 0.15, r: 32 }, stars: true,
+         ground: ["#3f3f46", "#18181b"], grass: "#9ca3af", grassDark: "#4b5563", curb: true }
+};
+const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+// Yumuşak tepe profili (-1..1): farklı frekanslı sinüslerin toplamı
+const ridge = (x, seed) => 0.5 * Math.sin(x * 0.0021 + seed) + 0.3 * Math.sin(x * 0.0053 + seed * 2.3) + 0.2 * Math.sin(x * 0.013 + seed * 4.1);
+const hillY = (sx, par, base, amp, seed) => base - amp * (1 + ridge(sx + camX * par, seed));
+let skyCache = null;
+
+function hillLayer(par, base, amp, seed, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, height);
+    for (let sx = 0; sx <= width + 12; sx += 12) ctx.lineTo(sx, hillY(sx, par, base, amp, seed));
+    ctx.lineTo(width, height);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// Katman üzerinde aralıklı nesneler (ağaç, yurt): her biri dünyada sabit yerde durur
+function layerProps(par, spacing, chance, seed, fn) {
+    const off = camX * par;
+    for (let i = Math.floor(off / spacing) - 1; i <= Math.ceil((off + width) / spacing) + 1; i++) {
+        if (hash(i * 1.31 + seed) > chance) continue;
+        fn(i * spacing + hash(i * 2.7 + seed) * spacing * 0.6 - off, i);
+    }
+}
+
+function cloud(x, y, s) {
+    ctx.beginPath();
+    [[0, 0, 30], [35, -16, 38], [76, 0, 30], [38, 8, 32]].forEach(([dx, dy, r]) => {
+        ctx.moveTo(x + dx * s + r * s, y + dy * s);
+        ctx.arc(x + dx * s, y + dy * s, r * s, 0, Math.PI * 2);
+    });
+    ctx.fill();
+}
+
+function skyline(par, base, minH, maxH, color, windowColor, seed) {
+    const step = 70, off = camX * par;
+    for (let i = Math.floor(off / step) - 2; i <= Math.ceil((off + width) / step) + 1; i++) {
+        const bw = 50 + hash(i * 2.11 + seed) * 60, bh = minH + hash(i * 1.37 + seed) * (maxH - minH);
+        const sx = i * step - off + (hash(i * 3.3 + seed) - 0.5) * 20, top = base - bh;
+        ctx.fillStyle = color;
+        ctx.fillRect(sx, top, bw, height - top);
+        if (hash(i * 4.1 + seed) > 0.7) ctx.fillRect(sx + bw / 2 - 1, top - 18, 2, 18);   // anten
+        if (!windowColor) continue;
+        ctx.fillStyle = windowColor;
+        const cols = Math.floor((bw - 14) / 13), rows = Math.floor((bh - 16) / 16);
+        for (let r = 0; r < rows; r++)
+            for (let c = 0; c < cols; c++)
+                if (hash(i * 91.7 + r * 7.3 + c * 3.1 + seed) > 0.62) ctx.fillRect(sx + 8 + c * 13, top + 10 + r * 16, 6, 9);
+    }
+}
+
+function drawBackground() {
+    const th = THEMES[currentLevel], time = performance.now() / 1000;
+    if (!skyCache || skyCache.h !== height || skyCache.lvl !== currentLevel) {
+        const g = ctx.createLinearGradient(0, 0, 0, height);
+        th.sky.forEach((c, i) => g.addColorStop(i / (th.sky.length - 1), c));
+        skyCache = { g, h: height, lvl: currentLevel };
+    }
+    ctx.fillStyle = skyCache.g;
+    ctx.fillRect(0, 0, width, height);
+
+    // Yıldızlar (yanıp söner)
+    if (th.stars) {
+        ctx.fillStyle = "#fff";
+        for (let i = 0; i < 160; i++) {
+            const x = ((hash(i) * 3000 - camX * 0.02) % 3000 + 3000) % 3000;
+            if (x > width) continue;
+            ctx.globalAlpha = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * (1 + hash(i + 0.2) * 3) + i));
+            const s = hash(i + 0.9) > 0.85 ? 2.5 : 1.5;
+            ctx.fillRect(x, hash(i + 0.5) * height * 0.6, s, s);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // Güneş / ay, etrafında hale
+    const orb = th.sun || th.moon;
+    const ox = width * orb.x, oy = height * orb.y;
+    const glow = ctx.createRadialGradient(ox, oy, orb.r * 0.5, ox, oy, orb.r * 4);
+    glow.addColorStop(0, th.sun ? orb.glow : "rgba(226,232,240,0.25)");
+    glow.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(ox - orb.r * 4, oy - orb.r * 4, orb.r * 8, orb.r * 8);
+    ctx.fillStyle = th.sun ? orb.c : "#f1f5f9";
+    ctx.beginPath(); ctx.arc(ox, oy, orb.r, 0, Math.PI * 2); ctx.fill();
+    if (th.moon) {
+        ctx.fillStyle = "rgba(148,163,184,0.45)";
+        [[-10, -6, 7], [9, 8, 5], [6, -12, 4]].forEach(([dx, dy, r]) => { ctx.beginPath(); ctx.arc(ox + dx, oy + dy, r, 0, Math.PI * 2); ctx.fill(); });
+    }
+
+    // Bulutlar: rüzgârla yavaşça kayar
+    if (th.clouds) {
+        ctx.fillStyle = th.clouds;
+        const P = Math.max(4200, width + 800);
+        for (let i = 0; i < 9; i++) {
+            const x = (((hash(i * 3.1) * P + time * (6 + hash(i) * 8) - camX * 0.12) % P) + P) % P - 300;
+            if (x > width + 50) continue;
+            cloud(x, height * (0.08 + hash(i * 7.7) * 0.28), 0.7 + hash(i * 5.3) * 0.8);
+        }
+    }
+
+    if (currentLevel === 1) {
+        hillLayer(0.08, height * 0.6, 80, 1.3, "#93a8c8");          // uzak dağlar (soluk mavi)
+        hillLayer(0.22, height * 0.74, 42, 4.2, "#6a9a4c");         // orta tepeler
+        const nb = height * 0.85;
+        hillLayer(0.45, nb, 24, 7.9, "#3f7a33");                    // yakın tepeler + ağaçlar
+        layerProps(0.45, 150, 0.55, 2, (sx, i) => {
+            const y = hillY(sx, 0.45, nb, 24, 7.9) + 4, s = 0.8 + hash(i * 9.1) * 0.6;
+            ctx.fillStyle = "#4a2e16"; ctx.fillRect(sx - 3 * s, y - 22 * s, 6 * s, 22 * s);
+            ctx.fillStyle = "#2f6b2a";
+            ctx.beginPath(); ctx.arc(sx, y - 34 * s, 18 * s, 0, Math.PI * 2); ctx.arc(sx - 12 * s, y - 24 * s, 12 * s, 0, Math.PI * 2); ctx.arc(sx + 12 * s, y - 24 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "rgba(255,255,255,0.12)";
+            ctx.beginPath(); ctx.arc(sx - 5 * s, y - 40 * s, 8 * s, 0, Math.PI * 2); ctx.fill();
+        });
+    } else if (currentLevel === 2) {
+        hillLayer(0.08, height * 0.62, 85, 2.1, "#6b2f5f");         // güneşin battığı mor dağlar
+        const mb = height * 0.76;
+        hillLayer(0.22, mb, 28, 5.5, "#8a4a2a");                    // bozkır
+        layerProps(0.22, 650, 0.5, 5, sx => {                       // yurtlar
+            const y = hillY(sx, 0.22, mb, 28, 5.5) + 6;
+            ctx.fillStyle = "#f3e3c3"; ctx.fillRect(sx - 30, y - 26, 60, 26);
+            ctx.beginPath(); ctx.ellipse(sx, y - 26, 32, 18, 0, Math.PI, 0); ctx.fill();
+            ctx.fillStyle = "#b91c1c"; ctx.fillRect(sx - 30, y - 22, 60, 5);
+            ctx.fillStyle = "#3f1d0b"; ctx.fillRect(sx - 7, y - 16, 14, 16);
+            ctx.fillStyle = "#7c2d12"; ctx.fillRect(sx - 2, y - 48, 4, 6);
+        });
+        hillLayer(0.45, height * 0.87, 16, 8.4, "#5a3317");
+        // Kartallar süzülür
+        ctx.strokeStyle = "#1e1b4b"; ctx.lineWidth = 2.5; ctx.lineCap = "round";
+        for (let i = 0; i < 4; i++) {
+            const x = (((time * (30 + i * 7) + i * 420 - camX * 0.05) % (width + 300)) + width + 300) % (width + 300) - 150;
+            const y = height * (0.2 + 0.08 * i) + Math.sin(time * 0.8 + i) * 12, f = Math.sin(time * 4 + i) * 6;
+            ctx.beginPath(); ctx.moveTo(x - 14, y - 4 - f); ctx.quadraticCurveTo(x - 6, y - 8, x, y); ctx.quadraticCurveTo(x + 6, y - 8, x + 14, y - 4 - f); ctx.stroke();
+        }
+    } else {
+        // Projektörler gökyüzünü tarar (mavi ve kırmızı: 17/25 gecesi)
+        [[0.25, "rgba(147,197,253,0.16)", 0], [0.7, "rgba(252,165,165,0.12)", 2]].forEach(([fx, col, ph]) => {
+            const x = width * fx, y = height * 0.85, a = Math.sin(time * 0.6 + ph) * 0.5, L = height * 1.3;
+            const g = ctx.createLinearGradient(x, y, x + Math.sin(a) * L, y - Math.cos(a) * L);
+            g.addColorStop(0, col); g.addColorStop(1, "rgba(255,255,255,0)");
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.moveTo(x - 6, y);
+            ctx.lineTo(x + Math.sin(a - 0.07) * L, y - Math.cos(a - 0.07) * L);
+            ctx.lineTo(x + Math.sin(a + 0.07) * L, y - Math.cos(a + 0.07) * L);
+            ctx.lineTo(x + 6, y); ctx.closePath(); ctx.fill();
+        });
+        skyline(0.15, height * 0.74, 60, 210, "#1e293b", "rgba(253,230,138,0.35)", 1);
+        skyline(0.35, height * 0.88, 80, 260, "#0b1222", "rgba(253,224,71,0.8)", 7);
+    }
+}
+
+// Zemin ve platformlar: toprak katmanı + çimen (3. bölümde kaldırım)
+function drawPlatform(ctx, p) {
+    const th = THEMES[currentLevel];
+    const x0 = Math.max(p.x, camX - 40), x1 = Math.min(p.x + p.w, camX + width + 40);
+    if (x1 <= x0) return;
+    const g = ctx.createLinearGradient(0, p.y, 0, p.y + Math.min(p.h, 220));
+    g.addColorStop(0, th.ground[0]); g.addColorStop(1, th.ground[1]);
+    ctx.fillStyle = g;
+    ctx.fillRect(x0, p.y, x1 - x0, p.h);
+    // Toprakta taşlar
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    const depth = Math.min(p.h, 140);
+    for (let x = Math.floor(x0 / 40) * 40; x < x1; x += 40)
+        for (let r = 0; r < 3; r++) {
+            const hh = hash(x * 0.37 + r * 11 + p.y * 0.01);
+            const sy = p.y + 24 + r * (depth - 30) / 3 + hh * 8;
+            if (hh > 0.5 && sy < p.y + p.h - 6) ctx.fillRect(x + hh * 30, sy, 7, 4);
+        }
+    ctx.fillStyle = th.grass; ctx.fillRect(x0, p.y, x1 - x0, 14);
+    ctx.fillStyle = th.grassDark; ctx.fillRect(x0, p.y + 14, x1 - x0, 4);
+    if (th.curb) {
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        for (let x = Math.ceil(x0 / 60) * 60; x < x1; x += 60) ctx.fillRect(x, p.y, 3, 14);
+    } else {
+        ctx.fillStyle = th.grass;
+        for (let x = Math.ceil(x0 / 18) * 18; x < x1; x += 18) {
+            const hh = hash(x * 0.11);
+            ctx.beginPath(); ctx.moveTo(x - 4, p.y + 1); ctx.lineTo(x + (hh - 0.5) * 6, p.y - 5 - hh * 9); ctx.lineTo(x + 4, p.y + 1); ctx.fill();
+        }
+    }
+}
+
+// Oy pusulası: "EVET" mühürlü kâğıt
+function drawBallot(ctx, x, y, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.fillStyle = "#fefce8"; ctx.strokeStyle = "#78716c"; ctx.lineWidth = 1.5;
+    ctx.fillRect(-14, -18, 28, 36); ctx.strokeRect(-14, -18, 28, 36);
+    ctx.strokeStyle = "#a8a29e"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-9, -11); ctx.lineTo(9, -11); ctx.moveTo(-9, -5); ctx.lineTo(9, -5); ctx.stroke();
+    ctx.strokeStyle = "#dc2626"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 8, 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "#dc2626"; ctx.font = "bold 6px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("EVET", 0, 8.5);
+    ctx.restore();
+}
+
+// SANDIK: şeffaf oy sandığı; içi pusula dolu, kızgın gözlü, kısa bacaklı. Kapağı saldırıdan önce açılır.
+function drawSandik(ctx, b) {
+    const W = b.w, H = b.h, legH = 46, bh = H - legH;
+    const lid = b.state === 'crouch' && b.next === 'volley' ? 1 - b.stateT / 36 : 0;
+    ctx.save();
+    bossBaseTransform(ctx, b);
+    // Bacaklar
+    [-1, 1].forEach((s, i) => {
+        const sw = b.state === 'leap' ? 0.5 * s : Math.sin(b.run + i * Math.PI) * 0.4;
+        ctx.save();
+        ctx.translate(s * W * 0.22, -legH);
+        ctx.rotate(sw);
+        ctx.strokeStyle = "#1f2937"; ctx.lineWidth = 14; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, legH - 10); ctx.stroke();
+        ctx.fillStyle = "#111";
+        ctx.beginPath(); ctx.ellipse(b.look * 8, legH - 7, 20, 9, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    });
+    ctx.translate(0, -legH);
+    ctx.scale(1 + 0.08 * b.crouch, 1 - 0.16 * b.crouch);   // hazırlanırken basılır
+    // İçerideki pusulalar
+    ctx.save();
+    ctx.beginPath(); ctx.rect(-W / 2, -bh, W, bh); ctx.clip();
+    for (let k = 0; k < 14; k++) {
+        ctx.save();
+        ctx.translate(-W / 2 + 26 + (k * 53) % (W - 52), -16 - (k * 37) % 80 - Math.floor(k / 7) * 10);
+        ctx.rotate((hash(k) - 0.5) * 1.4);
+        ctx.fillStyle = "#fefce8"; ctx.strokeStyle = "#a8a29e"; ctx.lineWidth = 1.5;
+        ctx.fillRect(-22, -15, 44, 30); ctx.strokeRect(-22, -15, 44, 30);
+        ctx.strokeStyle = "#dc2626"; ctx.beginPath(); ctx.arc(8, 3, 6, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+    }
+    ctx.restore();
+    // Şeffaf gövde
+    ctx.fillStyle = "rgba(186,230,253,0.3)"; ctx.strokeStyle = "#e0f2fe"; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.roundRect(-W / 2, -bh, W, bh, 8); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,0.45)"; ctx.lineWidth = 10;
+    ctx.beginPath(); ctx.moveTo(-W / 2 + 22, -bh + 40); ctx.lineTo(-W / 2 + 60, -bh + 10); ctx.stroke();
+    // Kapak + atma deliği
+    ctx.save();
+    ctx.translate(-W / 2 - 4, -bh);
+    ctx.rotate(-lid * 0.6);
+    ctx.fillStyle = "#1e3a8a"; ctx.fillRect(0, -26, W + 8, 26);
+    ctx.fillStyle = "#0b1020"; ctx.fillRect(W / 2 - 36, -17, 80, 8);
+    ctx.restore();
+    // Kırmızı mühür kilidi
+    ctx.strokeStyle = "#7f1d1d"; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(0, -bh + 14, 9, Math.PI, 0); ctx.stroke();
+    ctx.fillStyle = "#dc2626"; ctx.fillRect(-12, -bh + 14, 24, 18);
+    // Yüz: kızgın gözler oyuncuyu izler, ağız
+    [-1, 1].forEach(s => {
+        const ex = s * 48, ey = -bh + 82;
+        ctx.fillStyle = "#fff"; ctx.strokeStyle = "#111"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.ellipse(ex, ey, 24, 28, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#111";
+        ctx.beginPath(); ctx.arc(ex + b.look * 10, ey + 4, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.lineWidth = 8; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(s * 76, ey - 36); ctx.lineTo(s * 22, ey - 22); ctx.stroke();
+    });
+    ctx.fillStyle = "#7f1d1d";
+    ctx.beginPath(); ctx.roundRect(-46, -bh + 132, 92, 30 + lid * 16, 10); ctx.fill();
+    ctx.fillStyle = "#fff";
+    for (let k = 0; k < 6; k++) ctx.fillRect(-40 + k * 14, -bh + 132, 10, 8);
+    ctx.restore();
+}
+
 function draw() {
     ctx.clearRect(0,0,width,height);
+    drawBackground();
     ctx.save();
     ctx.translate(-camX, 0);
 
-    platforms.forEach(p => {
-        ctx.fillStyle = "#2d1b0d"; ctx.fillRect(p.x, p.y, p.w, p.h);
-        ctx.fillStyle = "#1e4d16"; ctx.fillRect(p.x, p.y, p.w, 15);
-    });
+    platforms.forEach(p => drawPlatform(ctx, p));
 
     items.forEach(it => { if(!it.collected) drawKulHakkiBag(ctx, it.x, it.y, 80); });
     enemies.forEach(en => {
-        if(en.dead) return;
-        if(en.kind === 'police') { drawPolice(ctx, en); return; }
-        // Halk'ın fotoğrafı boydan (kendi ayakları var), o yüzden ek bacak yok:
-        // yürürken ayakların üstünde sağa-sola salınır, her adımda hafif yükselir.
-        const moving = en.lastSpeed > 0;
-        const p = en.walkCycle;
-        const sway = moving ? Math.sin(p) * 0.07 + en.dir * 0.03 : 0;  // salınım + yürüme yönüne hafif eğilme
-        const bob  = moving ? -Math.abs(Math.cos(p)) * 6 : 0;          // adım ortasında yükselme
-        // Kırpılmış fotoğraf kutu yüksekliğine oranını koruyarak sığar, ayaklar zeminde
-        const c = enemyCrop || { sx: 0, sy: 0, sw: imgEnemy.naturalWidth, sh: imgEnemy.naturalHeight };
-        if(!c.sw) return;   // resim henüz yüklenmedi
-        const dh = en.h, dw = Math.min(en.w, dh * c.sw / c.sh);
+        if(en.dead && en.deathT >= DEATH_FRAMES) return;
         ctx.save();
-        ctx.translate(en.x + en.w / 2, en.y + en.h);   // dönme noktası: ayakların ortası
-        ctx.rotate(sway);
-        if(en.dir === -1) ctx.scale(-1, 1);        // yürüdüğü yöne baksın
-        ctx.drawImage(enemySprite, c.sx, c.sy, c.sw, c.sh, -dw / 2, -dh + bob, dw, dh);
+        if(en.dead) applyDeathPose(ctx, en);
+        if(en.kind === 'police') drawPolice(ctx, en); else drawHalk(ctx, en);
         ctx.restore();
     });
     if(boss) drawBoss(ctx, boss);
@@ -1480,6 +1897,7 @@ function draw() {
         if(p.type === 'fire') drawFire(ctx, p);
         else if(p.type === 'wave') drawWave(ctx, p);
         else if(p.type === 'cuffs') drawHandcuffs(ctx, p.x, p.y, 50, p.angle);
+        else if(p.type === 'ballot') drawBallot(ctx, p.x, p.y, p.angle);
         else drawCashRegister(ctx, p.x, p.y, 55, p.angle);
     });
 
@@ -1489,6 +1907,8 @@ function draw() {
             ctx.fillStyle = p.color;
             ctx.font = "bold 40px Arial";
             ctx.textAlign = "center";
+            ctx.lineWidth = 5; ctx.strokeStyle = "rgba(0,0,0,0.6)";   // açık gökyüzünde de okunsun
+            ctx.strokeText(p.text, p.x, p.y);
             ctx.fillText(p.text, p.x, p.y);
         } else {
             ctx.fillStyle = "white";
@@ -1575,6 +1995,7 @@ $('overlay-screen').addEventListener('pointerdown', e => {
 });
 
 $('start-button').onclick = () => {
+    initAudio();   // tarayıcılar sesi ancak bir tıklamayla başlatmaya izin verir
     removeIntro();
     $('overlay-screen').style.display = 'none';
     gameStarted = true;

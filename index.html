@@ -675,9 +675,11 @@ function killEnemy(en) {
 // --- BÖLÜM SONU CANAVARLARI ---
 // Her canavar: boyut, can, arena genişliği, isim, üstüne basılabilen derinlik, hareket ve çizim
 const BOSS_TYPES = {
-    alevi: { w: 260, h: 340, hp: 12, arena: 700, nameKey: "bossName", stomp: 110, labelY: 70, update: updateAlevi, draw: drawAlevi },
-    kurt:  { w: 210, h: 300, hp: 16, arena: 900, nameKey: "kurtName", stomp: 80,  update: updateKurt,  draw: drawKurt },
-    feto:  { w: 180, h: 290, hp: 20, arena: 900, nameKey: "fetoName", stomp: 70, labelY: 60, update: updateFeto, draw: drawFeto }
+    alevi: { w: 156, h: 204, dw: 260, dh: 340, scale: 0.6, hp: 12, arena: 700, nameKey: "bossName", stomp: 66, labelY: 45, update: updateAlevi, draw: drawAlevi },
+    // Canavar çizimleri büyük tasarlandı (dw x dh); oyunda scale ile küçültülür ki
+    // oyuncu (zıplama yüksekliği ~255 px) üzerlerinden atlayıp kafalarına basabilsin
+    kurt:  { w: 143, h: 204, dw: 210, dh: 300, scale: 0.68, hp: 16, arena: 900, nameKey: "kurtName", stomp: 60, update: updateKurt, draw: drawKurt },
+    feto:  { w: 126, h: 203, dw: 180, dh: 290, scale: 0.7, hp: 20, arena: 900, nameKey: "fetoName", stomp: 55, labelY: 45, update: updateFeto, draw: drawFeto }
 };
 function spawnBoss(x) {
     const kind = LEVELS[currentLevel].boss;
@@ -848,7 +850,7 @@ function updateFeto(b) {
     } else if(b.state === 'crouch' && --b.stateT <= 0) {
         if(b.next === 'volley') dollarVolley(b);
         else {
-            const cx = b.x + b.w / 2 + b.look * 70;   // bastonun yere değdiği yer
+            const cx = b.x + b.w / 2 + b.look * 70 * b.T.scale;   // bastonun yere değdiği yer
             [-1, 1].forEach(d => projectiles.push({ type: 'wave', x: cx + d * 30, y: height - 60, vx: d * 8, active: true, life: 85, angle: 0 }));
             for(let i = 0; i < 10; i++) createParticle(cx + (Math.random() - 0.5) * 80, height - 70);
             playSfx('hit', { rate: 0.5, vol: 0.8 });
@@ -1388,7 +1390,7 @@ function drawBoss(ctx, b) {
 // Canavar ölürken küçülür, vurulunca yanıp söner (orijin: ayakların ortası)
 function bossBaseTransform(ctx, b, lift = 0) {
     ctx.translate(b.x + b.w / 2, b.y + b.h - lift);
-    const shrink = b.dying ? Math.max(0, 1 - b.deathT / 60) : 1;
+    const shrink = (b.dying ? Math.max(0, 1 - b.deathT / 60) : 1) * ((b.T && b.T.scale) || 1);
     ctx.scale(shrink, shrink);
     if(b.hurt > 0 && Math.floor(b.hurt / 4) % 2 === 0) ctx.globalAlpha = 0.45;
 }
@@ -1396,7 +1398,7 @@ function bossBaseTransform(ctx, b, lift = 0) {
 // ALEVİ: alevden bir adam. Bacakları, kaslı gövdesi, yumrukları ve insan yüzü var; saçı alev alev yanar.
 // Saldırıdan önce kollarını havaya kaldırır, yumruklarındaki alevler büyür ve ağzını açar.
 function drawAlevi(ctx, b) {
-    const t0 = b.anim, W = b.w, H = b.h;
+    const t0 = b.anim, W = b.T.dw, H = b.T.dh;
     const charge = b.charge > 0 ? 1 - b.charge / 30 : 0;   // saldırı hazırlığı 0→1
     const flick = i => Math.sin(t0 * 0.25 + i * 1.7);
     const step = Math.sin(t0 * 0.09);                      // ağır adımlar
@@ -1514,9 +1516,9 @@ function drawAlevi(ctx, b) {
 // Kurt bacakları (parmak ucunda basar, bilek yerden yüksek), yırtık kot şort, pençeli uzun kollar,
 // gür saçlı, sakallı insan yüzü.
 function drawKurt(ctx, b) {
-    const W = b.w, H = b.h, c = b.crouch, air = b.state === 'leap';
+    const W = b.T.dw, H = b.T.dh, c = b.crouch, air = b.state === 'leap';   // tasarım boyutu
     const angry = b.state === 'crouch' || b.state === 'dash';
-    const moving = b.state === 'dash' || (b.state === 'walk' && Math.abs((player.x + player.w / 2) - (b.x + W / 2)) > 220);
+    const moving = b.state === 'dash' || (b.state === 'walk' && Math.abs((player.x + player.w / 2) - (b.x + b.w / 2)) > 220);
     const run = b.run, dash = b.state === 'dash';
     const FUR = "#6b6259", FUR_D = "#4a433d", FUR_L = "#b8afa6";
     ctx.save();
@@ -1930,7 +1932,7 @@ function drawOneDollar(ctx, x, y, angle) {
 // FETÖ: bastonlu, kambur yaşlı adam. Koyu palto, kravat, dazlak kafa, beyaz yan saçlar ve gür beyaz kaşlar.
 // Bir elinde baston, öbür eliyle 1 dolar savurur. Oyuncuya döner (ayna).
 function drawFeto(ctx, b) {
-    const W = b.w, H = b.h;
+    const W = b.T.dw, H = b.T.dh;   // tasarım boyutu (bossBaseTransform küçültür)
     const slam = b.state === 'crouch' && b.next === 'slam' ? 1 - b.stateT / 34 : 0;    // baston havaya kalkar
     const toss = b.state === 'crouch' && b.next === 'volley' ? 1 - b.stateT / 30 : 0;   // el geriye gider
     const hit = b.recover > 0 ? b.recover / 18 : 0;                                    // bastonu yere vurdu
@@ -2315,7 +2317,8 @@ function drawIntro(now) {
         drawPolice(c, { x: x - 60, y: -200, w: 120, h: 200, dir: -1, walkCycle: time * 4 + ph, lastSpeed: 1 });
     });
     const fx = span - 900 - pos(45, 1500);
-    drawFeto(c, { x: fx - 90, y: -290, w: 180, h: 290, look: -1, run: fx * 0.03, state: 'walk', stateT: 0, recover: 0, hurt: 0, dying: false, deathT: 0 });
+    const FT = BOSS_TYPES.feto;
+    drawFeto(c, { T: FT, x: fx - FT.w / 2, y: -FT.h, w: FT.w, h: FT.h, look: -1, run: fx * 0.03, state: 'walk', stateT: 0, recover: 0, hurt: 0, dying: false, deathT: 0 });
     c.restore();
 }
 

@@ -15,4 +15,4 @@
   - Lisans: CC0. Kırpıldı, ses seviyesi eşitlendi, MP3'e dönüştürüldü.
 
 ## Grafikler
-- 17/25 polisi, kelepçe, SANDIK canavarı, oy pusulası ve bölüm arka planları kodla (canvas) çizilmiştir, harici dosya kullanılmaz.
+- 17/25 polisi, kelepçe, bölüm sonu canavarları (ALEVİ, KURT, FETÖ), 1 dolar ve bölüm arka planları kodla (canvas) çizilmiştir, harici dosya kullanılmaz.

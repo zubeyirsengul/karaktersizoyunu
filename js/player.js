@@ -197,7 +197,7 @@ function drawRecep(ctx, o) {
     const hx = ex + Math.sin(armA - 0.3) * 18, hy = ey + Math.cos(armA - 0.3) * 18;
     ctx.strokeStyle = SUIT; ctx.lineWidth = 11;
     ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.lineTo(hx, hy); ctx.stroke();
-    drawHammer(ctx, hx, hy, ang, o.bigHammer ? 1.5 : 1);
+    drawHammer(ctx, hx, hy, ang, o.bigHammer ? 1.5 : 1, o.dir);
 
     // Kalkan siper: arka kol öne uzanır, kalkan yüzü ve gövdeyi kapatır
     if (o.shield) {
@@ -287,7 +287,7 @@ function drawLegs(ctx, cx, topY, h, dir, phase, moving, airborne, style) {
 }
 
 // Balyoz, oyuncunun merkezine göre piksel koordinatında (hx, hy) eldeki noktadan çizilir
-function drawHammer(ctx, hx, hy, angle, size = 1) {
+function drawHammer(ctx, hx, hy, angle, size = 1, dir = 1) {
     if (stampMode()) { drawStamp(ctx, hx, hy, angle, size); return; }
     const L = 130;
     ctx.save();
@@ -305,6 +305,12 @@ function drawHammer(ctx, hx, hy, angle, size = 1) {
     ctx.fillStyle = g;
     ctx.strokeStyle = "#111827";
     ctx.beginPath(); ctx.roundRect(-24, -L - 16, 48, 32, 5); ctx.fill(); ctx.stroke();
+    // Baştaki yazı: Recep sola bakarken de düz okunsun
+    ctx.save(); ctx.translate(0, -L); if (dir === -1) ctx.scale(-1, 1);
+    ctx.font = "bold 13px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.lineWidth = 3; ctx.strokeStyle = "#111827"; ctx.strokeText("YARGI", 0, 1, 44);
+    ctx.fillStyle = "#fde68a"; ctx.fillText("YARGI", 0, 1, 44);
+    ctx.restore();
     // Sapı tutan yumruk
     ctx.fillStyle = "#e8b48f";
     ctx.strokeStyle = "#7c4a2d";

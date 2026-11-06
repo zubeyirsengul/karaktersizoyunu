@@ -111,6 +111,9 @@ function drawBlockPerson(c, a, time) {
     if (a.who === 'recep') {   // balyoz
         c.fillStyle = '#7c4a1e'; c.fillRect(-4, bodyH - 70, 8, 74);
         blockRect(c, -18, bodyH - 90, 36, 22, '#4b5563');
+        c.save(); c.translate(0, bodyH - 79); c.scale(a.dir || 1, 1);
+        c.fillStyle = '#fde68a'; c.font = 'bold 9px monospace'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('YARGI', 0, 0, 34);
+        c.restore();
     }
     if (C.gold) { blockRect(c, -16, bodyH - 22, 32, 16, '#facc15'); c.fillStyle = '#fef08a'; c.fillRect(-12, bodyH - 20, 12, 4); }
     if (C.cane) { c.fillStyle = '#78350f'; c.fillRect(-3, bodyH - 10, 6, 70); }

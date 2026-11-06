@@ -1,6 +1,16 @@
 // Düşmanlar: 17/25 polisi, çevik kuvvet, keskin nişancı, mermiler
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 
+// Göğüsteki "17/25" isim plakası; düşman sola bakarken yazı ters görünmesin
+function chestPlate(ctx, x, y, dir) {
+    ctx.save(); ctx.translate(x, y); if (dir === -1) ctx.scale(-1, 1);
+    ctx.fillStyle = "#0f172a"; ctx.beginPath(); ctx.roundRect(-17, -7, 34, 14, 3); ctx.fill();
+    ctx.fillStyle = "white"; ctx.font = "bold 10px monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("17/25", 0, 0.5);
+    ctx.restore();
+}
+
 // --- 17/25 POLİSİ ---
 // Lacivert üniformalı, kasketli, tabancalı polis. Koordinat: ayakların ortası, sağa bakar.
 const POLICE_LEGS = {
@@ -45,14 +55,8 @@ function drawPolice(ctx, en) {
     ctx.beginPath();
     for (let i = 0; i < 10; i++) { const r = i % 2 ? 3 : 7, a = -Math.PI / 2 + i * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
     ctx.closePath(); ctx.fill(); ctx.restore();
-    // Göğüs yazısı
     // Göğüs yazısı: isim plakası, sola bakarken de ters görünmesin
-    ctx.save(); ctx.translate(9, 84); if (en.dir === -1) ctx.scale(-1, 1);
-    ctx.fillStyle = "#0f172a"; ctx.beginPath(); ctx.roundRect(-17, -7, 34, 14, 3); ctx.fill();
-    ctx.fillStyle = "white"; ctx.font = "bold 10px monospace";
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText("17/25", 0, 0.5);
-    ctx.restore();
+    chestPlate(ctx, 9, 84, en.dir);
     // Kemer
     ctx.fillStyle = "#111827"; ctx.fillRect(-27, 110, 54, 9);
     ctx.fillStyle = "#d4d4d8"; ctx.fillRect(-5, 111, 10, 7);
@@ -95,11 +99,6 @@ function drawPolice(ctx, en) {
     ctx.restore();
     ctx.restore();
 
-    // İsim etiketi (aynalanmaz)
-    const tagY = -h + legs.drop - 16;
-    ctx.font = "bold 22px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.lineWidth = 4; ctx.strokeStyle = "#0f172a"; ctx.strokeText("17/25", 0, tagY);
-    ctx.fillStyle = "#60a5fa"; ctx.fillText("17/25", 0, tagY);
     ctx.restore();
 }
 
@@ -193,6 +192,7 @@ function drawRiot(ctx, en) {
     ctx.fillStyle = "#374151";
     [-22, 22].forEach(x => { ctx.beginPath(); ctx.ellipse(x, 54, 12, 9, 0, 0, Math.PI * 2); ctx.fill(); });
     ctx.fillStyle = "#4b5563"; for (let i = 0; i < 3; i++) ctx.fillRect(-18, 70 + i * 13, 36, 7);
+    chestPlate(ctx, -4, 64, en.dir);
     ctx.fillStyle = "#0a0a0a"; ctx.fillRect(-28, 110, 56, 9);
     // Kafa ve kask (vizörlü)
     ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.ellipse(2, 30, 17, 19, 0, 0, Math.PI * 2); ctx.fill();
@@ -213,11 +213,6 @@ function drawRiot(ctx, en) {
     ctx.fillText("POLİS", 0, 0);
     ctx.restore();
     ctx.restore();
-    // İsim etiketi
-    const tagY = -h + legs.drop - 16;
-    ctx.font = "bold 22px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.lineWidth = 4; ctx.strokeStyle = "#0f172a"; ctx.strokeText("17/25", 0, tagY);
-    ctx.fillStyle = "#60a5fa"; ctx.fillText("17/25", 0, tagY);
     ctx.restore();
 }
 
@@ -267,6 +262,7 @@ function drawSniper(ctx, en) {
     ctx.fillStyle = "#1e40af"; ctx.beginPath(); ctx.roundRect(-17, -112, 34, 66, 9); ctx.fill();
     ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.roundRect(-15, -104, 30, 46, 6); ctx.fill();
     ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(-6, -96, 3.5, 0, Math.PI * 2); ctx.fill();
+    chestPlate(ctx, 0, -78, en.dir);
     // Kafa: bıyık, bere
     ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.ellipse(6, -126, 14, 15, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#3f2a1d"; ctx.beginPath(); ctx.ellipse(13, -118, 7, 2.5, 0.1, 0, Math.PI * 2); ctx.fill();
@@ -290,9 +286,6 @@ function drawSniper(ctx, en) {
     ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.arc(34, 5, 5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
     ctx.restore();
-    ctx.font = "bold 20px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.lineWidth = 4; ctx.strokeStyle = "#0f172a"; ctx.strokeText("17/25", 0, -en.h - 30);
-    ctx.fillStyle = "#60a5fa"; ctx.fillText("17/25", 0, -en.h - 30);
     ctx.restore();
 }
 

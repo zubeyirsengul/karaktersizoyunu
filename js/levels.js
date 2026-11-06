@@ -253,7 +253,7 @@ function createLevel() {
     player.w = 100; player.h = 180; player.shield = false;
     $('game-container').classList.remove('shake');
     $('kills').innerText = "0";
-    initChapter();
+    initChapter(); clearBricks();
     if (isFlight()) { createFlight(); return; }
 
     const layout = buildLayout(currentLevel);
@@ -261,12 +261,7 @@ function createLevel() {
     platforms = [...groundSegments(pits),
                  ...[...LEVELS[currentLevel].platforms, ...layout.plats].map(([x, up, w, h]) => ({ x, y: height - up, w, h }))];
 
-    for(let i=0; i<40; i++) {
-        items.push({ x: 800 + i * 700, y: height - 150 - (Math.random() * 250), collected: false,
-                     power: i % 5 === 2 ? POWER_ORDER[Math.floor(i / 5) % POWER_ORDER.length] : null });   // her 5 torbadan biri güç küresi
-    }
-
-    layout.bags.forEach(([x, up]) => items.push({ x, y: height - up, collected: false }));   // platform üstü torbalar
+    buildBricks(currentLevel);   // havada kırılabilir tuğlalar: içinden güç ya da kul hakkı çıkar
 
     for(let i=0; i<20; i++) {
         const homeX = 1500 + i * 1500;
@@ -281,14 +276,15 @@ function createLevel() {
             homeX: homeX,                          // Devriye merkezi
             dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
             speed: LEVELS[currentLevel].speed * (riot ? 0.7 : tank ? 0.8 : 1),   // bölüm ilerledikçe hızlanır; çevik kuvvet yavaş
-            walkCycle: Math.random() * Math.PI * 2
+            walkCycle: Math.random() * Math.PI * 2,
+            hp: riot ? 2 : 1, maxHp: riot ? 2 : 1, hurt: 0   // çevik kuvvet 2 vuruşta düşer
         });
     }
     // Keskin nişancılar yüksek platformların üstünde
     layout.snipers.forEach(([x, up]) => enemies.push({
         kind: 'sniper', x: x - 45, y: height - up - 120, w: 90, h: 120, dead: false, homeX: x,
         dir: -1, laser: 0, cool: 60 + Math.floor(Math.random() * 60), flash: 0, aimAng: 0, mx: x, my: height - up - 60,
-        walkCycle: 0, lastSpeed: 0
+        walkCycle: 0, lastSpeed: 0, hp: 2, maxHp: 2, hurt: 0   // nişancı 2 vuruşta düşer
     }));
     populateChapter();
 }

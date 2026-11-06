@@ -1,0 +1,185 @@
+// Kırılabilir tuğlalar (gökyüzündeki kul hakkı torbalarının yerine) ve Recep'in sırtındaki çuval
+// (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
+//
+// Tuğlalar havada asılı bloklardır. Alttan zıplayıp kafa atınca (1), rüşvet zarfıyla (1) ya da balyozla (2) vurulur;
+// her vuruşta biraz daha çatlar, 3 hasarda kırılır (Minecraft gibi). Üstüne basılabilir.
+// İçinden rastgele bir güç küresi ya da kul hakkı çıkar; kul hakkı uçup Recep'in çuvalına girer, çuval şişer.
+
+const BRICK = 60, BRICK_HP = 3;
+let bricks = [], debris = [], flyers = [], sackFill = 0;
+
+function clearBricks() { bricks = []; debris = []; flyers = []; sackFill = 0; }
+
+function buildBricks(level) {
+    clearBricks();
+    const r = seededRandom(level * 104729 + 7), gy = height - 60;
+    const clash = (x, y, w, h) => platforms.some(p => p.y < gy - 1 && x < p.x + p.w + 30 && x + w > p.x - 30 && y < p.y + p.h + 30 && y + h > p.y - 200);
+    for (let i = 0; i < 36; i++) {
+        const x = 700 + i * 1000 + Math.floor(r() * 400);
+        const n = 1 + Math.floor(r() * 3);                 // 1-3 tuğla yan yana
+        const up = 250 + Math.floor(r() * 3) * 30;         // alt kenarı zeminden 250-310: ayaktayken kafaya değmez, zıplayınca değer
+        const y = gy - up - BRICK;
+        if (clash(x, y, n * BRICK, BRICK)) continue;       // platformların içine girmesin
+        for (let k = 0; k < n; k++) bricks.push({ x: x + k * BRICK, y, hp: BRICK_HP, shake: 0, cd: 0, seed: r() * 100 });
+    }
+}
+
+// Kırılınca ne çıkar: %55 güç, %45 kul hakkı (3. bölümde kaset)
+const BRICK_POWERS = [['speed', 25], ['double', 25], ['hammer', 25], ['heart', 15], ['star', 10]];
+function pickBrickPower() {
+    let roll = Math.random() * 100;
+    for (const [k, w] of BRICK_POWERS) { if ((roll -= w) < 0) return k; }
+    return 'speed';
+}
+
+function hitBrick(b, dmg) {
+    if (b.cd > 0 || b.hp <= 0) return;
+    b.hp -= dmg; b.shake = 10; b.cd = 8;
+    for (let i = 0; i < 4; i++) debris.push(brickChip(b, 0.5));
+    playSfx('hit', { rate: 1.5 + Math.random() * 0.3, vol: 0.45 });
+    if (b.hp <= 0) breakBrick(b);
+}
+function brickChip(b, s) {
+    return { x: b.x + Math.random() * BRICK, y: b.y + Math.random() * BRICK, vx: (Math.random() - 0.5) * 8 * s, vy: -2 - Math.random() * 6 * s,
+             size: 6 + Math.random() * 8 * s, life: 50, color: Math.random() < 0.7 ? "#9a3412" : "#d6d3d1" };
+}
+function breakBrick(b) {
+    bricks = bricks.filter(o => o !== b);
+    for (let i = 0; i < 14; i++) debris.push(brickChip(b, 1.2));
+    playSfx('hit', { rate: 0.8, vol: 0.7 });
+    const cx = b.x + BRICK / 2, cy = b.y + BRICK / 2;
+    if (Math.random() < 0.55) {
+        items.push({ x: cx, y: cy, collected: false, power: pickBrickPower(), rise: 26, targetY: b.y - 60 });
+    } else {
+        flyers.push({ x: cx, y: cy, vx: (Math.random() - 0.5) * 4, vy: -9, t: 0 });
+    }
+    $('score').innerText = score += 500;
+}
+
+// Oyuncu tuğlaya alttan kafa atar ya da üstüne basar (platform döngüsünden hemen sonra çağrılır)
+function collideBricks() {
+    const pl = player.x + 25, pr = player.x + player.w - 25;
+    for (const b of bricks) {
+        if (pr < b.x || pl > b.x + BRICK) continue;
+        const bottom = b.y + BRICK;
+        if (player.vy < 0 && player.y < bottom && player.y > bottom + player.vy - 2) {   // kafa attı
+            player.y = bottom; player.vy = 2;
+            hitBrick(b, 1);
+        } else if (player.vy >= 0 && player.y + player.h > b.y && player.y + player.h < b.y + player.vy + 10) {   // üstüne bastı
+            player.y = b.y - player.h; player.vy = 0; player.grounded = true;
+        }
+    }
+}
+function hammerBricks(minX, maxX) {
+    bricks.filter(b => b.x < maxX && b.x + BRICK > minX && b.y < player.y + player.h && b.y + BRICK > player.y - 140).forEach(b => hitBrick(b, 2));
+}
+// Rüşvet zarfı tuğlaya çarparsa: true
+function bribeHitsBrick(p) {
+    const b = bricks.find(b => p.x > b.x && p.x < b.x + BRICK && p.y > b.y && p.y < b.y + BRICK);
+    if (!b) return false;
+    p.active = false; hitBrick(b, 1);
+    return true;
+}
+
+function updateBricks() {
+    bricks.forEach(b => { if (b.shake > 0) b.shake--; if (b.cd > 0) b.cd--; });
+    debris.forEach(d => { d.x += d.vx; d.vy += 0.5; d.y += d.vy; d.life--; });
+    debris = debris.filter(d => d.life > 0);
+    items.forEach(it => { if (it.rise > 0) { it.rise--; it.y += (it.targetY - it.y) * 0.2; } });
+    // Kul hakkı önce havaya fırlar, sonra Recep'in sırtındaki çuvala uçar
+    flyers.forEach(f => {
+        f.t++;
+        const tx = player.x + player.w / 2 - player.dir * 30, ty = player.y + 70;
+        if (f.t < 18) { f.vy += 0.6; f.x += f.vx; f.y += f.vy; return; }
+        const k = Math.min(0.35, 0.08 + f.t * 0.006);
+        f.x += (tx - f.x) * k; f.y += (ty - f.y) * k;
+        if (Math.hypot(tx - f.x, ty - f.y) < 26) {
+            f.done = true;
+            sackFill++;
+            $('score').innerText = score += 5000;
+            $('sfx-pickup').currentTime = 0; $('sfx-pickup').play().catch(() => {});
+            player.mouthOpen = 1.0;
+            createParticle(tx, player.y - 10, pickupText(), "#22c55e", 0.8);
+        }
+    });
+    flyers = flyers.filter(f => !f.done);
+}
+
+// --- ÇİZİM ---
+function drawBricks(ctx) {
+    const time = performance.now() / 1000;
+    bricks.forEach(b => {
+        if (b.x + BRICK < camX - 20 || b.x > camX + width + 20) return;
+        const sx = b.shake > 0 ? (Math.random() - 0.5) * 5 : 0, sy = b.shake > 0 ? -b.shake * 0.6 : 0;
+        const x = b.x + sx, y = b.y + sy, P = BRICK / 4;   // 4x4 "piksel" ızgara
+        ctx.fillStyle = "#d6d3d1"; ctx.fillRect(x, y, BRICK, BRICK);   // harç
+        for (let row = 0; row < 4; row++) {
+            const off = row % 2 ? P : 0;
+            for (let c = -1; c < 2; c++) {
+                const bx = x + off + c * 2 * P + 2, bw = 2 * P - 4;
+                const l = Math.max(x + 2, bx), rr = Math.min(x + BRICK - 2, bx + bw);
+                if (rr <= l) continue;
+                const shade = hash(b.seed + row * 3 + c) ;
+                ctx.fillStyle = shade > 0.66 ? "#b45309" : shade > 0.33 ? "#9a3412" : "#7c2d12";
+                ctx.fillRect(l, y + row * P + 2, rr - l, P - 4);
+                ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.fillRect(l, y + row * P + 2, rr - l, 3);
+            }
+        }
+        ctx.strokeStyle = "rgba(0,0,0,0.45)"; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, BRICK - 2, BRICK - 2);
+        // çatlaklar: vuruldukça artar
+        const dmg = BRICK_HP - b.hp;
+        if (dmg > 0) {
+            ctx.strokeStyle = "#111"; ctx.lineWidth = 3; ctx.lineCap = "square";
+            const lines = [[[30, 0], [26, 14], [34, 24], [28, 36]], [[0, 40], [14, 36], [22, 44]], [[60, 18], [46, 26], [50, 40], [40, 52]], [[10, 8], [20, 20]], [[36, 60], [42, 48], [56, 54]]];
+            lines.slice(0, dmg === 1 ? 2 : 5).forEach(ln => {
+                ctx.beginPath(); ln.forEach(([px, py], i) => i ? ctx.lineTo(x + px, y + py) : ctx.moveTo(x + px, y + py)); ctx.stroke();
+            });
+        }
+        // ara sıra parıltı: içinde bir şey var
+        if ((time * 0.7 + b.seed) % 3 < 0.25) {
+            ctx.fillStyle = "#fef9c3"; const k = ((time * 0.7 + b.seed) % 3) / 0.25;
+            ctx.fillRect(x + 8 + k * 40, y + 8, 4, 4); ctx.fillRect(x + 6 + k * 40, y + 10, 8, 1); ctx.fillRect(x + 10 + k * 40, y + 6, 1, 8);
+        }
+    });
+}
+function drawBrickFx(ctx) {
+    debris.forEach(d => {
+        ctx.globalAlpha = Math.min(1, d.life / 15);
+        ctx.fillStyle = d.color; ctx.fillRect(d.x - d.size / 2, d.y - d.size / 2, d.size, d.size);
+    });
+    ctx.globalAlpha = 1;
+    flyers.forEach(f => {
+        if (curLevel().item === 'tape') drawCassette(ctx, f.x, f.y);
+        else drawKulHakkiBag(ctx, f.x, f.y, 44, Math.sin(f.t * 0.3) * 0.3);
+    });
+}
+
+// Recep'in sırtındaki çuval (drawRecep içinden; gövdenin arkasında). fill: bölümde toplanan kul hakkı
+function drawSack(ctx, shY, hipY, fill, dir) {
+    const f = Math.min(1, fill / 12), rx = 18 + f * 10, ry = 24 + f * 12;
+    const cx = -34 - f * 8, cy = shY + 12 - f * 6;   // omzun arkasında, kalkanın üstünde kalsın
+    ctx.save();
+    ctx.fillStyle = "#c8a165"; ctx.strokeStyle = "#7c5a2b"; ctx.lineWidth = 2;
+    // boğumlu ağız, omzun üstünden öne bağlı
+    ctx.beginPath(); ctx.moveTo(cx - 7, cy - ry + 6); ctx.quadraticCurveTo(cx - 2, cy - ry - 16, cx + 12, cy - ry - 10); ctx.lineTo(cx + 8, cy - ry + 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, -0.12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // yamalar ve dikişler
+    ctx.fillStyle = "#a47c45"; ctx.fillRect(cx - rx * 0.6, cy + ry * 0.2, 12, 10);
+    ctx.strokeStyle = "#7c5a2b"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx + rx * 0.3, cy - ry * 0.6); ctx.lineTo(cx + rx * 0.5, cy - ry * 0.2); ctx.stroke();
+    // ip
+    ctx.strokeStyle = "#7c2d12"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(cx - 8, cy - ry + 4); ctx.lineTo(cx + 9, cy - ry - 1); ctx.stroke();
+    // yazı (aynalanmaz) ve ağzından taşan para
+    ctx.save(); ctx.translate(cx, cy + 2); if (dir === -1) ctx.scale(-1, 1);
+    ctx.fillStyle = "#4a2c00"; ctx.font = "bold 8px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(t("bag")[0], 0, -5, rx * 1.6); ctx.fillText(t("bag")[1], 0, 5, rx * 1.6);
+    ctx.restore();
+    if (f > 0.15) { ctx.fillStyle = "#22c55e"; ctx.fillRect(cx - 4, cy - ry - 4, 10, 6); ctx.fillStyle = "#15803d"; ctx.fillRect(cx + 2, cy - ry - 8, 8, 5); }
+    ctx.restore();
+}
+// Çuvalın askısı: göğüsten çapraz geçen ip (gövdeden sonra çizilir)
+function drawSackStrap(ctx, shY, hipY) {
+    ctx.strokeStyle = "#7c5a2b"; ctx.lineWidth = 4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(-16, shY + 2); ctx.lineTo(18, hipY - 6); ctx.stroke();
+}

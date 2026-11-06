@@ -69,7 +69,7 @@ window.onresize = () => {
     // Dünya ekranın altına hizalı; yükseklik değişince her şeyi aynı miktarda kaydır
     const dy = height - oldHeight;
     if(dy === 0) return;
-    [platforms, items, enemies, projectiles, playerProjectiles, particles].forEach(list => list.forEach(o => o.y += dy));
+    [platforms, items, enemies, projectiles, playerProjectiles, particles, bricks, debris, flyers].forEach(list => list.forEach(o => o.y += dy));
     player.y += dy;
     if(boss) boss.y += dy;
 };

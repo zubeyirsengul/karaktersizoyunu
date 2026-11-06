@@ -34,6 +34,7 @@ function update() {
                 player.y = p.y - player.h; player.vy = 0; player.grounded = true;
             }
         }
+        collideBricks();
     } else {
         player.y += 2; player.deathAngle += 0.05; player.opacity -= 0.01;
     }
@@ -43,7 +44,7 @@ function update() {
     camX = player.x - width/2;
 
     items.forEach(it => {
-        if(!it.collected && Math.hypot(player.x + player.w/2 - it.x, player.y + player.h/2 - it.y) < 100) {
+        if(!it.collected && !(it.rise > 0) && Math.hypot(player.x + player.w/2 - it.x, player.y + player.h/2 - it.y) < 100) {
             it.collected = true;
             if(it.power) { grantPower(it.power, it.x, it.y); score += 1000; $('score').innerText = score; return; }
             if(pickupChapterItem(it)) return;
@@ -56,6 +57,7 @@ function update() {
     });
 
     enemies.forEach(en => {
+        if(en.hurt > 0) en.hurt--;
         if(en.dead) {
             if(en.deathT < DEATH_FRAMES) en.deathT++;
             if(enemyLeaves(en)) { en.dir = en.fallDir; en.walkCycle += 0.4; en.lastSpeed = 5; }   // bavuluyla yürüyüp gider
@@ -106,6 +108,7 @@ function update() {
 
     playerProjectiles.forEach(p => {
         p.x += p.vx; p.vy += GRAVITY * 0.4; p.y += p.vy; p.angle += 0.2; p.life--;
+        if(bribeHitsBrick(p)) return;
         enemies.forEach(en => {
             if(!en.dead && p.active && p.x > en.x && p.x < en.x + en.w && p.y > en.y && p.y < en.y + en.h) {
                 if(en.kind === 'riot' && p.vx * en.dir < 0) riotBlock(p);   // kalkana önden çarptı
@@ -132,6 +135,7 @@ function update() {
     updateGrannies();
     updatePowers();
     updateChapter();
+    updateBricks();
     checkBest();
 }
 

@@ -115,6 +115,15 @@ function applyDeathPose(ctx, en) {
 
 function killEnemy(en) {
     if(en.dead) return;
+    // Çevik kuvvet ve nişancının 2 canı var: ilk vuruşta sarsılır, geri savrulur
+    if(en.hp > 1) {
+        if(en.hurt > 0) return;
+        en.hp--; en.hurt = 24;
+        if(en.kind === 'riot') en.x += (Math.sign(en.x + en.w / 2 - (player.x + player.w / 2)) || 1) * 30;
+        createParticle(en.x + en.w / 2, en.y, "-1", "#fca5a5", 0.8);
+        playSfx('hit', { rate: 1.2, vol: 0.6 });
+        return;
+    }
     if(chapterKill(en)) return;   // sivil: ihraç edilir, hedefe sayılmaz
     en.dead = true;
     killedEnemies++;

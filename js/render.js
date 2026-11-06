@@ -277,6 +277,7 @@ function draw() {
 
     drawPits(ctx);
     platforms.forEach(p => drawPlatform(ctx, p));
+    drawBricks(ctx);
     if(gate) drawGate(ctx, gate);
 
     items.forEach(it => { if(it.collected) return; if(it.power) drawPowerOrb(ctx, it); else if(!drawChapterItem(ctx, it)) drawKulHakkiBag(ctx, it.x, it.y, 80); });
@@ -285,6 +286,7 @@ function draw() {
         ctx.save();
         const leaves = en.dead && enemyLeaves(en) && en.kind !== 'tank';
         if(en.dead) (leaves ? applyExilePose : applyDeathPose)(ctx, en);
+        else if(en.hurt > 0 && Math.floor(en.hurt / 4) % 2) ctx.globalAlpha = 0.4;   // vurulunca yanıp söner
         if(en.kind === 'riot') drawRiot(ctx, en);
         else if(en.kind === 'sniper') drawSniper(ctx, en);
         else if(en.kind === 'tank') drawTank(ctx, en);
@@ -307,7 +309,7 @@ function draw() {
     const playerMoving = player.grounded && Math.abs(player.vx) > 1;
     ctx.translate(0, player.h / 2);   // çizim orijini: ayakların ortası
     drawRecep(ctx, { h: player.h, phase: player.legCycle, moving: playerMoving, airborne: !player.grounded,
-                     mouthOpen: player.mouthOpen, hammerAngle: hammerAngle(), shield: player.shield, bigHammer: power.hammer > 0,
+                     mouthOpen: player.mouthOpen, hammerAngle: hammerAngle(), sack: sackFill, shield: player.shield, bigHammer: power.hammer > 0,
                      dir: player.dir === -1 && !player.isDying ? -1 : 1 });
     ctx.restore();
 
@@ -322,6 +324,7 @@ function draw() {
         else if(p.type === 'bullet') drawBullet(ctx, p);
     });
 
+    drawBrickFx(ctx);
     drawParticles(ctx);
 
     ctx.restore();

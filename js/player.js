@@ -56,6 +56,7 @@ function updateHammer() {
                 killEnemy(en);
             }
         });
+        hammerBricks(minX, maxX);
         if(boss && boss.x + 30 < maxX && boss.x + boss.w - 30 > minX) damageBoss(power.hammer > 0 ? 3 : 2);
     }
 }
@@ -147,6 +148,8 @@ function drawRecep(ctx, o) {
     const hipY = top + h - h * st.ratio - st.width * 0.6;
     const shY = hipY - 50;
 
+    drawSack(ctx, shY, hipY, o.sack || 0, o.dir);   // sırttaki kul hakkı çuvalı
+
     // Arka kol: kalkan yanda asılı (kalkan kalkıkken en son, önde çizilir)
     const bsx = -10, bsy = shY + 8;
     if (!o.shield) {
@@ -172,6 +175,7 @@ function drawRecep(ctx, o) {
     ctx.beginPath(); ctx.moveTo(-1, shY); ctx.lineTo(8, shY + 24); ctx.lineTo(16, shY); ctx.stroke();
     ctx.fillStyle = "#0f172a";
     [36, 44].forEach(dy => { ctx.beginPath(); ctx.arc(9, shY + dy, 1.8, 0, Math.PI * 2); ctx.fill(); });
+    drawSackStrap(ctx, shY, hipY);
 
     // Kafa (fotoğraf): çene, yakanın hemen üstüne oturur
     const H = RECEP_HEAD, k = RECEP_K;

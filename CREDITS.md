@@ -8,9 +8,9 @@
   - `tools/bozkir.py` ile sentezlenir: `python tools/bozkir.py bozkir.wav`, ardından MP3'e dönüştürülür.
 
 ## Ses efektleri
-- **sfx/uufff.mp3** (polis ölüm sesi), **sfx/ahh.mp3** (Recep vurulunca/ölünce), **sfx/voice/gelsin.mp3, sfx/voice/kulhakki.mp3** (torba toplayınca),
+- **sfx/uufff.mp3** (polis ölüm sesi), **sfx/ahh.mp3** (Recep vurulunca/ölünce), **sfx/voice/kulhakki.mp3** (bölüm sonu canavarı yenilince),
   **sfx/yaali.mp3** (ALEVİ'nin karşılaması), **sfx/kro.mp3** (KURT'un karşılaması),
-  **sfx/gotununkili.mp3** (canavar ölünce gelen teyzeler): oyunun yapımcısının kendi sesiyle kaydedildi.
+  **sfx/gotununkili.mp3** (canavar ölünce gelen teyzeler, sonraki bölüme geçilene kadar tekrar eder): oyunun yapımcısının kendi sesiyle kaydedildi.
   - Kırpıldı, uğultusu azaltıldı, ses seviyesi eşitlendi, MP3'e dönüştürüldü.
 - **sfx/feto_greet.mp3** (FETÖ'nün burun çekme ve tükürük sesi): `tools/feto_ses.py` ile sentezlenmiş özgün ses.
 - **sfx/hit1–5.mp3** (darbe sesleri): "37 Hits/Punches" — Independent.nu

@@ -51,7 +51,6 @@ function update() {
             $('score').innerText = score;
             $('sfx-pickup').currentTime = 0; $('sfx-pickup').play().catch(()=>{});
             player.mouthOpen = 1.0;
-            if(!playSfx('voice_pickup')) speak(t("voices")[Math.floor(Math.random()*t("voices").length)], "Kore");
             createParticle(it.x, it.y, pickupText(), "#22c55e", 0.8);
         }
     });

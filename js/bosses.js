@@ -237,10 +237,12 @@ function damageBoss(n) {
     for(let i = 0; i < 30; i++) createParticle(boss.x + Math.random() * boss.w, boss.y + Math.random() * boss.h);
     playSfx('hit', { rate: 0.6, vol: 1 });
     playSfx('cry', { rate: 0.55, vol: 1, delay: 0.08 });   // canavar: kalın, uzun çığlık
-    // Başörtülü teyzeler koşarak gelip kutlar; ses bitince bölüm biter
+    // Recep "kul hakkı" der; başörtülü teyzeler koşarak gelip kutlar ve sonraki bölüme geçilene kadar tezahürat eder
+    const kd = playSfx('voice_win', { vol: 1, delay: 0.5 });
     spawnGrannies(boss.x + boss.w / 2);
-    const gd = playSfx('granny', { vol: 1, delay: 0.6 });
-    setTimeout(completeLevel, Math.max(3000, (gd + 0.6) * 1000 + 1200));
+    const chantAt = 0.5 + kd + 0.2;
+    startGrannyChant(chantAt);
+    setTimeout(completeLevel, Math.max(3000, (chantAt + sfxDuration('granny')) * 1000 + 1000));
 }
 
 function updateBoss() {

@@ -64,7 +64,7 @@ const SFX_FILES = {
     greet_feto: ['sfx/feto_greet.mp3'],
     granny: ['sfx/gotununkili.mp3'],                        // canavar ölünce gelen teyzeler
     // Recep'in replikleri (kayıt yoksa yapay sese, Gemini, düşer)
-    voice_pickup: ['sfx/voice/gelsin.mp3', 'sfx/voice/kulhakki.mp3'],   // torba toplayınca
+    voice_win: ['sfx/voice/kulhakki.mp3'],                              // bölüm sonu canavarı yenilince
     voice_ouch: ['sfx/ahh.mp3']                                         // vurulunca ve ölünce
 };
 let audioCtx = null;
@@ -127,4 +127,25 @@ function playGunshot(pan = 0, vol = 0.5) {
         g.connect(pn); pn.connect(audioCtx.destination);
     } else g.connect(audioCtx.destination);
     src.start();
+}
+
+// Bir kaydın süresi (yüklenmediyse 0)
+const sfxDuration = kind => ((sfxBuffers[kind] || []).find(b => b) || {}).duration || 0;
+
+// Teyzelerin tezahüratı: bir sonraki bölüme geçilene kadar aralıklarla tekrar eder
+let grannyChant = null;
+function startGrannyChant(delay) {
+    stopGrannyChant();
+    const token = {};
+    grannyChant = token;
+    const once = () => {
+        if (grannyChant !== token) return;
+        const d = playSfx('granny', { vol: 1 });
+        token.t = setTimeout(once, ((d || 1.5) + 0.5) * 1000);
+    };
+    token.t = setTimeout(once, delay * 1000);
+}
+function stopGrannyChant() {
+    if (grannyChant) clearTimeout(grannyChant.t);
+    grannyChant = null;
 }

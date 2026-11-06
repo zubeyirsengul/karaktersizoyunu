@@ -186,7 +186,7 @@ function completeLevel() {
         $('start-button').innerText = t(`l${n}Btn`) || t("lvlNext").replace("{n}", n + 1);
         $('start-button').onclick = () => goToLevel(n + 1);
     } else {
-        if (!storyDone.end) { playStory('end', () => { levelCompleted = false; completeLevel(); }); return; }
+        if (!storyDone.end) { stopGrannyChant(); playStory('end', () => { levelCompleted = false; completeLevel(); }); return; }
         $('overlay-title').innerText = t("winTitle");
         $('overlay-note').innerText = t("winNote");
         $('start-button').innerText = t("winBtn");
@@ -230,6 +230,7 @@ const LEVELS = {
 const MAX_LEVEL = 8;
 
 function goToLevel(n) {
+    stopGrannyChant();   // teyzeler sonraki bölüme geçince susar
     if (!storyDone[n]) { $('overlay-screen').style.display = 'none'; playStory(n, () => goToLevel(n)); return; }
     currentLevel = n; targetKills = LEVELS[n].target;
     $('current-level').innerText = n; $('target-kills').innerText = targetKills;

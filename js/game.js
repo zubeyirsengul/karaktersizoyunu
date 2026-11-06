@@ -157,6 +157,7 @@ function startGame() {
     removeIntro();
     $('overlay-screen').style.display = 'none';
     gameStarted = true;
+    document.body.classList.add('playing');
     $('pause-btn').style.display = 'block';
     $('help-btn').style.display = 'block';
     resizeCanvas();
@@ -166,14 +167,32 @@ function startGame() {
     bgMusic.volume = 0.1; bgMusic.play().catch(()=>{});
 }
 // Canvas'ı ekranın gerçek piksel yoğunluğuna göre boyutlandır (Retina/telefonlarda net görüntü).
-// Oyun kodu CSS pikseliyle çalışmaya devam eder; ölçekleme setTransform ile yapılır.
+// Küçük ekranlarda (yan tutulan telefon) dünya küçültülerek çizilir: oyun en az MIN_VIEW_H x MIN_VIEW_W
+// birimlik bir alan görür, böylece 180 birim boyundaki oyuncu ekranın yarısını kaplamaz.
+// width/height oyun birimidir; ölçekleme setTransform ile yapılır.
+const MIN_VIEW_H = 620, MIN_VIEW_W = 960;
+let viewScale = 1;
 function resizeCanvas() {
     const dpr = window.devicePixelRatio || 1;
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    canvas.style.width = width + 'px';
-    canvas.style.height = height + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const cssW = window.innerWidth, cssH = window.innerHeight;
+    viewScale = Math.min(1, cssH / MIN_VIEW_H, cssW / MIN_VIEW_W);
+    width = cssW / viewScale;
+    height = cssH / viewScale;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.setTransform(dpr * viewScale, 0, 0, dpr * viewScale, 0, 0);
+}
+
+// Telefonda oyunu tam ekran ve yatay aç (tarayıcı çubukları ekranı yemesin). Desteklenmiyorsa sessizce geçer.
+function goFullscreenLandscape() {
+    if (!matchMedia('(pointer: coarse)').matches) return;
+    const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req || document.fullscreenElement || document.webkitFullscreenElement) return;
+    try {
+        const p = req.call(el, { navigationUI: 'hide' });
+        const lock = () => { try { screen.orientation.lock('landscape').catch(() => {}); } catch (e) {} };
+        if (p && p.then) p.then(lock).catch(() => {}); else lock();
+    } catch (e) {}
 }

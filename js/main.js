@@ -36,6 +36,7 @@ $('howto').addEventListener('click', e => { if (e.target === $('howto')) closeHo
 renderHowto();
 $('start-button').onclick = () => {
     initAudio();
+    goFullscreenLandscape();
     if (!howtoSeen()) openHowto(true);   // ilk kez oynayana önce kurallar
     else startGame();
 };

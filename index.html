@@ -2,7 +2,9 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>OMURGASIZ - Sesli Edition</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -46,6 +48,7 @@
         <div class="btn shield-btn" id="shield-btn"><span data-i18n="shield">KALKAN</span> <span class="key-hint">(S)</span></div>
     </div>
     <canvas id="gameCanvas"></canvas>
+    <div id="rotate-hint"><div class="rotate-ico">📱↻</div><div data-i18n="rotate">Telefonu yan çevir</div></div>
 </div>
 
 <audio id="intro-music" loop><source src="intro_title.mp3" type="audio/mpeg"></audio>

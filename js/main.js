@@ -14,12 +14,14 @@ window.onkeydown = e => {
     if($('howto').style.display === 'flex') { if(e.key === 'Escape' || e.key === 'Enter') closeHowto(); return; }
     if(e.key === 'Escape' || k === 'p') { setUserPause(!userPaused); return; }
     if(userPaused) return;
-    if(k==='a') keys.a=true; if(k==='d') keys.d=true; if(k==='s' || e.key==='ArrowDown') keys.s=true;
+    if(k==='a' || e.key==='ArrowLeft') keys.a=true; if(k==='d' || e.key==='ArrowRight') keys.d=true; if(k==='s' || e.key==='ArrowDown') keys.s=true;
+    if(k==='w' || e.key==='ArrowUp') keys.w=true;
     if(e.key===' ' && !e.repeat) jump(); if(e.key==='Enter') shoot(); if(k==='f' && !e.repeat) hammer();
 };
 window.onkeyup = e => {
     let k = e.key.toLowerCase();
-    if(k==='a') keys.a=false; if(k==='d') keys.d=false; if(k==='s' || e.key==='ArrowDown') keys.s=false;
+    if(k==='a' || e.key==='ArrowLeft') keys.a=false; if(k==='d' || e.key==='ArrowRight') keys.d=false; if(k==='s' || e.key==='ArrowDown') keys.s=false;
+    if(k==='w' || e.key==='ArrowUp') keys.w=false;
 };
 resizeIntro();
 window.addEventListener('resize', () => { if (introRAF) resizeIntro(); if (story) resizeStory(); });

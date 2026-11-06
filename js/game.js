@@ -3,6 +3,7 @@
 
 function update() {
     if(!gameStarted || paused || userPaused) return;
+    if(isFlight()) { updateFlight(); return; }
 
     if(!player.isDying) {
         let moveDir = (keys.a ? -1 : (keys.d ? 1 : joyDir));
@@ -45,19 +46,26 @@ function update() {
         if(!it.collected && Math.hypot(player.x + player.w/2 - it.x, player.y + player.h/2 - it.y) < 100) {
             it.collected = true;
             if(it.power) { grantPower(it.power, it.x, it.y); score += 1000; $('score').innerText = score; return; }
+            if(pickupChapterItem(it)) return;
             score += 5000; 
             $('score').innerText = score;
             $('sfx-pickup').currentTime = 0; $('sfx-pickup').play().catch(()=>{});
             player.mouthOpen = 1.0;
             if(!playSfx('voice_pickup')) speak(t("voices")[Math.floor(Math.random()*t("voices").length)], "Kore");
-            createParticle(it.x, it.y, t("pickup"), "#22c55e", 0.8);
+            createParticle(it.x, it.y, pickupText(), "#22c55e", 0.8);
         }
     });
 
     enemies.forEach(en => {
-        if(en.dead) { if(en.deathT < DEATH_FRAMES) en.deathT++; return; }
+        if(en.dead) {
+            if(en.deathT < DEATH_FRAMES) en.deathT++;
+            if(enemyLeaves(en)) { en.dir = en.fallDir; en.walkCycle += 0.4; en.lastSpeed = 5; }   // bavuluyla yürüyüp gider
+            return;
+        }
         if(en.kind === 'riot') { updateRiot(en); enemyContact(en); return; }
         if(en.kind === 'sniper') { updateSniper(en); enemyContact(en); return; }
+        if(en.kind === 'tank') { updateTank(en); enemyContact(en); return; }
+        if(en.kind === 'civil') { updateCivil(en); return; }   // siviller zararsız
 
         // --- Düşman hareketi (tabancalı polis) ---
         const PATROL_RANGE = 250, CHASE_RANGE = 400, CHASE_DIST = 700;
@@ -124,6 +132,7 @@ function update() {
     updateGate();
     updateGrannies();
     updatePowers();
+    updateChapter();
     checkBest();
 }
 
@@ -146,7 +155,7 @@ function setUserPause(on) {
     if(!gameStarted || paused || levelCompleted) on = false;   // bölüm sonu ekranındayken duraklatma yok
     if(userPaused === on) return;
     userPaused = on;
-    keys.a = keys.d = keys.s = false; shieldHeld = false;
+    keys.a = keys.d = keys.s = keys.w = false; shieldHeld = false;
     const m = $('bg-music');
     if(on) m.pause(); else m.play().catch(()=>{});
     $('pause-btn').textContent = on ? '▶' : '⏸';

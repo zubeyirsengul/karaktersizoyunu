@@ -464,6 +464,12 @@ function storyLoop(now) {
     });
     if ((sc.props || []).includes('bars')) STORY_PROPS.bars(c, time);   // parmaklık karakterlerin önünde
 
+    if (sc.sepia) {   // geçmişe dönüş: eski fotoğraf rengi
+        c.globalCompositeOperation = 'color'; c.fillStyle = '#a0784a'; c.fillRect(0, 0, STORY_W, STORY_H);
+        c.globalCompositeOperation = 'source-over';
+        c.fillStyle = '#fde68a'; c.font = 'bold 22px monospace'; c.textAlign = 'right'; c.textBaseline = 'alphabetic';
+        c.fillText(storyT('flashback'), STORY_W - 20, STORY_H - 16);
+    }
     if (sc.card) drawStoryCard(c, sc, el);
     else drawStoryBox(c, sc, full);
     c.restore();
@@ -516,7 +522,7 @@ function drawStoryCard(c, sc, el) {
         const pulse = 1 + Math.sin(performance.now() / 200) * 0.04;
         c.save(); c.translate(STORY_W / 2, 460); c.scale(pulse, pulse);
         blockRect(c, -120, -30, 240, 60, '#fbbf24');
-        c.fillStyle = '#000'; c.font = 'bold 28px monospace'; c.textBaseline = 'middle'; c.fillText(storyT('go'), 0, 2);
+        c.fillStyle = '#000'; c.font = 'bold 28px monospace'; c.textBaseline = 'middle'; c.fillText(storyT(sc.card.go || 'go'), 0, 2);
         c.restore();
     }
 }

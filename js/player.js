@@ -3,12 +3,14 @@
 
 function jump() {
     if(player.isDying || paused || userPaused || levelCompleted) return;
+    if(isFlight()) { player.vy -= 9; return; }   // uçakta: yukarı fırla
     if(player.grounded) { player.vy = player.jumpPower; player.grounded = false; }
     else tryDoubleJump();   // çift zıplama gücü açıksa havada bir kez daha
 }
 
 function shoot() {
     if(!gameStarted || player.isDying || paused || userPaused || levelCompleted || player.shield) return;
+    if(isFlight()) { playerProjectiles.push({ x: player.x + player.w, y: player.y + player.h * 0.6, vx: 16, vy: 0, angle: 0, life: 120, active: true }); return; }
     playerProjectiles.push({
         x: player.x + (player.dir === 1 ? player.w : 0),
         y: player.y + player.h / 2,
@@ -20,7 +22,7 @@ function shoot() {
 // --- BALYOZ ---
 const SWING_FRAMES = 24, HAMMER_REACH = 190;
 function hammer() {
-    if(!gameStarted || player.isDying || paused || userPaused || levelCompleted || player.swing > 0 || player.shield) return;
+    if(!gameStarted || player.isDying || paused || userPaused || levelCompleted || player.swing > 0 || player.shield || isFlight()) return;
     player.swing = SWING_FRAMES;
     player.swingHit = false;
 }
@@ -48,6 +50,7 @@ function updateHammer() {
         const minX = Math.min(cx, cx + player.dir * reach), maxX = Math.max(cx, cx + player.dir * reach);
         const headX = cx + player.dir * (reach - 40), headY = player.y + player.h - 10;
         for(let i = 0; i < 8; i++) createParticle(headX, headY);   // toz
+        if(stampMode()) createParticle(headX, headY - 50, "KHK", "#dc2626", 0.7);
         enemies.forEach(en => {
             if(!en.dead && en.x < maxX && en.x + en.w > minX && en.y < player.y + player.h + 20 && en.y + en.h > player.y - 60) {
                 killEnemy(en);
@@ -285,6 +288,7 @@ function drawLegs(ctx, cx, topY, h, dir, phase, moving, airborne, style) {
 
 // Balyoz, oyuncunun merkezine göre piksel koordinatında (hx, hy) eldeki noktadan çizilir
 function drawHammer(ctx, hx, hy, angle, size = 1) {
+    if (stampMode()) { drawStamp(ctx, hx, hy, angle, size); return; }
     const L = 130;
     ctx.save();
     ctx.translate(hx, hy);            // el

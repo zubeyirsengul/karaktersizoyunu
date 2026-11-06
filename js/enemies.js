@@ -116,6 +116,7 @@ function applyDeathPose(ctx, en) {
 
 function killEnemy(en) {
     if(en.dead) return;
+    if(chapterKill(en)) return;   // sivil: ihraç edilir, hedefe sayılmaz
     en.dead = true;
     killedEnemies++;
     const isPolice = true;   // bütün düşmanlar 17/25 polisi
@@ -123,8 +124,9 @@ function killEnemy(en) {
     en.deathT = 0; en.lastSpeed = 0;
     en.fallDir = Math.sign(en.x + en.w / 2 - (player.x + player.w / 2)) || 1;
     enemyDeathSound(en);
-    createParticle(en.x + en.w/2, en.y, isPolice ? t("policeCry") : t("hit"), isPolice ? "#60a5fa" : "white", 1.0);
-    $('score').innerText = score += ({ police: 3000, riot: 4000, sniper: 5000 })[en.kind] || 2000; $('kills').innerText = killedEnemies;
+    const [cry, cryColor] = enemyCryText(en);
+    createParticle(en.x + en.w/2, en.y, isPolice ? cry : t("hit"), isPolice ? cryColor : "white", 1.0);
+    $('score').innerText = score += ({ police: 3000, riot: 4000, sniper: 5000, tank: 4000 })[en.kind] || 2000; $('kills').innerText = killedEnemies;
     if(killedEnemies === targetKills) {
         // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: ALEVİ, 2: KURT, 3: FETÖ)
         spawnGate();

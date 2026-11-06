@@ -74,13 +74,13 @@ function drawBribe(ctx, x, y, angle) {
 // --- ARKA PLAN: bölüme göre paralaks katmanlar ---
 // 1: gündüz, yeşil tepeler ve ağaçlar · 2: bozkırda gün batımı, yurtlar · 3: gece şehri, projektörler
 const THEMES = {
-    1: { sky: ["#38bdf8", "#7dd3fc", "#e0f2fe", "#fef9c3"], sun: { x: 0.8, y: 0.17, r: 44, c: "#fde68a", glow: "rgba(253,224,71,0.35)" },
+    hills: { sky: ["#38bdf8", "#7dd3fc", "#e0f2fe", "#fef9c3"], sun: { x: 0.8, y: 0.17, r: 44, c: "#fde68a", glow: "rgba(253,224,71,0.35)" },
          clouds: "rgba(255,255,255,0.92)",
          ground: ["#7a4a24", "#3b2412"], grass: "#4caf2f", grassDark: "#2e6b1c" },
-    2: { sky: ["#1e1b4b", "#831843", "#ea580c", "#fcd34d"], sun: { x: 0.3, y: 0.6, r: 70, c: "#fdba74", glow: "rgba(251,146,60,0.45)" },
+    steppe: { sky: ["#1e1b4b", "#831843", "#ea580c", "#fcd34d"], sun: { x: 0.3, y: 0.6, r: 70, c: "#fdba74", glow: "rgba(251,146,60,0.45)" },
          clouds: "rgba(253,186,116,0.5)",
          ground: ["#8a5a2b", "#4a2f15"], grass: "#b5a642", grassDark: "#7c6f2a" },
-    3: { sky: ["#020617", "#0f172a", "#1e3a8a"], moon: { x: 0.82, y: 0.15, r: 32 }, stars: true,
+    city: { sky: ["#020617", "#0f172a", "#1e3a8a"], moon: { x: 0.82, y: 0.15, r: 32 }, stars: true,
          ground: ["#3f3f46", "#18181b"], grass: "#9ca3af", grassDark: "#4b5563", curb: true }
 };
 const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
@@ -135,7 +135,7 @@ function skyline(par, base, minH, maxH, color, windowColor, seed) {
 }
 
 function drawBackground() {
-    const th = THEMES[currentLevel], time = performance.now() / 1000;
+    const bg = LEVELS[currentLevel].bg, th = THEMES[bg], time = performance.now() / 1000;
     if (!skyCache || skyCache.h !== height || skyCache.lvl !== currentLevel) {
         const g = ctx.createLinearGradient(0, 0, 0, height);
         th.sky.forEach((c, i) => g.addColorStop(i / (th.sky.length - 1), c));
@@ -183,7 +183,7 @@ function drawBackground() {
         }
     }
 
-    if (currentLevel === 1) {
+    if (bg === 'hills') {
         hillLayer(0.08, height * 0.6, 80, 1.3, "#93a8c8");          // uzak dağlar (soluk mavi)
         hillLayer(0.22, height * 0.74, 42, 4.2, "#6a9a4c");         // orta tepeler
         const nb = height * 0.85;
@@ -196,7 +196,7 @@ function drawBackground() {
             ctx.fillStyle = "rgba(255,255,255,0.12)";
             ctx.beginPath(); ctx.arc(sx - 5 * s, y - 40 * s, 8 * s, 0, Math.PI * 2); ctx.fill();
         });
-    } else if (currentLevel === 2) {
+    } else if (bg === 'steppe') {
         hillLayer(0.08, height * 0.62, 85, 2.1, "#6b2f5f");         // güneşin battığı mor dağlar
         const mb = height * 0.76;
         hillLayer(0.22, mb, 28, 5.5, "#8a4a2a");                    // bozkır
@@ -216,6 +216,8 @@ function drawBackground() {
             const y = height * (0.2 + 0.08 * i) + Math.sin(time * 0.8 + i) * 12, f = Math.sin(time * 4 + i) * 6;
             ctx.beginPath(); ctx.moveTo(x - 14, y - 4 - f); ctx.quadraticCurveTo(x - 6, y - 8, x, y); ctx.quadraticCurveTo(x + 6, y - 8, x + 14, y - 4 - f); ctx.stroke();
         }
+    } else if (bg !== 'city') {
+        drawChapterBackground(bg, time);
     } else {
         // Projektörler gökyüzünü tarar (mavi ve kırmızı: 17/25 gecesi)
         [[0.25, "rgba(147,197,253,0.16)", 0], [0.7, "rgba(252,165,165,0.12)", 2]].forEach(([fx, col, ph]) => {
@@ -235,7 +237,7 @@ function drawBackground() {
 
 // Zemin ve platformlar: toprak katmanı + çimen (3. bölümde kaldırım)
 function drawPlatform(ctx, p) {
-    const th = THEMES[currentLevel];
+    const th = THEMES[LEVELS[currentLevel].bg];
     const x0 = Math.max(p.x, camX - 40), x1 = Math.min(p.x + p.w, camX + width + 40);
     if (x1 <= x0) return;
     const g = ctx.createLinearGradient(0, p.y, 0, p.y + Math.min(p.h, 220));
@@ -268,6 +270,7 @@ function drawPlatform(ctx, p) {
 
 function draw() {
     ctx.clearRect(0,0,width,height);
+    if (isFlight()) { drawFlight(); return; }
     drawBackground();
     ctx.save();
     ctx.translate(-camX, 0);
@@ -276,14 +279,18 @@ function draw() {
     platforms.forEach(p => drawPlatform(ctx, p));
     if(gate) drawGate(ctx, gate);
 
-    items.forEach(it => { if(it.collected) return; if(it.power) drawPowerOrb(ctx, it); else drawKulHakkiBag(ctx, it.x, it.y, 80); });
+    items.forEach(it => { if(it.collected) return; if(it.power) drawPowerOrb(ctx, it); else if(!drawChapterItem(ctx, it)) drawKulHakkiBag(ctx, it.x, it.y, 80); });
     enemies.forEach(en => {
         if(en.dead && en.deathT >= DEATH_FRAMES) return;
         ctx.save();
-        if(en.dead) applyDeathPose(ctx, en);
+        const leaves = en.dead && enemyLeaves(en) && en.kind !== 'tank';
+        if(en.dead) (leaves ? applyExilePose : applyDeathPose)(ctx, en);
         if(en.kind === 'riot') drawRiot(ctx, en);
         else if(en.kind === 'sniper') drawSniper(ctx, en);
+        else if(en.kind === 'tank') drawTank(ctx, en);
+        else if(en.kind === 'civil') drawCivil(ctx, en);
         else drawPolice(ctx, en);
+        if(leaves) drawSuitcase(ctx, en);
         ctx.restore();
     });
     enemies.forEach(en => { if(en.kind === 'sniper') drawSniperLaser(ctx, en); });
@@ -311,10 +318,22 @@ function draw() {
     projectiles.forEach(p => {
         if(p.type === 'fire') drawFire(ctx, p);
         else if(p.type === 'wave') drawWave(ctx, p);
-        else if(p.type === 'dollar1') drawOneDollar(ctx, p.x, p.y, p.angle);
+        else if(p.type === 'dollar1') (p.skin === 'lock' ? drawLockIcon : drawOneDollar)(ctx, p.x, p.y, p.angle);
         else if(p.type === 'bullet') drawBullet(ctx, p);
     });
 
+    drawParticles(ctx);
+
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    if(boss && !boss.dying) drawBossBar(ctx, boss);
+    drawGateHint(ctx);
+    drawPowerHud(ctx);
+    drawChapterHud(ctx);
+    drawScreenOverlays(ctx);
+}
+
+function drawParticles(ctx) {
     particles.forEach(p => {
         ctx.globalAlpha = p.life / (p.maxLife || 1);
         if(p.text) {
@@ -330,11 +349,10 @@ function draw() {
         }
     });
 
-    ctx.restore();
-    ctx.globalAlpha = 1;
-    if(boss && !boss.dying) drawBossBar(ctx, boss);
-    drawGateHint(ctx);
-    drawPowerHud(ctx);
+}
+
+// Duraklatma ekranı ve beyaz parlama
+function drawScreenOverlays(ctx) {
     if(userPaused) {
         ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, width, height);
         ctx.textAlign = "center"; ctx.textBaseline = "middle";

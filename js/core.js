@@ -14,7 +14,7 @@ let items = [], platforms = [], enemies = [], projectiles = [], playerProjectile
 let killedEnemies = 0, currentLevel = 1, targetKills = 7, levelCompleted = false, levelStartScore = 0;
 let levelEnding = false;                 // bitiş ekranı gelmek üzere: artık ölünmez
 let boss = null, bossCheckpoint = null;  // 1. bölüm sonu canavarı ALEVİ; ölünce canavardan devam
-const keys = { a: false, d: false, s: false };
+const keys = { a: false, d: false, s: false, w: false };
 let shieldHeld = false;   // dokunmatik KALKAN butonu basılı mı
 let userPaused = false;   // oyuncunun duraklatması (bölüm sonu ekranından ayrı)
 

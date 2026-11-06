@@ -1,10 +1,10 @@
 # Krediler
 
 ## Müzik
-- **intro_title.mp3** (açılış ekranı), **chiptune_level1.mp3** (1. bölüm) ve **chiptune_level3.mp3** (3. bölüm): "Title Screen", "Level 1" ve "Level 3" — Juhani Junkala, *Retro Game Music Pack (5 Chiptunes – Action)*
+- **intro_title.mp3** (açılış ekranı ve 6. bölüm), **chiptune_level1.mp3** (1., 3. ve 8. bölüm) ve **chiptune_level3.mp3** (4. ve 7. bölüm): "Title Screen", "Level 1" ve "Level 3" — Juhani Junkala, *Retro Game Music Pack (5 Chiptunes – Action)*
   - Kaynak: https://opengameart.org/content/5-chiptunes-action
   - Lisans: CC0 (kamu malı). Orijinal WAV, 128 kbps MP3'e dönüştürüldü.
-- **bozkir_dortnal.mp3** (2. bölüm): "Bozkır Dörtnal" — bu oyun için bestelenmiş özgün parça.
+- **bozkir_dortnal.mp3** (2. ve 5. bölüm): "Bozkır Dörtnal" — bu oyun için bestelenmiş özgün parça.
   - `tools/bozkir.py` ile sentezlenir: `python tools/bozkir.py bozkir.wav`, ardından MP3'e dönüştürülür.
 
 ## Ses efektleri
@@ -19,3 +19,5 @@
 
 ## Grafikler
 - Recep'in gövdesi ve "DİN" yazılı kalkanı, tabancalı 17/25 polisi, kalkanlı çevik kuvvet, keskin nişancı, platformlar ve çukurlar, bölüm sonu canavarları (ALEVİ, KURT, FETÖ), bölüm sonu kapısı, başörtülü teyzeler, güç küreleri, 1 dolar, bölüm arka planları ve Kaçak Saray'lı açılış sahnesi kodla (canvas) çizilmiştir, harici dosya kullanılmaz.
+- 3-8. bölümlerin her şeyi de kodla çizilmiştir: arka planlar (Boğaz, Marmaris, gece uçuşu, OHAL Ankarası, karlı Pensilvanya), kaset, şarj aleti, rüşvet zarfı, mini tanklar, siviller, KHK damgası, uçaklar, canavarlar (PARA MAKİNESİ, DARBE TANKI, TANKER UÇAK, BYLOCK).
+- Bölüm girişi hikâyelerindeki blok (piksel) karakterler: 4'lü çete (`resimler/4lucete.png`) ve Sarraf (`resimler/sarraf.png`) yapımcının verdiği fotoğraflardan pikselleştirilir; Recep `recep.jpg`'den alınır. Polis, FETÖ, KURT, spiker, öğretmen ve gazeteci 8x8 piksel olarak elle çizilmiştir (fotoğraf kullanılmaz).

@@ -12,7 +12,7 @@ const POWERS = {
 };
 const POWER_ORDER = ['speed', 'double', 'hammer', 'heart', 'star'];
 let power = { speed: 0, double: 0, hammer: 0, star: 0 }, usedDouble = false;
-const hammerReach = () => HAMMER_REACH * (power.hammer > 0 ? 1.6 : 1);
+const hammerReach = () => HAMMER_REACH * (power.hammer > 0 ? 1.6 : 1) * (LEVELS[currentLevel].stamp ? 1.3 : 1);   // KHK damgası daha geniş vurur
 
 function grantPower(kind, x, y) {
     const P = POWERS[kind];

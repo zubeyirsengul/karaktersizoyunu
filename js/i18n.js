@@ -19,9 +19,10 @@ const LANGS = {
         voices: ["Ham!", "Gelsin paracıklar!", "Yarasın!", "Çok lezzetli!", "Kul hakkı gibisi yok!"],
         ouch: "Eyvah!", enemyCry: "ANAM",
         bossName: "ALEVİ", bossIntro: "BÖLÜM SONU CANAVARI!", kurtName: "KURT", policeCry: "DOSYA KAPANDI!",
-        l2Title: "BÖLÜM 2 TAMAM!", l2Note: "Kurt da gitti! Sıra FETÖ'de.", l2Btn: "3. BÖLÜME GEÇ", fetoName: "FETÖ",
+        l2Title: "BÖLÜM 2 TAMAM!", l2Note: "Altınlar geri geldi! Sıra 25 Aralık kasetlerinde.", l2Btn: "3. BÖLÜME GEÇ", fetoName: "FETÖ",
         doorOpen: "KAPI AÇILDI!", gateHint: "KAPI",
-        soundOn: "🔊 SESİ AÇ", soundOff: "🔇 SESİ KAPAT"
+        soundOn: "🔊 SESİ AÇ", soundOff: "🔇 SESİ KAPAT",
+        montaj: "MONTAJ!", tapeLabel: "SIFIRLA", exileCry: "SÜRGÜN!", surrender: "TESLİM!", expel: "İHRAÇ!", batteryOut: "ŞARJ BİTTİ!", charge: "ŞARJ!", khkHud: "İhraç edilen", role_teacher: "ÖĞRETMEN", role_journalist: "GAZETECİ", role_academic: "AKADEMİSYEN", role_student: "ÖĞRENCİ", sayacName: "PARA MAKİNESİ", tankName: "DARBE TANKI", tankerName: "TANKER UÇAK", bylockName: "BYLOCK", feto2Name: "FETÖ: SON", lvlDone: "BÖLÜM {n} TAMAM!", lvlNext: "{n}. BÖLÜME GEÇ", l3Note: "Kasetler montaj oldu, para makinesi sıfırlandı!", l4Note: "Sandık kurtuldu... ama FETÖ'yle iş bitmedi. 15 Temmuz geliyor!", l5Note: "FaceTime bağlantısı kopmadı! Şimdi uçağa!", l6Note: "İstanbul'a inildi! Sıra OHAL'de.", l7Note: "Herkes ihraç edildi... Sıra Pensilvanya'da!"
     },
     en: {
         title: "OMURGASIZ - Voice Edition",
@@ -39,9 +40,10 @@ const LANGS = {
         voices: ["Nom!", "Come to me, money!", "Enjoy!", "So delicious!", "Nothing beats the people's due!"],
         ouch: "Uh oh!", enemyCry: "MAMA!",
         bossName: "ALEVİ", bossIntro: "BOSS FIGHT!", kurtName: "KURT", policeCry: "CASE CLOSED!",
-        l2Title: "LEVEL 2 COMPLETE!", l2Note: "The wolf is gone! Now it's FETÖ's turn.", l2Btn: "GO TO LEVEL 3", fetoName: "FETÖ",
+        l2Title: "LEVEL 2 COMPLETE!", l2Note: "The gold is back! Next up: the December 25 tapes.", l2Btn: "GO TO LEVEL 3", fetoName: "FETÖ",
         doorOpen: "THE GATE IS OPEN!", gateHint: "GATE",
-        soundOn: "🔊 SOUND ON", soundOff: "🔇 SOUND OFF"
+        soundOn: "🔊 SOUND ON", soundOff: "🔇 SOUND OFF",
+        montaj: "FAKE!", tapeLabel: "ZERO IT", exileCry: "EXILED!", surrender: "SURRENDER!", expel: "PURGED!", batteryOut: "BATTERY DEAD!", charge: "CHARGED!", khkHud: "Purged", role_teacher: "TEACHER", role_journalist: "JOURNALIST", role_academic: "ACADEMIC", role_student: "STUDENT", sayacName: "MONEY COUNTER", tankName: "COUP TANK", tankerName: "TANKER PLANE", bylockName: "BYLOCK", feto2Name: "FETÖ: FINAL", lvlDone: "LEVEL {n} COMPLETE!", lvlNext: "GO TO LEVEL {n}", l3Note: "The tapes are 'fake', the money counter is zeroed!", l4Note: "The ballot box is safe... but FETÖ isn't done. July 15 is coming!", l5Note: "The FaceTime call held! Now to the plane!", l6Note: "Landed in Istanbul! State of emergency next.", l7Note: "Everyone's been purged... Next stop: Pennsylvania!"
     },
     fr: {
         title: "OMURGASIZ - Édition Vocale",
@@ -59,9 +61,10 @@ const LANGS = {
         voices: ["Miam !", "Venez, petits sous !", "Bon appétit !", "Délicieux !", "Rien ne vaut le bien du peuple !"],
         ouch: "Oh non !", enemyCry: "MAMAN !",
         bossName: "ALEVİ", bossIntro: "BOSS DE FIN !", kurtName: "KURT", policeCry: "AFFAIRE CLASSÉE !",
-        l2Title: "NIVEAU 2 TERMINÉ !", l2Note: "Le loup est parti ! Au tour de FETÖ.", l2Btn: "NIVEAU 3", fetoName: "FETÖ",
+        l2Title: "NIVEAU 2 TERMINÉ !", l2Note: "L'or est revenu ! Place aux cassettes du 25 décembre.", l2Btn: "NIVEAU 3", fetoName: "FETÖ",
         doorOpen: "LA PORTE EST OUVERTE !", gateHint: "PORTE",
-        soundOn: "🔊 ACTIVER LE SON", soundOff: "🔇 COUPER LE SON"
+        soundOn: "🔊 ACTIVER LE SON", soundOff: "🔇 COUPER LE SON",
+        montaj: "MONTAGE !", tapeLabel: "À ZÉRO", exileCry: "EXIL !", surrender: "REDDITION !", expel: "RADIÉ !", batteryOut: "BATTERIE VIDE !", charge: "RECHARGÉ !", khkHud: "Radiés", role_teacher: "PROF", role_journalist: "JOURNALISTE", role_academic: "UNIVERSITAIRE", role_student: "ÉTUDIANT", sayacName: "COMPTEUSE", tankName: "TANK DU PUTSCH", tankerName: "RAVITAILLEUR", bylockName: "BYLOCK", feto2Name: "FETÖ : FINAL", lvlDone: "NIVEAU {n} TERMINÉ !", lvlNext: "NIVEAU {n}", l3Note: "Les cassettes sont des « montages », la compteuse est à zéro !", l4Note: "L'urne est sauvée... mais FETÖ n'a pas dit son dernier mot. Le 15 juillet approche !", l5Note: "L'appel FaceTime a tenu ! Vite, à l'avion !", l6Note: "Atterrissage à Istanbul ! Place à l'état d'urgence.", l7Note: "Tout le monde est radié... Prochaine étape : la Pennsylvanie !"
     },
     nl: {
         title: "OMURGASIZ - Spraakeditie",
@@ -79,9 +82,10 @@ const LANGS = {
         voices: ["Hap!", "Kom maar, geldjes!", "Eet smakelijk!", "Heerlijk!", "Niets gaat boven volksrecht!"],
         ouch: "Oei!", enemyCry: "MAMA!",
         bossName: "ALEVİ", bossIntro: "EINDBAAS!", kurtName: "KURT", policeCry: "ZAAK GESLOTEN!",
-        l2Title: "LEVEL 2 VOLTOOID!", l2Note: "De wolf is weg! Nu is FETÖ aan de beurt.", l2Btn: "NAAR LEVEL 3", fetoName: "FETÖ",
+        l2Title: "LEVEL 2 VOLTOOID!", l2Note: "Het goud is terug! Nu de banden van 25 december.", l2Btn: "NAAR LEVEL 3", fetoName: "FETÖ",
         doorOpen: "DE POORT IS OPEN!", gateHint: "POORT",
-        soundOn: "🔊 GELUID AAN", soundOff: "🔇 GELUID UIT"
+        soundOn: "🔊 GELUID AAN", soundOff: "🔇 GELUID UIT",
+        montaj: "MONTAGE!", tapeLabel: "OP NUL", exileCry: "VERBANNEN!", surrender: "OVERGAVE!", expel: "ONTSLAGEN!", batteryOut: "BATTERIJ LEEG!", charge: "OPGELADEN!", khkHud: "Ontslagen", role_teacher: "LERAAR", role_journalist: "JOURNALIST", role_academic: "ACADEMICUS", role_student: "STUDENT", sayacName: "GELDTELLER", tankName: "COUPTANK", tankerName: "TANKVLIEGTUIG", bylockName: "BYLOCK", feto2Name: "FETÖ: FINALE", lvlDone: "LEVEL {n} VOLTOOID!", lvlNext: "NAAR LEVEL {n}", l3Note: "De banden zijn 'montage', de geldteller staat op nul!", l4Note: "De stembus is gered... maar FETÖ is nog niet klaar. 15 juli komt eraan!", l5Note: "Het FaceTime-gesprek hield stand! Snel naar het vliegtuig!", l6Note: "Geland in Istanbul! Nu de noodtoestand.", l7Note: "Iedereen is ontslagen... Volgende halte: Pennsylvania!"
     },
     de: {
         title: "OMURGASIZ - Sprachausgabe",
@@ -99,9 +103,10 @@ const LANGS = {
         voices: ["Mampf!", "Her mit dem Geld!", "Guten Appetit!", "So lecker!", "Nichts geht über Volksrecht!"],
         ouch: "Oh nein!", enemyCry: "MAMA!",
         bossName: "ALEVİ", bossIntro: "ENDGEGNER!", kurtName: "KURT", policeCry: "FALL ABGESCHLOSSEN!",
-        l2Title: "LEVEL 2 GESCHAFFT!", l2Note: "Der Wolf ist weg! Jetzt ist FETÖ dran.", l2Btn: "ZU LEVEL 3", fetoName: "FETÖ",
+        l2Title: "LEVEL 2 GESCHAFFT!", l2Note: "Das Gold ist zurück! Jetzt die Bänder vom 25. Dezember.", l2Btn: "ZU LEVEL 3", fetoName: "FETÖ",
         doorOpen: "DAS TOR IST OFFEN!", gateHint: "TOR",
-        soundOn: "🔊 TON AN", soundOff: "🔇 TON AUS"
+        soundOn: "🔊 TON AN", soundOff: "🔇 TON AUS",
+        montaj: "MONTAGE!", tapeLabel: "AUF NULL", exileCry: "VERBANNT!", surrender: "KAPITULATION!", expel: "ENTLASSEN!", batteryOut: "AKKU LEER!", charge: "GELADEN!", khkHud: "Entlassen", role_teacher: "LEHRER", role_journalist: "JOURNALIST", role_academic: "AKADEMIKER", role_student: "STUDENT", sayacName: "GELDZÄHLER", tankName: "PUTSCH-PANZER", tankerName: "TANKFLUGZEUG", bylockName: "BYLOCK", feto2Name: "FETÖ: FINALE", lvlDone: "LEVEL {n} GESCHAFFT!", lvlNext: "ZU LEVEL {n}", l3Note: "Die Bänder sind „Montage“, der Geldzähler steht auf null!", l4Note: "Die Urne ist gerettet... aber FETÖ gibt nicht auf. Der 15. Juli naht!", l5Note: "Der FaceTime-Anruf hat gehalten! Schnell ins Flugzeug!", l6Note: "Gelandet in Istanbul! Jetzt der Ausnahmezustand.", l7Note: "Alle sind entlassen... Nächster Halt: Pennsylvania!"
     },
     ru: {
         title: "OMURGASIZ - Голосовая версия",
@@ -119,9 +124,10 @@ const LANGS = {
         voices: ["Ам!", "Идите сюда, денежки!", "Приятного аппетита!", "Очень вкусно!", "Нет ничего лучше народного добра!"],
         ouch: "Ой-ой!", enemyCry: "МАМА!",
         bossName: "АЛЕВИ", bossIntro: "БОСС!", kurtName: "КУРТ", policeCry: "ДЕЛО ЗАКРЫТО!",
-        l2Title: "УРОВЕНЬ 2 ПРОЙДЕН!", l2Note: "Волк повержен! Теперь очередь ФЕТÖ.", l2Btn: "НА УРОВЕНЬ 3", fetoName: "ФЕТÖ",
+        l2Title: "УРОВЕНЬ 2 ПРОЙДЕН!", l2Note: "Золото вернулось! Теперь записи 25 декабря.", l2Btn: "НА УРОВЕНЬ 3", fetoName: "ФЕТÖ",
         doorOpen: "ВОРОТА ОТКРЫТЫ!", gateHint: "ВОРОТА",
-        soundOn: "🔊 ВКЛЮЧИТЬ ЗВУК", soundOff: "🔇 ВЫКЛЮЧИТЬ ЗВУК"
+        soundOn: "🔊 ВКЛЮЧИТЬ ЗВУК", soundOff: "🔇 ВЫКЛЮЧИТЬ ЗВУК",
+        montaj: "МОНТАЖ!", tapeLabel: "ОБНУЛИ", exileCry: "В ССЫЛКУ!", surrender: "СДАЮСЬ!", expel: "УВОЛЕН!", batteryOut: "БАТАРЕЯ СЕЛА!", charge: "ЗАРЯД!", khkHud: "Уволено", role_teacher: "УЧИТЕЛЬ", role_journalist: "ЖУРНАЛИСТ", role_academic: "УЧЁНЫЙ", role_student: "СТУДЕНТ", sayacName: "СЧЁТНАЯ МАШИНКА", tankName: "ТАНК ПУТЧА", tankerName: "ЗАПРАВЩИК", bylockName: "BYLOCK", feto2Name: "ФЕТÖ: ФИНАЛ", lvlDone: "УРОВЕНЬ {n} ПРОЙДЕН!", lvlNext: "НА УРОВЕНЬ {n}", l3Note: "Записи — «монтаж», счётная машинка обнулена!", l4Note: "Урна спасена... но ФЕТÖ не сдаётся. Приближается 15 июля!", l5Note: "Звонок по FaceTime выдержал! Скорее в самолёт!", l6Note: "Посадка в Стамбуле! Дальше — чрезвычайное положение.", l7Note: "Все уволены... Следующая остановка: Пенсильвания!"
     }
 };
 

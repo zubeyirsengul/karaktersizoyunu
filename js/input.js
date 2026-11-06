@@ -2,7 +2,7 @@
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 
 // --- JOYSTICK ---
-let joyDir = 0, joyPointer = null;
+let joyDir = 0, joyDirY = 0, joyPointer = null;   // joyDirY: uçuş bölümünde yukarı/aşağı
 const joyWrap = $('joystick-wrapper'), joyStick = $('joystick-stick');
 
 function joyMove(e) {
@@ -14,9 +14,10 @@ function joyMove(e) {
     if (dist > JOY_MAX) { dx = dx / dist * JOY_MAX; dy = dy / dist * JOY_MAX; }
     joyStick.style.transform = `translate(${dx}px, ${dy}px)`;
     joyDir = Math.abs(dx) < JOY_DEADZONE ? 0 : Math.sign(dx);
+    joyDirY = Math.abs(dy) < JOY_DEADZONE ? 0 : dy / JOY_MAX;
 }
 function joyEnd(e) {
     if (e.pointerId !== joyPointer) return;
-    joyPointer = null; joyDir = 0;
+    joyPointer = null; joyDir = 0; joyDirY = 0;
     joyStick.style.transform = '';
 }

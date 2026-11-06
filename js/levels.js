@@ -12,7 +12,7 @@ function seededRandom(seed) {
 }
 function buildLayout(level) {
     const r = seededRandom(level * 7919 + 13);
-    const pitChance = [0, 0.35, 0.5, 0.65][level], sniperChance = [0, 0.3, 0.45, 0.6][level];
+    const L = LEVELS[level], pitChance = L.pit, sniperChance = L.sniper;
     const plats = [], pitList = [], snipers = [], bags = [], spots = [];   // spots: nişancı konabilecek yüksek yerler
     // Polisler 1500 + i*1500'de durur; desenler ve çukurlar aralarına (c) yerleşir. Başlangıç bölgesi elle tasarlandı.
     for (let k = 1; k < 19; k++) {
@@ -40,7 +40,7 @@ function buildLayout(level) {
     // Nişancılar: her yüksek yere şansla; bölüm ilerledikçe en az 2 / 3 / 4 tane olacak şekilde tamamlanır
     const rest = [];
     spots.forEach(s => (r() < sniperChance ? snipers : rest).push(s));
-    const minSnipers = [0, 2, 3, 4][level];
+    const minSnipers = L.minSnipers;
     while (snipers.length < minSnipers && rest.length) snipers.push(rest.splice(Math.floor(r() * rest.length), 1)[0]);
     return { plats, pits: pitList, snipers, bags };
 }
@@ -167,7 +167,8 @@ function restartLevel() {
     if(cp) {
         killedEnemies = targetKills;
         $('kills').innerText = killedEnemies;
-        if(cp.stage === 'gate') spawnGate(); else spawnBoss(player.x + 420);
+        if(isFlight()) flightSpawnBoss();
+        else if(cp.stage === 'gate') spawnGate(); else spawnBoss(player.x + 420);
     }
 }
 
@@ -180,11 +181,12 @@ function completeLevel() {
 
     if (currentLevel < MAX_LEVEL) {
         const n = currentLevel;
-        $('overlay-title').innerText = t(`l${n}Title`);
+        $('overlay-title').innerText = t(`l${n}Title`) || t("lvlDone").replace("{n}", n);
         $('overlay-note').innerText = t(`l${n}Note`);
-        $('start-button').innerText = t(`l${n}Btn`);
+        $('start-button').innerText = t(`l${n}Btn`) || t("lvlNext").replace("{n}", n + 1);
         $('start-button').onclick = () => goToLevel(n + 1);
     } else {
+        if (!storyDone.end) { playStory('end', () => { levelCompleted = false; completeLevel(); }); return; }
         $('overlay-title').innerText = t("winTitle");
         $('overlay-note').innerText = t("winNote");
         $('start-button').innerText = t("winBtn");
@@ -196,15 +198,36 @@ function completeLevel() {
 // --- BÖLÜMLER ---
 // platforms: [x, ekranın altından yükseklik, genişlik, kalınlık] (başlangıç bölgesi; gerisi buildLayout ile üretilir)
 // fire: polislerin ateş aralığı (kare); riot(i): i. düşman çevik kuvvet mi
+// kinds(i): i. düşmanın türü ('police' tabancalı, 'riot' çevik kuvvet, 'tank' mini tank)
+// bg: arka plan; pit/sniper: çukur ve nişancı olasılığı; minSnipers: en az nişancı sayısı
+// Bölüme özel: item 'tape' (kaset), exile 'surgun'/'ihrac' (ölen bavulla gider), battery (şarj),
+// mode 'flight' (uçuş), stamp (KHK damgası), civilians (zararsız siviller)
 const LEVELS = {
-    1: { target: 7, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, fire: 170, riot: i => i % 5 === 2,
+    1: { target: 7, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, fire: 170, kinds: i => i % 5 === 2 ? 'riot' : 'police',
+         bg: 'hills', pit: 0.35, sniper: 0.3, minSnipers: 2,
          platforms: [[600, 180, 200, 120], [1200, 250, 300, 50], [1800, 150, 150, 100], [2300, 350, 400, 50]] },
-    2: { target: 7, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150, riot: i => i % 3 === 2,
+    2: { target: 7, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : 'police',
+         bg: 'steppe', pit: 0.5, sniper: 0.45, minSnipers: 3,
          platforms: [[400, 150, 150, 40], [800, 300, 150, 40], [1200, 450, 200, 40], [1600, 300, 300, 40]] },
-    3: { target: 7, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125, riot: i => i % 2 === 1,
+    3: { target: 7, music: 'chiptune_level1.mp3', boss: 'sayac', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : 'police',
+         bg: 'villa', pit: 0.5, sniper: 0.45, minSnipers: 3, item: 'tape',
+         platforms: [[500, 160, 180, 40], [900, 280, 160, 40], [1300, 380, 220, 40], [1800, 220, 260, 40]] },
+    4: { target: 7, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125, kinds: i => i % 2 === 1 ? 'riot' : 'police',
+         bg: 'city', pit: 0.65, sniper: 0.6, minSnipers: 4, exile: 'surgun',
+         platforms: [[500, 170, 180, 40], [850, 290, 180, 40], [1250, 400, 260, 40], [1700, 260, 200, 40], [2200, 180, 300, 40]] },
+    5: { target: 7, music: 'bozkir_dortnal.mp3', boss: 'darbetank', speed: 2.2, fire: 140, kinds: i => i % 2 === 0 ? 'tank' : 'police',
+         bg: 'coast', pit: 0.5, sniper: 0.4, minSnipers: 2, battery: true,
+         platforms: [[600, 170, 200, 40], [1100, 290, 200, 40], [1600, 200, 240, 40]] },
+    6: { target: 12, music: 'intro_title.mp3', boss: 'tanker', mode: 'flight', bg: 'sky', speed: 0, fire: 0, kinds: () => 'police',
+         pit: 0, sniper: 0, minSnipers: 0, platforms: [] },
+    7: { target: 7, music: 'chiptune_level3.mp3', boss: 'bylock', speed: 3, fire: 130, kinds: i => i % 3 === 2 ? 'riot' : 'police',
+         bg: 'ankara', pit: 0.55, sniper: 0.5, minSnipers: 3, exile: 'ihrac', stamp: true, civilians: true,
+         platforms: [[500, 170, 200, 40], [950, 300, 200, 40], [1400, 200, 260, 40]] },
+    8: { target: 7, music: 'chiptune_level1.mp3', boss: 'feto2', speed: 3.4, fire: 115, kinds: i => i % 2 === 1 ? 'riot' : 'police',
+         bg: 'snow', pit: 0.65, sniper: 0.65, minSnipers: 4,
          platforms: [[500, 170, 180, 40], [850, 290, 180, 40], [1250, 400, 260, 40], [1700, 260, 200, 40], [2200, 180, 300, 40]] }
 };
-const MAX_LEVEL = 3;
+const MAX_LEVEL = 8;
 
 function goToLevel(n) {
     if (!storyDone[n]) { $('overlay-screen').style.display = 'none'; playStory(n, () => goToLevel(n)); return; }
@@ -226,8 +249,11 @@ function createLevel() {
     player.isDying = false; player.deathAngle = 0; player.opacity = 1; player.mouthOpen = 0; player.dir = 1;
     player.swing = 0; player.swingHit = false;
     player.hp = player.maxHp; player.invuln = 0; player.knock = 0; updateHearts();
+    player.w = 100; player.h = 180; player.shield = false;
     $('game-container').classList.remove('shake');
     $('kills').innerText = "0";
+    initChapter();
+    if (isFlight()) { createFlight(); return; }
 
     const layout = buildLayout(currentLevel);
     pits = layout.pits;
@@ -244,16 +270,16 @@ function createLevel() {
     for(let i=0; i<20; i++) {
         const homeX = 1500 + i * 1500;
         // 17/25 polisleri: tabancalı polis ya da kalkanlı çevik kuvvet; bölüm ilerledikçe çevik kuvvet artar
-        const riot = LEVELS[currentLevel].riot(i);
-        const w = 120, h = 200;
+        const kind = LEVELS[currentLevel].kinds(i), riot = kind === 'riot', tank = kind === 'tank';
+        const w = tank ? 170 : 120, h = tank ? 96 : 200;
         enemies.push({
-            kind: riot ? 'riot' : 'police', turnT: 0,
+            kind, turnT: 0,
             x: homeX, y: height - 60 - h, w, h,   // alt kenar zeminde
-            timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire, dead: false,
+            timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire * (tank ? 1.3 : 1), dead: false,
             aim: 0, flash: 0,
             homeX: homeX,                          // Devriye merkezi
             dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
-            speed: LEVELS[currentLevel].speed * (riot ? 0.7 : 1),   // bölüm ilerledikçe hızlanır; çevik kuvvet yavaş
+            speed: LEVELS[currentLevel].speed * (riot ? 0.7 : tank ? 0.8 : 1),   // bölüm ilerledikçe hızlanır; çevik kuvvet yavaş
             walkCycle: Math.random() * Math.PI * 2
         });
     }
@@ -263,4 +289,5 @@ function createLevel() {
         dir: -1, laser: 0, cool: 60 + Math.floor(Math.random() * 60), flash: 0, aimAng: 0, mx: x, my: height - up - 60,
         walkCycle: 0, lastSpeed: 0
     }));
+    populateChapter();
 }

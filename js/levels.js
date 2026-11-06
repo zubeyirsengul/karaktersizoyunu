@@ -207,6 +207,7 @@ const LEVELS = {
 const MAX_LEVEL = 3;
 
 function goToLevel(n) {
+    if (!storyDone[n]) { $('overlay-screen').style.display = 'none'; playStory(n, () => goToLevel(n)); return; }
     currentLevel = n; targetKills = LEVELS[n].target;
     $('current-level').innerText = n; $('target-kills').innerText = targetKills;
     $('overlay-screen').style.display = 'none'; paused = false;

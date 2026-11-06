@@ -50,6 +50,27 @@ function drawDollarBill(ctx, x, y, size, angle) {
     ctx.restore();
 }
 
+// Rüşvet zarfı: kahverengi zarf, ağzından dolar destesi taşar, üstünde "RÜŞVET" damgası (dile göre)
+function drawBribe(ctx, x, y, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(Math.sin(angle) * 0.5);           // tam dönmez, sallanarak uçar
+    const w = 46, h = 30;
+    // zarftan taşan banknotlar
+    ctx.fillStyle = "#16a34a"; ctx.fillRect(-w / 2 + 5, -h / 2 - 9, w - 14, 12);
+    ctx.fillStyle = "#22c55e"; ctx.fillRect(-w / 2 + 9, -h / 2 - 13, w - 16, 12);
+    ctx.fillStyle = "#14532d"; ctx.font = "bold 10px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("$$", 0, -h / 2 - 7);
+    // zarf gövdesi ve kapak
+    ctx.fillStyle = "#c08a4a"; ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.strokeStyle = "#7c4f1f"; ctx.lineWidth = 2; ctx.strokeRect(-w / 2, -h / 2, w, h);
+    ctx.beginPath(); ctx.moveTo(-w / 2, -h / 2); ctx.lineTo(0, 2); ctx.lineTo(w / 2, -h / 2); ctx.stroke();
+    // damga
+    ctx.fillStyle = "#b91c1c"; ctx.font = "bold 9px Arial";
+    ctx.fillText(t("bribe"), 0, h / 2 - 7, w - 6);
+    ctx.restore();
+}
+
 // --- ARKA PLAN: bölüme göre paralaks katmanlar ---
 // 1: gündüz, yeşil tepeler ve ağaçlar · 2: bozkırda gün batımı, yurtlar · 3: gece şehri, projektörler
 const THEMES = {
@@ -284,7 +305,7 @@ function draw() {
     ctx.restore();
 
     playerProjectiles.forEach(p => {
-        drawDollarBill(ctx, p.x, p.y, 20, p.angle);
+        drawBribe(ctx, p.x, p.y, p.angle);
     });
 
     projectiles.forEach(p => {

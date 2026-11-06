@@ -83,6 +83,11 @@ canvas {
 .shake { animation: shake 0.5s both; }
 @keyframes shake { 10%, 90% { transform: translate3d(-2px,0,0); } 30%, 70% { transform: translate3d(-8px,0,0); } 50% { transform: translate3d(8px,0,0); } }
 
+/* Bölüm girişi hikâyesi */
+#story { position: absolute; inset: 0; z-index: 1500; display: none; background: #000; cursor: pointer; }
+#story-canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+#story-skip { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: calc(12px + env(safe-area-inset-right)); background: rgba(0,0,0,0.6); color: var(--gold); border: 2px solid var(--gold); border-radius: 8px; padding: 6px 14px; font: bold 15px monospace; cursor: pointer; }
+
 /* Dikey tutulan telefonda oyun sırasında "yan çevir" uyarısı */
 #rotate-hint { display: none; position: absolute; inset: 0; z-index: 2000; background: rgba(0,0,0,0.92); color: var(--gold); flex-direction: column; justify-content: center; align-items: center; gap: 12px; font-size: 22px; font-weight: bold; text-align: center; padding: 24px; box-sizing: border-box; }
 .rotate-ico { font-size: 56px; }

@@ -30,6 +30,7 @@
         <button id="start-button" class="primary-btn" data-i18n="start">OYUNU BAŞLAT</button>
     </div>
     <div id="howto"><div id="howto-panel"></div></div>
+    <div id="story"><canvas id="story-canvas"></canvas><button id="story-skip" type="button"></button></div>
 
     <div id="status" class="ui"><span data-i18n="treasure">Hazine</span>: <span id="score">0</span><span id="best-hud"></span></div>
     <div id="level-display" class="ui"><span data-i18n="level">Seviye</span>: <span id="current-level">1</span></div>
@@ -43,7 +44,7 @@
         <!-- Oyun kolu gibi baklava dizilimi: üst KALKAN, sol FIRLAT, sağ BALYOZ, alt ZIPLA -->
         <div id="pad">
             <div class="btn pad-top shield-btn" id="shield-btn"><span class="pad-sym">△</span><span data-i18n="shield">KALKAN</span> <span class="key-hint">(S)</span></div>
-            <div class="btn pad-left shoot-btn" id="shoot-btn"><span class="pad-sym">□</span><span data-i18n="shoot">FIRLAT</span> <span class="key-hint">(Enter)</span></div>
+            <div class="btn pad-left shoot-btn" id="shoot-btn"><span class="pad-sym">□</span><span data-i18n="shoot">RÜŞVET VER</span> <span class="key-hint">(Enter)</span></div>
             <div class="btn pad-right hammer-btn" id="hammer-btn"><span class="pad-sym">○</span><span data-i18n="hammer">BALYOZ</span> <span class="key-hint">(F)</span></div>
             <div class="btn pad-bottom jump-btn" id="jump-btn"><span class="pad-sym">✕</span><span data-i18n="jump">ZIPLA</span> <span class="key-hint">(Space)</span></div>
         </div>
@@ -70,6 +71,7 @@
 <script src="js/game.js"></script>
 <script src="js/intro.js"></script>
 <script src="js/howto.js"></script>
+<script src="js/story.js"></script>
 <script src="js/input.js"></script>
 <script src="js/main.js"></script>
 </body>

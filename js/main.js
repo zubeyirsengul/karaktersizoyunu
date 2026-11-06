@@ -10,6 +10,7 @@ document.addEventListener('visibilitychange', () => { if(document.hidden) { setU
 
 window.onkeydown = e => {
     let k = e.key.toLowerCase();
+    if(story) { storyKey(e); return; }
     if($('howto').style.display === 'flex') { if(e.key === 'Escape' || e.key === 'Enter') closeHowto(); return; }
     if(e.key === 'Escape' || k === 'p') { setUserPause(!userPaused); return; }
     if(userPaused) return;
@@ -21,7 +22,9 @@ window.onkeyup = e => {
     if(k==='a') keys.a=false; if(k==='d') keys.d=false; if(k==='s' || e.key==='ArrowDown') keys.s=false;
 };
 resizeIntro();
-window.addEventListener('resize', () => { if (introRAF) resizeIntro(); });
+window.addEventListener('resize', () => { if (introRAF) resizeIntro(); if (story) resizeStory(); });
+$('story').addEventListener('pointerdown', e => { if (e.target.id !== 'story-skip') storyNext(); });
+$('story-skip').addEventListener('click', endStory);
 introRAF = requestAnimationFrame(introLoop);
 $('sound-btn').addEventListener('click', () => setIntroSound(!$('sound-btn').dataset.on));
 $('overlay-screen').addEventListener('pointerdown', e => {

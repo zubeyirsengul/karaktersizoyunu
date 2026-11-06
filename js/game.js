@@ -153,6 +153,7 @@ function setUserPause(on) {
 }
 
 function startGame() {
+    if (!storyDone[1]) { playStory(1, startGame); return; }   // önce 1. bölümün hikâyesi
     initAudio();   // tarayıcılar sesi ancak bir tıklamayla başlatmaya izin verir
     removeIntro();
     $('overlay-screen').style.display = 'none';

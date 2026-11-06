@@ -78,10 +78,18 @@ canvas {
 /* Açılış ekranı arka planında kodla çizilen canlı sahne (Kaçak Saray); yazılar okunsun diye üstüne hafif karartma */
 #intro-video { position: absolute; inset: 0; overflow: hidden; z-index: -1; pointer-events: none; }
 #intro-video canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-#intro-video::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.35); }
-#sound-btn { margin-bottom: 20px; background: rgba(0,0,0,0.5); }
+#intro-video::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.25) 100%); }
+#sound-btn { margin-bottom: 20px; }
 .shake { animation: shake 0.5s both; }
 @keyframes shake { 10%, 90% { transform: translate3d(-2px,0,0); } 30%, 70% { transform: translate3d(-8px,0,0); } 50% { transform: translate3d(8px,0,0); } }
+
+/* Açılış ekranı yazıları hareketli sahnenin üstünde okunsun: koyu zemin, kontur ve gölge */
+#overlay-screen h1 { -webkit-text-stroke: 2px #451a03; text-shadow: 0 4px 0 #451a03, 0 0 24px rgba(251,191,36,0.7), 0 6px 18px rgba(0,0,0,0.9); }
+#overlay-screen .story-note { background: rgba(0,0,0,0.72); color: #fde68a; text-shadow: 0 1px 2px #000; }
+#overlay-desc { background: rgba(0,0,0,0.65); padding: 6px 16px; border-radius: 8px; color: #fff; font-weight: bold; text-shadow: 0 1px 3px #000; }
+#overlay-screen .best-line { text-shadow: 0 2px 4px #000, 0 0 8px #000; }
+#overlay-screen .lang-btn { background: rgba(0,0,0,0.72); text-shadow: 0 1px 2px #000; }
+#overlay-screen .lang-btn.active { background: var(--gold); color: #000; text-shadow: none; }
 
 /* Bölüm girişi hikâyesi */
 #story { position: absolute; inset: 0; z-index: 1500; display: none; background: #000; cursor: pointer; }

@@ -4,8 +4,8 @@
 // --- DİLLER ---
 const LANGS = {
     tr: {
-        title: "OMURGASIZ - Sesli Edition",
-        note: "\"Bu omurgasız bir yüzükle çıkmıştı yollara..\"",
+        title: "HIRHIZ - Sesli Edition",
+        note: "\"Bu HIRHIZ bir yüzükle çıkmıştı yollara...\"",
         desc: "Kul Hakkı Torbalarını Topla!",
         best: "Rekor", newRecord: "YENİ REKOR!", pwSpeed: "HIZ!", pwDouble: "ÇİFT ZIPLAMA!", pwHammer: "DEV BALYOZ!", pwHeart: "+1 CAN!", pwStar: "DOKUNULMAZ!",
         start: "OYUNU BAŞLAT",
@@ -25,8 +25,8 @@ const LANGS = {
         montaj: "MONTAJ!", tapeLabel: "SIFIRLA", exileCry: "SÜRGÜN!", surrender: "TESLİM!", expel: "İHRAÇ!", batteryOut: "ŞARJ BİTTİ!", charge: "ŞARJ!", khkHud: "İhraç edilen", role_teacher: "ÖĞRETMEN", role_journalist: "GAZETECİ", role_academic: "AKADEMİSYEN", role_student: "ÖĞRENCİ", sayacName: "PARA MAKİNESİ", tankName: "DARBE TANKI", tankerName: "TANKER UÇAK", bylockName: "BYLOCK", feto2Name: "FETÖ: SON", lvlDone: "BÖLÜM {n} TAMAM!", lvlNext: "{n}. BÖLÜME GEÇ", l3Note: "Kasetler montaj oldu, para makinesi sıfırlandı!", l4Note: "Sandık kurtuldu... ama FETÖ'yle iş bitmedi. 15 Temmuz geliyor!", l5Note: "FaceTime bağlantısı kopmadı! Şimdi uçağa!", l6Note: "İstanbul'a inildi! Sıra OHAL'de.", l7Note: "Herkes ihraç edildi... Sıra Pensilvanya'da!"
     },
     en: {
-        title: "OMURGASIZ - Voice Edition",
-        note: "\"This spineless one set out on the road with a ring..\"",
+        title: "HIRHIZ - Voice Edition",
+        note: "\"This HIRHIZ set out on the road with a ring...\"",
         desc: "Collect the People's Due Bags!",
         best: "Best", newRecord: "NEW RECORD!", pwSpeed: "SPEED!", pwDouble: "DOUBLE JUMP!", pwHammer: "GIANT HAMMER!", pwHeart: "+1 LIFE!", pwStar: "INVINCIBLE!",
         start: "START GAME",
@@ -46,8 +46,8 @@ const LANGS = {
         montaj: "FAKE!", tapeLabel: "ZERO IT", exileCry: "EXILED!", surrender: "SURRENDER!", expel: "PURGED!", batteryOut: "BATTERY DEAD!", charge: "CHARGED!", khkHud: "Purged", role_teacher: "TEACHER", role_journalist: "JOURNALIST", role_academic: "ACADEMIC", role_student: "STUDENT", sayacName: "MONEY COUNTER", tankName: "COUP TANK", tankerName: "TANKER PLANE", bylockName: "BYLOCK", feto2Name: "FETÖ: FINAL", lvlDone: "LEVEL {n} COMPLETE!", lvlNext: "GO TO LEVEL {n}", l3Note: "The tapes are 'fake', the money counter is zeroed!", l4Note: "The ballot box is safe... but FETÖ isn't done. July 15 is coming!", l5Note: "The FaceTime call held! Now to the plane!", l6Note: "Landed in Istanbul! State of emergency next.", l7Note: "Everyone's been purged... Next stop: Pennsylvania!"
     },
     fr: {
-        title: "OMURGASIZ - Édition Vocale",
-        note: "« Cet invertébré avait pris la route avec une bague.. »",
+        title: "HIRHIZ - Édition Vocale",
+        note: "« Ce HIRHIZ avait pris la route avec une bague... »",
         desc: "Ramasse les sacs du Droit du Peuple !",
         best: "Record", newRecord: "NOUVEAU RECORD !", pwSpeed: "VITESSE !", pwDouble: "DOUBLE SAUT !", pwHammer: "MARTEAU GÉANT !", pwHeart: "+1 VIE !", pwStar: "INVINCIBLE !",
         start: "LANCER LE JEU",
@@ -67,8 +67,8 @@ const LANGS = {
         montaj: "MONTAGE !", tapeLabel: "À ZÉRO", exileCry: "EXIL !", surrender: "REDDITION !", expel: "RADIÉ !", batteryOut: "BATTERIE VIDE !", charge: "RECHARGÉ !", khkHud: "Radiés", role_teacher: "PROF", role_journalist: "JOURNALISTE", role_academic: "UNIVERSITAIRE", role_student: "ÉTUDIANT", sayacName: "COMPTEUSE", tankName: "TANK DU PUTSCH", tankerName: "RAVITAILLEUR", bylockName: "BYLOCK", feto2Name: "FETÖ : FINAL", lvlDone: "NIVEAU {n} TERMINÉ !", lvlNext: "NIVEAU {n}", l3Note: "Les cassettes sont des « montages », la compteuse est à zéro !", l4Note: "L'urne est sauvée... mais FETÖ n'a pas dit son dernier mot. Le 15 juillet approche !", l5Note: "L'appel FaceTime a tenu ! Vite, à l'avion !", l6Note: "Atterrissage à Istanbul ! Place à l'état d'urgence.", l7Note: "Tout le monde est radié... Prochaine étape : la Pennsylvanie !"
     },
     nl: {
-        title: "OMURGASIZ - Spraakeditie",
-        note: "\"Deze ruggengraatloze was met een ring op pad gegaan..\"",
+        title: "HIRHIZ - Spraakeditie",
+        note: "\"Deze HIRHIZ was met een ring op pad gegaan...\"",
         desc: "Verzamel de Volksrecht-zakken!",
         best: "Record", newRecord: "NIEUW RECORD!", pwSpeed: "SNELHEID!", pwDouble: "DUBBELE SPRONG!", pwHammer: "REUZENHAMER!", pwHeart: "+1 LEVEN!", pwStar: "ONKWETSBAAR!",
         start: "SPEL STARTEN",
@@ -88,8 +88,8 @@ const LANGS = {
         montaj: "MONTAGE!", tapeLabel: "OP NUL", exileCry: "VERBANNEN!", surrender: "OVERGAVE!", expel: "ONTSLAGEN!", batteryOut: "BATTERIJ LEEG!", charge: "OPGELADEN!", khkHud: "Ontslagen", role_teacher: "LERAAR", role_journalist: "JOURNALIST", role_academic: "ACADEMICUS", role_student: "STUDENT", sayacName: "GELDTELLER", tankName: "COUPTANK", tankerName: "TANKVLIEGTUIG", bylockName: "BYLOCK", feto2Name: "FETÖ: FINALE", lvlDone: "LEVEL {n} VOLTOOID!", lvlNext: "NAAR LEVEL {n}", l3Note: "De banden zijn 'montage', de geldteller staat op nul!", l4Note: "De stembus is gered... maar FETÖ is nog niet klaar. 15 juli komt eraan!", l5Note: "Het FaceTime-gesprek hield stand! Snel naar het vliegtuig!", l6Note: "Geland in Istanbul! Nu de noodtoestand.", l7Note: "Iedereen is ontslagen... Volgende halte: Pennsylvania!"
     },
     de: {
-        title: "OMURGASIZ - Sprachausgabe",
-        note: "„Dieser Rückgratlose war mit einem Ring losgezogen..“",
+        title: "HIRHIZ - Sprachausgabe",
+        note: "„Dieser HIRHIZ war mit einem Ring losgezogen...“",
         desc: "Sammle die Volksrecht-Säcke!",
         best: "Rekord", newRecord: "NEUER REKORD!", pwSpeed: "TEMPO!", pwDouble: "DOPPELSPRUNG!", pwHammer: "RIESENHAMMER!", pwHeart: "+1 LEBEN!", pwStar: "UNVERWUNDBAR!",
         start: "SPIEL STARTEN",
@@ -109,8 +109,8 @@ const LANGS = {
         montaj: "MONTAGE!", tapeLabel: "AUF NULL", exileCry: "VERBANNT!", surrender: "KAPITULATION!", expel: "ENTLASSEN!", batteryOut: "AKKU LEER!", charge: "GELADEN!", khkHud: "Entlassen", role_teacher: "LEHRER", role_journalist: "JOURNALIST", role_academic: "AKADEMIKER", role_student: "STUDENT", sayacName: "GELDZÄHLER", tankName: "PUTSCH-PANZER", tankerName: "TANKFLUGZEUG", bylockName: "BYLOCK", feto2Name: "FETÖ: FINALE", lvlDone: "LEVEL {n} GESCHAFFT!", lvlNext: "ZU LEVEL {n}", l3Note: "Die Bänder sind „Montage“, der Geldzähler steht auf null!", l4Note: "Die Urne ist gerettet... aber FETÖ gibt nicht auf. Der 15. Juli naht!", l5Note: "Der FaceTime-Anruf hat gehalten! Schnell ins Flugzeug!", l6Note: "Gelandet in Istanbul! Jetzt der Ausnahmezustand.", l7Note: "Alle sind entlassen... Nächster Halt: Pennsylvania!"
     },
     ru: {
-        title: "OMURGASIZ - Голосовая версия",
-        note: "«Этот бесхребетный отправился в путь с кольцом..»",
+        title: "HIRHIZ - Голосовая версия",
+        note: "«Этот HIRHIZ отправился в путь с кольцом...»",
         desc: "Собирай мешки народного добра!",
         best: "Рекорд", newRecord: "НОВЫЙ РЕКОРД!", pwSpeed: "СКОРОСТЬ!", pwDouble: "ДВОЙНОЙ ПРЫЖОК!", pwHammer: "ГИГАНТСКИЙ МОЛОТ!", pwHeart: "+1 ЖИЗНЬ!", pwStar: "НЕУЯЗВИМ!",
         start: "НАЧАТЬ ИГРУ",

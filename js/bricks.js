@@ -25,7 +25,7 @@ function buildBricks(level) {
 }
 
 // Kırılınca ne çıkar: %55 güç, %45 kul hakkı (3. bölümde kaset)
-const BRICK_POWERS = [['speed', 25], ['double', 25], ['hammer', 25], ['heart', 15], ['star', 10]];
+const BRICK_POWERS = [['speed', 29], ['double', 28], ['hammer', 25], ['heart', 15], ['star', 3]];   // yıldız (dokunulmazlık) nadir
 function pickBrickPower() {
     let roll = Math.random() * 100;
     for (const [k, w] of BRICK_POWERS) { if ((roll -= w) < 0) return k; }

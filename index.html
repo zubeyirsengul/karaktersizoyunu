@@ -40,12 +40,13 @@
 
     <div id="ui-layer">
         <div id="joystick-wrapper"><div id="joystick-stick"></div></div>
-        <div class="action-buttons">
-            <div class="btn shoot-btn" id="shoot-btn"><span data-i18n="shoot">FIRLAT</span> <span class="key-hint">(Enter)</span></div>
-            <div class="btn" id="jump-btn"><span data-i18n="jump">ZIPLA</span> <span class="key-hint">(Space)</span></div>
+        <!-- Oyun kolu gibi baklava dizilimi: üst KALKAN, sol FIRLAT, sağ BALYOZ, alt ZIPLA -->
+        <div id="pad">
+            <div class="btn pad-top shield-btn" id="shield-btn"><span class="pad-sym">△</span><span data-i18n="shield">KALKAN</span> <span class="key-hint">(S)</span></div>
+            <div class="btn pad-left shoot-btn" id="shoot-btn"><span class="pad-sym">□</span><span data-i18n="shoot">FIRLAT</span> <span class="key-hint">(Enter)</span></div>
+            <div class="btn pad-right hammer-btn" id="hammer-btn"><span class="pad-sym">○</span><span data-i18n="hammer">BALYOZ</span> <span class="key-hint">(F)</span></div>
+            <div class="btn pad-bottom jump-btn" id="jump-btn"><span class="pad-sym">✕</span><span data-i18n="jump">ZIPLA</span> <span class="key-hint">(Space)</span></div>
         </div>
-        <div class="btn hammer-btn" id="hammer-btn"><span data-i18n="hammer">BALYOZ</span> <span class="key-hint">(F)</span></div>
-        <div class="btn shield-btn" id="shield-btn"><span data-i18n="shield">KALKAN</span> <span class="key-hint">(S)</span></div>
     </div>
     <canvas id="gameCanvas"></canvas>
     <div id="rotate-hint"><div class="rotate-ico">📱↻</div><div data-i18n="rotate">Telefonu yan çevir</div></div>

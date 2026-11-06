@@ -37,14 +37,23 @@ canvas {
 #pause-btn { position: absolute; top: 16px; right: 16px; z-index: 40; width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--gold); background: rgba(0,0,0,0.45); color: var(--gold); font-size: 22px; cursor: pointer; display: none; }
 
 #ui-layer { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
-#joystick-wrapper { position: absolute; bottom: 50px; left: 50px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); pointer-events: auto; display: flex; justify-content: center; align-items: center; }
-#joystick-stick { width: 50px; height: 50px; background: var(--gold); border-radius: 50%; }
+#joystick-wrapper { position: absolute; bottom: 40px; left: 40px; width: 170px; height: 170px; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); pointer-events: auto; display: flex; justify-content: center; align-items: center; touch-action: none; }
+#joystick-stick { width: 70px; height: 70px; background: var(--gold); border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
 
-.action-buttons { position: absolute; bottom: 50px; right: 50px; display: flex; gap: 20px; pointer-events: auto; }
-.btn { width: 100px; height: 100px; background: rgba(251,191,36,0.6); border: 4px solid var(--gold); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; text-align: center; font-size: 14px; color: white; text-shadow: 1px 1px 2px black; }
-.shoot-btn { background: rgba(34,197,94,0.6); border-color: #22c55e; }
-.hammer-btn { position: absolute; bottom: 170px; right: 50px; pointer-events: auto; background: rgba(239,68,68,0.6); border-color: #ef4444; }
-.shield-btn { position: absolute; bottom: 170px; right: 170px; pointer-events: auto; background: rgba(22,101,52,0.7); border-color: #fbbf24; }
+/* Oyun kolu düğmeleri: --b düğme çapı, baklava 3x3 ızgaranın üst/sol/sağ/alt hücrelerinde */
+#pad { --b: 84px; --g: 4px; position: absolute; bottom: 30px; right: 30px; width: calc(var(--b) * 3 + var(--g) * 2); height: calc(var(--b) * 3 + var(--g) * 2); pointer-events: none; }
+.btn { position: absolute; width: var(--b); height: var(--b); box-sizing: border-box; border: 3px solid; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; text-align: center; font-size: 12px; line-height: 1.1; color: white; text-shadow: 1px 1px 2px black; pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+.btn:active { filter: brightness(1.4); transform: scale(0.94); }
+.pad-sym { font-size: calc(var(--b) * 0.36); line-height: 1; }
+.pad-top    { left: calc(var(--b) + var(--g)); top: 0; }
+.pad-left   { left: 0; top: calc(var(--b) + var(--g)); }
+.pad-right  { right: 0; top: calc(var(--b) + var(--g)); }
+.pad-bottom { left: calc(var(--b) + var(--g)); bottom: 0; }
+.shield-btn { background: rgba(20,184,166,0.45); border-color: #2dd4bf; }   /* △ yeşil-turkuaz */
+.shoot-btn  { background: rgba(236,72,153,0.45); border-color: #f472b6; }   /* □ pembe */
+.hammer-btn { background: rgba(239,68,68,0.45);  border-color: #f87171; }   /* ○ kırmızı */
+.jump-btn   { background: rgba(59,130,246,0.45); border-color: #60a5fa; }   /* ✕ mavi */
+
 /* Dokunmatik cihazlarda klavye ipuçlarını gizle */
 @media (hover: none) and (pointer: coarse) { .key-hint { display: none; } }
 
@@ -90,16 +99,10 @@ canvas {
     #pause-btn { right: calc(10px + env(safe-area-inset-right)); }
     #help-btn { right: calc(54px + env(safe-area-inset-right)); }
 
-    #joystick-wrapper { width: 92px; height: 92px; bottom: calc(14px + env(safe-area-inset-bottom)); left: calc(18px + env(safe-area-inset-left)); background: rgba(255,255,255,0.08); }
-    #joystick-stick { width: 38px; height: 38px; opacity: 0.85; }
-
-    .btn { width: 58px; height: 58px; font-size: 10px; border-width: 2px; background-color: rgba(251,191,36,0.35); }
-    .shoot-btn { background-color: rgba(34,197,94,0.35); }
-    .hammer-btn { background-color: rgba(239,68,68,0.35); }
-    .shield-btn { background-color: rgba(22,101,52,0.45); }
-    .action-buttons { gap: 10px; bottom: calc(12px + env(safe-area-inset-bottom)); right: calc(14px + env(safe-area-inset-right)); }
-    .hammer-btn { bottom: calc(80px + env(safe-area-inset-bottom)); right: calc(14px + env(safe-area-inset-right)); }
-    .shield-btn { bottom: calc(80px + env(safe-area-inset-bottom)); right: calc(82px + env(safe-area-inset-right)); }
+    #joystick-wrapper { width: 150px; height: 150px; bottom: calc(10px + env(safe-area-inset-bottom)); left: calc(14px + env(safe-area-inset-left)); }
+    #joystick-stick { width: 62px; height: 62px; opacity: 0.9; }
+    #pad { --b: 56px; --g: 2px; bottom: calc(8px + env(safe-area-inset-bottom)); right: calc(12px + env(safe-area-inset-right)); }
+    .btn { font-size: 8px; border-width: 2px; }
 
     /* Açılış ekranı alçak ekrana sığsın, sığmazsa kaydırılsın */
     #overlay-screen { justify-content: flex-start; overflow-y: auto; padding: 10px 0; box-sizing: border-box; }

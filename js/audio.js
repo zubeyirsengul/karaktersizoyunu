@@ -63,6 +63,7 @@ const SFX_FILES = {
     greet_kurt: ['sfx/kro.mp3'],
     greet_feto: ['sfx/feto_greet.mp3'],
     granny: ['sfx/gotununkili.mp3'],                        // canavar ölünce gelen teyzeler
+    yalarim: ['sfx/yalarim.mp3'],                           // 2. bölüm canavarı ölünce ara sahne
     // Recep'in replikleri (kayıt yoksa yapay sese, Gemini, düşer)
     voice_win: ['sfx/voice/kulhakki.mp3'],                              // bölüm sonu canavarı yenilince
     voice_ouch: ['sfx/ahh.mp3']                                         // vurulunca ve ölünce

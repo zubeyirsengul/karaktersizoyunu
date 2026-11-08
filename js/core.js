@@ -17,6 +17,9 @@ let boss = null, bossCheckpoint = null;  // 1. bölüm sonu canavarı ALEVİ; ö
 const keys = { a: false, d: false, s: false, w: false };
 let shieldHeld = false;   // dokunmatik KALKAN butonu basılı mı
 let userPaused = false;   // oyuncunun duraklatması (bölüm sonu ekranından ayrı)
+let hitStop = 0;          // vuruş anında oyun birkaç kare donar (darbe hissi)
+let camShake = 0;         // balyoz/vuruşta kamera sarsıntısı (kare)
+let midCheckpoint = null; // bölüm ortası kontrol noktası: ölünce buradan devam
 
 const GRAVITY = 0.95;
 const WORLD_WIDTH = 40000;
@@ -25,14 +28,16 @@ const WORLD_WIDTH = 40000;
 const player = {
     x: 100, y: 0, w: 100, h: 180,   // 120 kafa + 60 bacak
     vx: 0, vy: 0,
-    speed: 7, jumpPower: -22,
+    speed: 7, jumpPower: -23,
     grounded: false, dir: 1,
     isDying: false, deathAngle: 0,
     opacity: 1, legCycle: 0,
     mouthOpen: 0,
     shield: false,                   // kalkan kalkık mı
     hp: 3, maxHp: 3, invuln: 0,      // can; vurulduktan sonra kısa dokunulmazlık (kare)
-    swing: 0, swingHit: false        // balyoz: kalan animasyon karesi, bu vuruşta isabet kontrolü yapıldı mı
+    swing: 0, swingHit: false,       // balyoz: kalan animasyon karesi, bu vuruşta isabet kontrolü yapıldı mı
+    coyote: 0, jumpBuffer: 0, jumping: false,   // zıplama toleransı, erken basma tamponu, değişken zıplama
+    safePlat: null, safeOff: 0       // en son sağlam basılan zemin (çukura düşünce buraya dönülür)
 };
 
 const imgPlayer = new Image(); imgPlayer.src = 'recep.jpg';

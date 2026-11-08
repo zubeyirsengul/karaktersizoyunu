@@ -9,12 +9,13 @@ const STORY_W = 960, STORY_H = 540, STORY_GROUND = 440, PX = 4;   // sahne birim
 
 // --- YÜZLER ---
 const STORY_FACES = {
-    g1: { src: 'resimler/4lucete.png', box: [28, 22, 52, 58] },
-    g2: { src: 'resimler/4lucete.png', box: [153, 42, 54, 60] },
-    g3: { src: 'resimler/4lucete.png', box: [240, 30, 54, 60] },
-    g4: { src: 'resimler/4lucete.png', box: [413, 54, 54, 58] },
-    sarraf: { src: 'resimler/sarraf.png', box: [40, 20, 195, 240] }
+    g1: { src: 'resimler/4lucete.png', box: [24, 16, 58, 66] },
+    g2: { src: 'resimler/4lucete.png', box: [149, 38, 62, 70] },
+    g3: { src: 'resimler/4lucete.png', box: [235, 26, 62, 70] },
+    g4: { src: 'resimler/4lucete.png', box: [409, 46, 62, 70] },
+    sarraf: { src: 'resimler/sarraf.png', box: [50, 25, 190, 255] }   // saç, yüz ve sakal; omuzlar dışarıda
 };
+const FACE_GRID = 24;   // fotoğraf yüzleri kaç blok genişliğinde
 const storyImgs = {}, storyFaceCache = {};
 function storyImg(src) {
     if (!storyImgs[src]) { const im = new Image(); im.src = src; storyImgs[src] = im; }
@@ -33,11 +34,30 @@ function storyFace(key) {
         if (!src.complete || !src.naturalWidth) return null;
         box = f.box;
     }
-    const gw = 16, gh = Math.round(16 * box[3] / box[2]);
+    const gw = FACE_GRID, gh = Math.round(FACE_GRID * box[3] / box[2]);
     const c = document.createElement('canvas'); c.width = gw; c.height = gh;
     const x = c.getContext('2d');
     x.imageSmoothingQuality = 'high';
     x.drawImage(src, box[0], box[1], box[2], box[3], 0, 0, gw, gh);
+    // Fotoğraf yüzleri oval kesilir (arka plan atılır), biraz aydınlatılır ve çevresine koyu blok çizgi çekilir
+    if (key !== 'recep') {
+        const d = x.getImageData(0, 0, gw, gh), p = d.data, inside = (i, j) => {
+            const u = (i + 0.5 - gw / 2) / (gw / 2), v = (j + 0.5 - gh / 2) / (gh / 2);
+            return u * u + v * v <= 1;
+        };
+        for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) {
+            const o = (j * gw + i) * 4;
+            if (!inside(i, j)) { p[o + 3] = 0; continue; }
+            for (let k = 0; k < 3; k++) p[o + k] = Math.min(255, (p[o + k] - 128) * 1.12 + 128 + 14);
+            p[o + 3] = 255;
+        }
+        for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) {   // dış çizgi: kenardaki iç bloklar koyulaşır
+            const o = (j * gw + i) * 4;
+            if (!p[o + 3]) continue;
+            if (!inside(i - 1, j) || !inside(i + 1, j) || !inside(i, j - 1) || !inside(i, j + 1)) { p[o] *= 0.35; p[o + 1] *= 0.35; p[o + 2] *= 0.35; }
+        }
+        x.putImageData(d, 0, 0);
+    }
     storyFaceCache[key] = c;
     return c;
 }
@@ -130,7 +150,7 @@ function drawBlockPerson(c, a, time) {
     if (C.face) {
         const f = storyFace(C.face);
         if (f) {
-            const hw = a.who === 'recep' ? head * 1.25 : head, hh = hw * f.height / f.width;
+            const hw = a.who === 'recep' ? head * 1.25 : head * 1.15, hh = hw * f.height / f.width;
             c.drawImage(f, -hw / 2, hy + head - hh, hw, hh);
         } else blockRect(c, -head / 2, hy, head, head, C.hand);
     } else {
@@ -183,10 +203,13 @@ const STORY_BG = {
         c.fillStyle = '#fbbf24'; c.font = 'bold 26px monospace'; c.textAlign = 'center'; c.fillText(storyT('station'), 470, 140);
         storyGround(c, '#4b5563', '#374151');
     },
-    palace(c) {
+    palace(c, time) {
         storySky(c, ['#38bdf8', '#5cc8f9', '#7dd3fc', '#a5e3fd', '#cfeffd']);
         c.fillStyle = '#fde047'; c.fillRect(800, 40, 64, 64);
-        [[60, 60], [300, 90], [560, 50]].forEach(([x, y]) => { c.fillStyle = '#fff'; c.fillRect(x, y, 120, 24); c.fillRect(x + 24, y - 16, 64, 16); });
+        [[60, 60], [300, 90], [560, 50]].forEach(([x0, y]) => {
+            const x = Math.floor(((x0 + time * 14) % (STORY_W + 160)) / PX) * PX - 140;   // bulutlar yavaşça süzülür
+            c.fillStyle = '#fff'; c.fillRect(x, y, 120, 24); c.fillRect(x + 24, y - 16, 64, 16);
+        });
         // blok saray
         c.fillStyle = '#efe4cc'; c.fillRect(150, 250, 660, 190);
         c.fillStyle = '#cdbb96'; c.fillRect(150, 240, 660, 16); c.fillRect(380, 180, 200, 70);
@@ -455,15 +478,27 @@ function storyLoop(now) {
     c.translate(ox, oy); c.scale(s, s);
     c.beginPath(); c.rect(0, 0, STORY_W, STORY_H); c.clip();
 
+    // Kamera: sahne boyunca çok yavaş yakınlaşır (kart sahnelerinde sabit)
+    if (!sc.card) {
+        const z = 1 + Math.min(1, el / 7) * 0.035;
+        c.translate(STORY_W / 2, STORY_GROUND - 120); c.scale(z, z); c.translate(-STORY_W / 2, -(STORY_GROUND - 120));
+    }
     STORY_BG[sc.bg](c, time);
     (sc.props || []).forEach(p => { if (p !== 'bars') STORY_PROPS[p](c, time); });
     // oyuncular: 'to' varsa 2 saniyede yürüyerek gelir
+    const speaking = story.shown < full.length;
     (sc.actors || []).forEach((a, k) => {
         const walkT = a.to !== undefined ? Math.min(1, el / (a.dur || 2)) : 1;
         const x = a.to !== undefined ? a.x + (a.to - a.x) * walkT : a.x;
         const walking = a.to !== undefined && walkT < 1;
-        const y = STORY_GROUND - (a.jump ? Math.abs(Math.sin(time * 6 + k)) * 40 : 0);
-        drawBlockPerson(c, { ...a, x, y, walking, walk: el * 10, talk: a.talk && !walking && story.shown < full.length }, time);
+        const lift = a.jump ? Math.abs(Math.sin(time * 6 + k)) * 40 : 0;
+        // yürürken adım adım sekme, dururken blok blok nefes alma
+        const bob = walking ? Math.round(Math.abs(Math.sin(el * 10)) * 1.5) * PX : (Math.floor(time * 1.6 + k * 0.7) % 2) * 2;
+        const y = STORY_GROUND - lift - bob;
+        storyShadow(c, x, a.scale || 1, lift);
+        if (walking) storyDust(c, x, a.dir || 1, el, k);
+        drawBlockPerson(c, { ...a, x, y, walking, walk: el * 10, talk: a.talk && !walking && speaking }, time);
+        if (!walking && isSpeaker(sc, a)) storySpeakerArrow(c, x, y, a.scale || 1, time);
     });
     if ((sc.props || []).includes('bars')) STORY_PROPS.bars(c, time);   // parmaklık karakterlerin önünde
 
@@ -473,8 +508,12 @@ function storyLoop(now) {
         c.fillStyle = '#fde68a'; c.font = 'bold 22px monospace'; c.textAlign = 'right'; c.textBaseline = 'alphabetic';
         c.fillText(storyT('flashback'), STORY_W - 20, STORY_H - 16);
     }
+    c.restore(); c.save();
+    c.translate(ox, oy); c.scale(s, s);
+    c.beginPath(); c.rect(0, 0, STORY_W, STORY_H); c.clip();
     if (sc.card) drawStoryCard(c, sc, el);
-    else drawStoryBox(c, sc, full);
+    else drawStoryBox(c, sc, full, el);
+    storyWipe(c, el);
     c.restore();
 
     // sahne sırası noktaları
@@ -482,6 +521,7 @@ function storyLoop(now) {
     for (let i = 0; i < n; i++) { c.fillStyle = i === story.i ? '#fbbf24' : 'rgba(255,255,255,0.35)'; c.fillRect(ox + 16 + i * 16, oy + STORY_H * s - 22, 10, 10); }
 }
 
+const speakingNow = full => story && story.shown < full.length;
 function wrapLines(c, text, maxW) {
     const words = text.split(' '), lines = [];
     let line = '';
@@ -490,18 +530,73 @@ function wrapLines(c, text, maxW) {
     return lines;
 }
 
-function drawStoryBox(c, sc, full) {
-    const x = 40, y = 16, w = STORY_W - 80, hgt = 132;
+// --- SAHNE SÜSLERİ ---
+// Sahne açılışı: ekran blok blok, rastgele sırayla açılır
+function storyWipe(c, el) {
+    const D = 0.45; if (el >= D) return;
+    const B = 60; c.fillStyle = '#000';
+    for (let j = 0; j < STORY_H / B; j++) for (let i = 0; i < STORY_W / B; i++) {
+        const h = storyHash(i * 13 + j * 71 + story.i * 7);
+        if (el < D * (0.25 + 0.75 * h)) c.fillRect(i * B, j * B, B, B);
+    }
+}
+// Ayak altında blok gölge (zıplayınca küçülür)
+function storyShadow(c, x, s, lift) {
+    const w = Math.round((76 - lift * 0.6) * s / PX) * PX;
+    c.fillStyle = 'rgba(0,0,0,0.28)';
+    c.fillRect(Math.round((x - w / 2) / PX) * PX, STORY_GROUND - PX, w, PX * 2);
+}
+// Yürürken ayak arkasında kalkan toz blokları
+function storyDust(c, x, dir, el, k) {
+    for (let n = 0; n < 3; n++) {
+        const ph = (el * 2.2 + n / 3 + k * 0.13) % 1;
+        const sz = Math.round((1 - ph) * 3) * PX;
+        if (!sz) continue;
+        c.fillStyle = `rgba(230,220,200,${0.55 * (1 - ph)})`;
+        c.fillRect(Math.round((x - dir * (34 + ph * 46)) / PX) * PX, STORY_GROUND - PX - Math.round(ph * 6) * PX, sz, sz);
+    }
+}
+// Konuşan: say.who ile aynı kişi; 'gang' ise dört çete üyesi
+function isSpeaker(sc, a) {
+    const w = sc.say && sc.say.who;
+    if (!w) return false;
+    return a.who === w || (w === 'gang' && /^g[1-4]$/.test(a.who));
+}
+function storySpeakerArrow(c, x, y, s, time) {
+    const top = y - (72 + 72 + 104 + 20) * s - Math.round(Math.abs(Math.sin(time * 5)) * 3) * PX;
+    c.fillStyle = '#fbbf24';
+    [[-3, 0, 6], [-2, 1, 4], [-1, 2, 2]].forEach(([dx, dy, n]) => c.fillRect(x + dx * PX, top + dy * PX, n * PX, PX));
+    c.fillStyle = '#7c2d12'; c.fillRect(x - 3 * PX, top - PX, 6 * PX, PX);
+}
+// Konuşma kutusundaki portre (fotoğraf ya da piksel yüz)
+function speakerPortrait(who) {
+    const C = STORY_CAST[who === 'gang' ? 'g2' : who];
+    if (!C) return null;
+    return C.face ? storyFace(C.face) : pixFace(C.pix);
+}
+
+function drawStoryBox(c, sc, full, el) {
+    const slide = Math.min(1, el / 0.3), ease = 1 - (1 - slide) * (1 - slide);
+    const x = 40, y = 16 - (1 - ease) * 170, w = STORY_W - 80, hgt = 132;
     c.fillStyle = 'rgba(0,0,0,0.78)'; c.fillRect(x, y, w, hgt);
     c.strokeStyle = '#fbbf24'; c.lineWidth = 4; c.strokeRect(x, y, w, hgt);
-    let ty = y + 40;
+    let ty = y + 40, tx = x + 20;
+    const pf = sc.say.who && speakerPortrait(sc.say.who);
+    if (pf) {   // sol başta konuşanın portresi
+        const ph = 104, pw = Math.min(104, ph * pf.width / pf.height);
+        c.fillStyle = '#1f2937'; c.fillRect(x + 12, y + 14, 104, 104);
+        c.imageSmoothingEnabled = false;
+        c.drawImage(pf, x + 12 + (104 - pw) / 2, y + 14 + (104 - ph) / 2 + (speakingNow(full) ? Math.round(Math.sin(performance.now() / 55)) * 2 : 0), pw, ph);
+        c.strokeStyle = '#fbbf24'; c.lineWidth = 3; c.strokeRect(x + 12, y + 14, 104, 104);
+        tx = x + 132;
+    }
     c.textAlign = 'left'; c.textBaseline = 'alphabetic';
     if (sc.say.who) {
         c.fillStyle = '#fbbf24'; c.font = 'bold 22px monospace';
-        c.fillText(storyT(sc.say.who) + ':', x + 20, ty); ty += 32;
+        c.fillText(storyT(sc.say.who) + ':', tx, ty); ty += 32;
     }
     c.fillStyle = '#fff'; c.font = 'bold 24px monospace';
-    wrapLines(c, full.slice(0, story.shown), w - 40).forEach((ln, i) => c.fillText(ln, x + 20, ty + i * 30));
+    wrapLines(c, full.slice(0, story.shown), x + w - 20 - tx).forEach((ln, i) => c.fillText(ln, tx, ty + i * 30));
     if (story.shown >= full.length && Math.floor(performance.now() / 400) % 2) {
         c.fillStyle = '#fbbf24'; c.font = 'bold 18px monospace'; c.textAlign = 'right';
         c.fillText(storyT('tap'), x + w - 16, y + hgt - 14);

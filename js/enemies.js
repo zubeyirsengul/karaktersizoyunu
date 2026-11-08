@@ -119,6 +119,7 @@ function killEnemy(en) {
     if(en.hp > 1) {
         if(en.hurt > 0) return;
         en.hp--; en.hurt = 24;
+        hitStop = Math.max(hitStop, 2);
         if(en.kind === 'riot') en.x += (Math.sign(en.x + en.w / 2 - (player.x + player.w / 2)) || 1) * 30;
         createParticle(en.x + en.w / 2, en.y, "-1", "#fca5a5", 0.8);
         playSfx('hit', { rate: 1.2, vol: 0.6 });
@@ -131,10 +132,13 @@ function killEnemy(en) {
     // Devrilme animasyonu: oyuncudan uzağa doğru yere yığılır
     en.deathT = 0; en.lastSpeed = 0;
     en.fallDir = Math.sign(en.x + en.w / 2 - (player.x + player.w / 2)) || 1;
+    en.kvx = en.fallDir * (en.kind === 'tank' ? 6 : 12);   // darbeyle geri savrulur
+    hitStop = Math.max(hitStop, 4);
     enemyDeathSound(en);
     const [cry, cryColor] = enemyCryText(en);
     createParticle(en.x + en.w/2, en.y, isPolice ? cry : t("hit"), isPolice ? cryColor : "white", 1.0);
     $('score').innerText = score += ({ police: 3000, riot: 4000, sniper: 5000, tank: 4000 })[en.kind] || 2000; $('kills').innerText = killedEnemies;
+    if(killedEnemies === Math.ceil(targetKills / 2) && !bossCheckpoint) setMidCheckpoint();
     if(killedEnemies === targetKills) {
         // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: ALEVİ, 2: KURT, 3: FETÖ)
         spawnGate();
@@ -144,7 +148,7 @@ function killEnemy(en) {
 // --- ORTAK: düşmana temas ---
 function enemyContact(en) {
     if (!player.isDying && player.x + 40 < en.x + en.w - 40 && player.x + player.w - 40 > en.x && player.y + player.h > en.y && player.y < en.y + en.h) {
-        if (player.vy > 0 && player.y + player.h < en.y + 60) { player.vy = -18; killEnemy(en); }   // üstüne zıplayınca ezilir
+        if (player.vy > 0 && player.y + player.h < en.y + 60) { player.vy = -18; player.jumping = false; killEnemy(en); }   // üstüne zıplayınca ezilir
         else if (power.star > 0) killEnemy(en);                                                     // dokunulmazken çarptığı ölür
         else die();
     }

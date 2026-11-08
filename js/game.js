@@ -4,6 +4,8 @@
 function update() {
     if(!gameStarted || paused || userPaused) return;
     if(isFlight()) { updateFlight(); return; }
+    if(camShake > 0) camShake--;
+    if(hitStop > 0) { hitStop--; return; }   // vuruş donması: ekran çizilir, oyun bekler
 
     if(!player.isDying) {
         let moveDir = (keys.a ? -1 : (keys.d ? 1 : joyDir));
@@ -22,7 +24,7 @@ function update() {
         // Harita sınırları: zeminin dışına çıkılmasın
         player.x = Math.max(0, Math.min(player.x, WORLD_WIDTH - player.w));
         // Bir şekilde aşağı düşülürse öl
-        if(player.y > height + 200) killPlayer();   // uçuruma düşmek can sormaz
+        if(player.y > height + 200) fallIntoPit();   // çukura düşen bir can kaybeder, son zemine döner
 
         if(player.mouthOpen > 0) player.mouthOpen -= 0.05;
         updateHammer();
@@ -32,9 +34,16 @@ function update() {
             if (player.x + player.w * 0.2 < p.x + p.w && player.x + player.w * 0.8 > p.x &&
                 player.y + player.h > p.y && player.y + player.h < p.y + p.h + player.vy + 10 && player.vy >= 0) {
                 player.y = p.y - player.h; player.vy = 0; player.grounded = true;
+                // Ayakların tamamı zemindeyse burayı güvenli nokta say
+                if(player.x >= p.x && player.x + player.w <= p.x + p.w) { player.safePlat = p; player.safeOff = player.x - p.x; }
+            } else if (p.h < 100 && player.vy < 0 && player.x + 30 < p.x + p.w && player.x + player.w - 30 > p.x &&
+                       player.y < p.y + p.h && player.y - player.vy >= p.y + p.h - 2) {
+                // Tuğla rafa alttan kafa attı: yukarı çıkamaz
+                player.y = p.y + p.h; player.vy = 2; player.jumping = false;
             }
         }
         collideBricks();
+        updateJumpAssist();
     } else {
         player.y += 2; player.deathAngle += 0.05; player.opacity -= 0.01;
     }
@@ -60,6 +69,7 @@ function update() {
         if(en.hurt > 0) en.hurt--;
         if(en.dead) {
             if(en.deathT < DEATH_FRAMES) en.deathT++;
+            if(en.kvx) { en.x += en.kvx; en.kvx *= 0.82; if(Math.abs(en.kvx) < 0.3) en.kvx = 0; }   // darbeyle geri savrulma
             if(enemyLeaves(en)) { en.dir = en.fallDir; en.walkCycle += 0.4; en.lastSpeed = 5; }   // bavuluyla yürüyüp gider
             return;
         }
@@ -132,6 +142,7 @@ function update() {
     projectiles = projectiles.filter(p => p.active && p.life > 0);
     updateBoss();
     updateGate();
+    updateOutro();
     updateGrannies();
     updatePowers();
     updateChapter();

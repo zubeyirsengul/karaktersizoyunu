@@ -4,8 +4,30 @@
 function jump() {
     if(player.isDying || paused || userPaused || levelCompleted) return;
     if(isFlight()) { player.vy -= 9; return; }   // uçakta: yukarı fırla
-    if(player.grounded) { player.vy = player.jumpPower; player.grounded = false; }
-    else tryDoubleJump();   // çift zıplama gücü açıksa havada bir kez daha
+    if(player.grounded || player.coyote > 0) doJump();   // kenardan düştükten hemen sonra da zıplanır
+    else if(!tryDoubleJump()) player.jumpBuffer = JUMP_BUFFER;   // yere inmeden az önce basıldıysa inince zıplar
+}
+// Zıplama hissi: kenar toleransı ve erken basma tamponu (kare cinsinden)
+const COYOTE_FRAMES = 7, JUMP_BUFFER = 8, JUMP_CUT_VY = -9;
+let jumpHeld = false;
+function doJump() {
+    player.vy = player.jumpPower; player.grounded = false;
+    player.coyote = 0; player.jumpBuffer = 0; player.jumping = true;
+}
+// Zıplama tuşu erken bırakılırsa alçak zıplar (basılı tutunca tam yükseklik)
+function releaseJump() {
+    jumpHeld = false;
+    if(isFlight() || !player.jumping) return;
+    if(player.vy < JUMP_CUT_VY) player.vy = JUMP_CUT_VY;
+    player.jumping = false;
+}
+// Her karede, platform çarpışmasından sonra çağrılır
+function updateJumpAssist() {
+    if(player.grounded) {
+        player.coyote = COYOTE_FRAMES; player.jumping = false;
+        if(player.jumpBuffer > 0) { doJump(); if(!jumpHeld) releaseJump(); }
+    } else if(player.coyote > 0) player.coyote--;
+    if(player.jumpBuffer > 0) player.jumpBuffer--;
 }
 
 function shoot() {
@@ -50,6 +72,7 @@ function updateHammer() {
         const minX = Math.min(cx, cx + player.dir * reach), maxX = Math.max(cx, cx + player.dir * reach);
         const headX = cx + player.dir * (reach - 40), headY = player.y + player.h - 10;
         for(let i = 0; i < 8; i++) createParticle(headX, headY);   // toz
+        camShake = Math.max(camShake, 5);
         if(stampMode()) createParticle(headX, headY - 50, "KHK", "#dc2626", 0.7);
         enemies.forEach(en => {
             if(!en.dead && en.x < maxX && en.x + en.w > minX && en.y < player.y + player.h + 20 && en.y + en.h > player.y - 60) {
@@ -75,11 +98,33 @@ function die() {
     player.vy = -9;                                   // hafifçe havaya ve geriye savrulur
     player.vx = -player.dir * 9;
     player.knock = 12;
+    hitStop = 4;
     playSfx('hit', { rate: 1.1, vol: 0.8 });
     createParticle(player.x + player.w / 2, player.y, "-1 ❤️", "#ef4444", 1.0);
     $('game-container').classList.remove('shake'); void $('game-container').offsetWidth;
     $('game-container').classList.add('shake');
     if(!playSfx('voice_ouch')) speak(t("ouch"), "Kore");
+}
+
+// Çukura düşünce: son sağlam zemine geri konur, bir can gider (son canla düşerse ölür)
+function fallIntoPit() {
+    if(player.isDying || levelCompleted || levelEnding) return;
+    const free = power.star > 0;
+    if(!free && player.hp <= 1) { killPlayer(); return; }
+    if(!free) { player.hp--; updateHearts(); }
+    const sp = player.safePlat;
+    if(sp && platforms.includes(sp)) {
+        player.x = Math.max(sp.x + 10, Math.min(sp.x + player.safeOff, sp.x + sp.w - player.w - 10));
+        player.y = sp.y - player.h;
+    } else { player.x = Math.max(0, player.x - 400); player.y = 0; }
+    player.vx = 0; player.vy = 0; player.knock = 0; player.invuln = 120;
+    player.coyote = 0; player.jumpBuffer = 0; player.jumping = false;
+    if(!free) {
+        createParticle(player.x + player.w / 2, player.y, "-1 ❤️", "#ef4444", 1.0);
+        playSfx('hit', { rate: 1.1, vol: 0.8 });
+        $('game-container').classList.remove('shake'); void $('game-container').offsetWidth;
+        $('game-container').classList.add('shake');
+    }
 }
 
 async function killPlayer() {

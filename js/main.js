@@ -16,10 +16,11 @@ window.onkeydown = e => {
     if(userPaused) return;
     if(k==='a' || e.key==='ArrowLeft') keys.a=true; if(k==='d' || e.key==='ArrowRight') keys.d=true; if(k==='s' || e.key==='ArrowDown') keys.s=true;
     if(k==='w' || e.key==='ArrowUp') keys.w=true;
-    if(e.key===' ' && !e.repeat) jump(); if(e.key==='Enter') shoot(); if(k==='f' && !e.repeat) hammer();
+    if(e.key===' ' && !e.repeat) { jumpHeld = true; jump(); } if(e.key==='Enter') shoot(); if(k==='f' && !e.repeat) hammer();
 };
 window.onkeyup = e => {
     let k = e.key.toLowerCase();
+    if(e.key === ' ') releaseJump();
     if(k==='a' || e.key==='ArrowLeft') keys.a=false; if(k==='d' || e.key==='ArrowRight') keys.d=false; if(k==='s' || e.key==='ArrowDown') keys.s=false;
     if(k==='w' || e.key==='ArrowUp') keys.w=false;
 };
@@ -55,7 +56,8 @@ joyWrap.addEventListener('pointermove', e => { if (e.pointerId === joyPointer) j
 joyWrap.addEventListener('pointerup', joyEnd);
 joyWrap.addEventListener('pointercancel', joyEnd);
 
-$('jump-btn').addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
+$('jump-btn').addEventListener('pointerdown', e => { e.preventDefault(); jumpHeld = true; $('jump-btn').setPointerCapture(e.pointerId); jump(); });
+['pointerup', 'pointercancel'].forEach(ev => $('jump-btn').addEventListener(ev, releaseJump));
 $('shoot-btn').addEventListener('pointerdown', e => { e.preventDefault(); shoot(); });
 $('hammer-btn').addEventListener('pointerdown', e => { e.preventDefault(); hammer(); });
 // Kalkan: buton basılı tutulduğu sürece kalkık kalır

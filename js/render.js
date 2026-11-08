@@ -236,10 +236,32 @@ function drawBackground() {
 }
 
 // Zemin ve platformlar: toprak katmanı + çimen (3. bölümde kaldırım)
+// Havadaki raf: kırılabilir tuğlalarla aynı tuğla dokusu (15 px sıra, 30 px tuğla, şaşırtmalı dizilim)
+function drawBrickLedge(ctx, p) {
+    const C = 15, B = 30;
+    ctx.fillStyle = "#d6d3d1"; ctx.fillRect(p.x, p.y, p.w, p.h);   // harç
+    for (let row = 0; row * C < p.h; row++) {
+        const y = p.y + row * C, off = row % 2 ? B / 2 : 0;
+        for (let bx = p.x - off; bx < p.x + p.w; bx += B) {
+            const l = Math.max(p.x + 1, bx + 1), r = Math.min(p.x + p.w - 1, bx + B - 1);
+            if (r <= l) continue;
+            const shade = hash(bx * 0.13 + row * 7.1);
+            ctx.fillStyle = shade > 0.66 ? "#b45309" : shade > 0.33 ? "#9a3412" : "#7c2d12";
+            ctx.fillRect(l, y + 1, r - l, C - 2);
+            ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.fillRect(l, y + 1, r - l, 3);
+        }
+    }
+    ctx.fillStyle = "#e7e5e4"; ctx.fillRect(p.x - 4, p.y - 4, p.w + 8, 6);          // üstte taş kapak
+    ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(p.x - 4, p.y + 2, p.w + 8, 2);
+    ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.fillRect(p.x, p.y + p.h, p.w, 6);        // altında gölge
+    ctx.strokeStyle = "rgba(0,0,0,0.45)"; ctx.lineWidth = 2; ctx.strokeRect(p.x + 1, p.y + 1, p.w - 2, p.h - 2);
+}
+
 function drawPlatform(ctx, p) {
     const th = THEMES[LEVELS[currentLevel].bg];
     const x0 = Math.max(p.x, camX - 40), x1 = Math.min(p.x + p.w, camX + width + 40);
     if (x1 <= x0) return;
+    if (p.h < 100) { drawBrickLedge(ctx, p); return; }   // zemin değil: tuğla raf
     const g = ctx.createLinearGradient(0, p.y, 0, p.y + Math.min(p.h, 220));
     g.addColorStop(0, th.ground[0]); g.addColorStop(1, th.ground[1]);
     ctx.fillStyle = g;
@@ -273,9 +295,11 @@ function draw() {
     if (isFlight()) { drawFlight(); return; }
     drawBackground();
     ctx.save();
-    ctx.translate(-camX, 0);
+    const sh = camShake > 0 ? camShake : 0;
+    ctx.translate(-camX + (Math.random() - 0.5) * sh * 2, (Math.random() - 0.5) * sh * 2);
 
     drawPits(ctx);
+    drawCheckpointFlag(ctx);
     platforms.forEach(p => drawPlatform(ctx, p));
     drawBricks(ctx);
     if(gate) drawGate(ctx, gate);
@@ -333,6 +357,7 @@ function draw() {
     drawGateHint(ctx);
     drawPowerHud(ctx);
     drawChapterHud(ctx);
+    drawBossOutro(ctx);
     drawScreenOverlays(ctx);
 }
 

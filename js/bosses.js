@@ -63,6 +63,26 @@ function spawnBoss(x) {
     boss.talk = Math.round(((dur || 1.5) + 0.3) * 60);
 }
 
+// Öfke: canı yarıya inince kızarır, buharlar çıkar, daha hızlı saldırır
+function enrageBoss(b) {
+    b.rage = true;
+    camShake = Math.max(camShake, 14);
+    createParticle(b.x + b.w / 2, b.y - 70, t("rage"), "#ef4444", 2.0);
+    if (b.T.greet) playSfx(b.T.greet, { vol: 1, rate: 1.25 });
+}
+function drawRageAura(ctx, b) {
+    if (!b.rage || b.dying) return;
+    const t0 = performance.now() / 1000, cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    const g = ctx.createRadialGradient(cx, cy, 10, cx, cy, b.h * 0.9);
+    g.addColorStop(0, `rgba(239,68,68,${0.35 + 0.15 * Math.sin(t0 * 10)})`); g.addColorStop(1, "rgba(239,68,68,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, b.h * 0.9, 0, Math.PI * 2); ctx.fill();
+    for (let i = 0; i < 4; i++) {   // kafadan yükselen buhar
+        const ph = (t0 * 1.2 + i / 4) % 1, x = cx + (i - 1.5) * 22 + Math.sin(t0 * 4 + i) * 6, y = b.y - ph * 70;
+        ctx.fillStyle = `rgba(255,255,255,${0.5 * (1 - ph)})`;
+        ctx.beginPath(); ctx.arc(x, y, 8 + ph * 14, 0, Math.PI * 2); ctx.fill();
+    }
+}
+
 // Canavarın karşılama balonu (konuşurken)
 function drawSpeech(ctx, b) {
     if (!(b.talk > 0) || !b.T.say || b.dying) return;
@@ -342,7 +362,11 @@ function updateBoss() {
     if(b.dying) { if(++b.deathT > 60) boss = null; return; }
     if(b.hurt > 0) b.hurt--;
     if(b.talk > 0) b.talk--;      // karşılama konuşması bitene kadar saldırmaz
-    else b.T.update(b);
+    else {
+        b.T.update(b);
+        if(b.rage && b.anim % 2 === 0) b.T.update(b);   // öfkeliyken 1,5 kat hızlı hareket eder ve saldırır
+    }
+    if(!b.rage && b.hp <= b.T.hp / 2) enrageBoss(b);
 
     // Temas: üstüne zıplayınca hasar, yandan değince ölüm
     if(!player.isDying && player.x + player.w - 30 > b.x + 40 && player.x + 30 < b.x + b.w - 40 &&
@@ -477,6 +501,7 @@ function updateWave(p) {
 }
 
 function drawBoss(ctx, b) {
+    drawRageAura(ctx, b);
     b.T.draw(ctx, b);
     if(!b.dying) {
         const name = t(b.T.nameKey);
@@ -485,7 +510,7 @@ function drawBoss(ctx, b) {
         ctx.lineWidth = 5; ctx.strokeStyle = "#000";
         const ly = b.y - (b.T.labelY || 35);   // isim, canavarın başının üstünde
         ctx.strokeText(name, b.x + b.w / 2, ly);
-        ctx.fillStyle = "#fde047";
+        ctx.fillStyle = b.rage ? "#ef4444" : "#fde047";
         ctx.fillText(name, b.x + b.w / 2, ly);
     }
     drawSpeech(ctx, b);

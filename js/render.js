@@ -346,6 +346,7 @@ function draw() {
         else if(p.type === 'wave') drawWave(ctx, p);
         else if(p.type === 'dollar1') (p.skin === 'lock' ? drawLockIcon : drawOneDollar)(ctx, p.x, p.y, p.angle);
         else if(p.type === 'bullet') drawBullet(ctx, p);
+        else if(p.type === 'gas') drawGasShell(ctx, p);
     });
 
     drawBrickFx(ctx);

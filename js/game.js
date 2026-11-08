@@ -76,6 +76,7 @@ function update() {
         if(en.kind === 'riot') { updateRiot(en); enemyContact(en); return; }
         if(en.kind === 'sniper') { updateSniper(en); enemyContact(en); return; }
         if(en.kind === 'tank') { updateTank(en); enemyContact(en); return; }
+        if(en.kind === 'gas') { updateGas(en); enemyContact(en); return; }
         if(en.kind === 'civil') { updateCivil(en); return; }   // siviller zararsız
 
         // --- Düşman hareketi (tabancalı polis) ---
@@ -138,6 +139,7 @@ function update() {
         if(p.type === 'wave') { updateWave(p); return; }
         if(p.type === 'dollar1') { updateOneDollar(p); return; }
         if(p.type === 'bullet') updateBullet(p);
+        if(p.type === 'gas') updateGasShell(p);
     });
     projectiles = projectiles.filter(p => p.active && p.life > 0);
     updateBoss();

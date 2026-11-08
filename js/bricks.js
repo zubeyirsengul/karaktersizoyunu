@@ -24,6 +24,31 @@ function buildBricks(level) {
     }
 }
 
+// --- GİZLİ HAZİNE BLOKLARI ---
+// Görünmez bloklar: yalnızca alttan kafa atınca ortaya çıkar, içinden 4 kul hakkı ve bonus puan fışkırır.
+// Ara sıra hafifçe parıldar (ipucu). Açıldıktan sonra altın blok olarak kalır, üstüne basılabilir.
+function buildSecrets(level) {
+    const r = seededRandom(level * 31337 + 5), gy = height - 60, y = gy - 260 - BRICK;
+    const free = x => !platforms.some(p => p.y < gy - 1 && x < p.x + p.w + 60 && x + BRICK > p.x - 60)
+                   && !bricks.some(b => Math.abs(b.x - x) < 180);
+    let n = 0;
+    for (let k = 1; k < 19 && n < 3; k++) {
+        if (r() > 0.3) continue;
+        const x = 2250 + k * 1500 + 690 + Math.floor(r() * 120);   // iki desen arasındaki boşluk
+        if (free(x)) { bricks.push({ x, y, hp: BRICK_HP, shake: 0, cd: 0, seed: r() * 100, secret: true, hidden: true }); n++; }
+    }
+}
+function revealSecret(b) {
+    b.hidden = false; b.used = true; b.shake = 14; b.cd = 8;
+    const cx = b.x + BRICK / 2;
+    for (let i = 0; i < 4; i++) flyers.push({ x: cx, y: b.y, vx: (i - 1.5) * 2.5, vy: -10 - Math.random() * 3, t: 0 });
+    for (let i = 0; i < 16; i++) debris.push({ x: cx, y: b.y + BRICK / 2, vx: (Math.random() - 0.5) * 10, vy: -3 - Math.random() * 6, size: 5 + Math.random() * 5, life: 45, color: Math.random() < 0.5 ? "#fde047" : "#fff7ae" });
+    $('score').innerText = score += 10000;
+    createParticle(cx, b.y - 40, t("secret"), "#fde047", 2.0);
+    playSfx('hit', { rate: 1.9, vol: 0.6 });
+    camShake = Math.max(camShake, 6);
+}
+
 // Kırılınca ne çıkar: %55 güç, %45 kul hakkı (3. bölümde kaset)
 const BRICK_POWERS = [['speed', 29], ['double', 28], ['hammer', 25], ['heart', 15], ['star', 3]];   // yıldız (dokunulmazlık) nadir
 function pickBrickPower() {
@@ -33,7 +58,7 @@ function pickBrickPower() {
 }
 
 function hitBrick(b, dmg) {
-    if (b.cd > 0 || b.hp <= 0) return;
+    if (b.cd > 0 || b.hp <= 0 || b.used) return;   // açılmış hazine bloğu kırılmaz
     b.hp -= dmg; b.shake = 10; b.cd = 8;
     for (let i = 0; i < 4; i++) debris.push(brickChip(b, 0.5));
     playSfx('hit', { rate: 1.5 + Math.random() * 0.3, vol: 0.45 });
@@ -63,19 +88,19 @@ function collideBricks() {
         if (pr < b.x || pl > b.x + BRICK) continue;
         const bottom = b.y + BRICK;
         if (player.vy < 0 && player.y < bottom && player.y > bottom + player.vy - 2) {   // kafa attı
-            player.y = bottom; player.vy = 2;
-            hitBrick(b, 1);
-        } else if (player.vy >= 0 && player.y + player.h > b.y && player.y + player.h < b.y + player.vy + 10) {   // üstüne bastı
+            player.y = bottom; player.vy = 2; player.jumping = false;
+            if (b.hidden) revealSecret(b); else hitBrick(b, 1);
+        } else if (!b.hidden && player.vy >= 0 && player.y + player.h > b.y && player.y + player.h < b.y + player.vy + 10) {   // üstüne bastı
             player.y = b.y - player.h; player.vy = 0; player.grounded = true;
         }
     }
 }
 function hammerBricks(minX, maxX) {
-    bricks.filter(b => b.x < maxX && b.x + BRICK > minX && b.y < player.y + player.h && b.y + BRICK > player.y - 140).forEach(b => hitBrick(b, 2));
+    bricks.filter(b => !b.secret && b.x < maxX && b.x + BRICK > minX && b.y < player.y + player.h && b.y + BRICK > player.y - 140).forEach(b => hitBrick(b, 2));
 }
 // Rüşvet zarfı tuğlaya çarparsa: true
 function bribeHitsBrick(p) {
-    const b = bricks.find(b => p.x > b.x && p.x < b.x + BRICK && p.y > b.y && p.y < b.y + BRICK);
+    const b = bricks.find(b => !b.hidden && p.x > b.x && p.x < b.x + BRICK && p.y > b.y && p.y < b.y + BRICK);
     if (!b) return false;
     p.active = false; hitBrick(b, 1);
     return true;
@@ -112,6 +137,7 @@ function drawBricks(ctx) {
         if (b.x + BRICK < camX - 20 || b.x > camX + width + 20) return;
         const sx = b.shake > 0 ? (Math.random() - 0.5) * 5 : 0, sy = b.shake > 0 ? -b.shake * 0.6 : 0;
         const x = b.x + sx, y = b.y + sy, P = BRICK / 4;   // 4x4 "piksel" ızgara
+        if (b.secret) { drawSecretBlock(ctx, b, x, y, time); return; }
         ctx.fillStyle = "#d6d3d1"; ctx.fillRect(x, y, BRICK, BRICK);   // harç
         for (let row = 0; row < 4; row++) {
             const off = row % 2 ? P : 0;
@@ -141,6 +167,21 @@ function drawBricks(ctx) {
             ctx.fillRect(x + 8 + k * 40, y + 8, 4, 4); ctx.fillRect(x + 6 + k * 40, y + 10, 8, 1); ctx.fillRect(x + 10 + k * 40, y + 6, 1, 8);
         }
     });
+}
+function drawSecretBlock(ctx, b, x, y, time) {
+    if (b.hidden) {   // görünmez: birkaç saniyede bir silik parıltı
+        const k = (time * 0.5 + b.seed) % 4;
+        if (k < 0.5) {
+            ctx.strokeStyle = `rgba(253,224,71,${0.35 * Math.sin(k / 0.5 * Math.PI)})`; ctx.lineWidth = 2;
+            ctx.strokeRect(x + 4, y + 4, BRICK - 8, BRICK - 8);
+        }
+        return;
+    }
+    ctx.fillStyle = "#a16207"; ctx.fillRect(x, y, BRICK, BRICK);
+    ctx.fillStyle = "#ca8a04"; ctx.fillRect(x + 4, y + 4, BRICK - 8, BRICK - 8);
+    ctx.fillStyle = "rgba(255,255,255,0.25)"; ctx.fillRect(x + 4, y + 4, BRICK - 8, 6);
+    ctx.fillStyle = "#713f12"; [[8, 8], [BRICK - 12, 8], [8, BRICK - 12], [BRICK - 12, BRICK - 12]].forEach(([dx, dy]) => ctx.fillRect(x + dx, y + dy, 4, 4));
+    ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, BRICK - 2, BRICK - 2);
 }
 function drawBrickFx(ctx) {
     debris.forEach(d => {

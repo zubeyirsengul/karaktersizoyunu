@@ -29,12 +29,14 @@ function buildLayout(level) {
         if (kind === 0) {                                              // piramit: alt raf → üst raf → alt raf
             plats.push([c - 480, T1, 240, LEDGE], [c - 180, T2, 300, LEDGE], [c + 180, T1, 240, LEDGE]);
             spots.push([c - 30, T2]);
+            bags.push([c + 60, T2 + 70]);                              // tepeye çıkana ödül
         } else if (kind === 1) {                                       // çukurun üstünden geçen uzun köprü
             plats.push([c - 360, T1, 720, LEDGE]);
             spots.push([c + 240, T1]);
         } else if (kind === 2) {                                       // iki alt raf, ortada yüksek ada
             plats.push([c - 540, T1, 240, LEDGE], [c - 120, T2, 240, LEDGE], [c + 300, T1, 240, LEDGE]);
             spots.push([c, T2]);
+            bags.push([c + 70, T2 + 70]);
         } else if (r() < 0.5) plats.push([c - 120, T1, 240, LEDGE]);  // dinlenme alanı, bazen tek raf
     }
     // Nişancılar: her yüksek yere şansla; bölüm ilerledikçe en az 2 / 3 / 4 tane olacak şekilde tamamlanır
@@ -228,7 +230,7 @@ function completeLevel() {
 // --- BÖLÜMLER ---
 // platforms: [x, rafın üstünün yerden yüksekliği (T1/T2), genişlik, kalınlık] (başlangıç bölgesi; gerisi buildLayout ile üretilir)
 // fire: polislerin ateş aralığı (kare); riot(i): i. düşman çevik kuvvet mi
-// kinds(i): i. düşmanın türü ('police' tabancalı, 'riot' çevik kuvvet, 'tank' mini tank)
+// kinds(i): i. düşmanın türü ('police' tabancalı, 'riot' çevik kuvvet, 'tank' mini tank, 'gas' gaz bombacı)
 // bg: arka plan; pit/sniper: çukur ve nişancı olasılığı; minSnipers: en az nişancı sayısı
 // Bölüme özel: item 'tape' (kaset), exile 'surgun'/'ihrac' (ölen bavulla gider), battery (şarj),
 // mode 'flight' (uçuş), stamp (KHK damgası), civilians (zararsız siviller)
@@ -236,13 +238,13 @@ const LEVELS = {
     1: { target: 7, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, fire: 170, kinds: i => i % 5 === 2 ? 'riot' : 'police',
          bg: 'hills', pit: 0.35, sniper: 0.3, minSnipers: 2,
          platforms: [[600, T1, 240, LEDGE], [900, T2, 240, LEDGE], [1200, T1, 180, LEDGE], [1900, T1, 300, LEDGE], [2260, T2, 180, LEDGE]] },
-    2: { target: 7, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : 'police',
+    2: { target: 7, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
          bg: 'steppe', pit: 0.5, sniper: 0.45, minSnipers: 3,
          platforms: [[420, T1, 180, LEDGE], [660, T2, 300, LEDGE], [1020, T1, 240, LEDGE], [1620, T1, 240, LEDGE], [1920, T2, 240, LEDGE]] },
-    3: { target: 7, music: 'chiptune_level1.mp3', boss: 'sayac', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : 'police',
+    3: { target: 7, music: 'chiptune_level1.mp3', boss: 'sayac', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 3 ? 'gas' : 'police',
          bg: 'villa', pit: 0.5, sniper: 0.45, minSnipers: 3, item: 'tape',
          platforms: [[500, T1, 240, LEDGE], [800, T2, 180, LEDGE], [1040, T1, 180, LEDGE], [1800, T1, 300, LEDGE]] },
-    4: { target: 7, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125, kinds: i => i % 2 === 1 ? 'riot' : 'police',
+    4: { target: 7, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
          bg: 'city', pit: 0.65, sniper: 0.6, minSnipers: 4, exile: 'surgun',
          platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] },
     5: { target: 7, music: 'bozkir_dortnal.mp3', boss: 'darbetank', speed: 2.2, fire: 140, kinds: i => i % 2 === 0 ? 'tank' : 'police',
@@ -250,10 +252,10 @@ const LEVELS = {
          platforms: [[600, T1, 240, LEDGE], [1100, T1, 240, LEDGE], [1400, T2, 240, LEDGE]] },
     6: { target: 12, music: 'intro_title.mp3', boss: 'tanker', mode: 'flight', bg: 'sky', speed: 0, fire: 0, kinds: () => 'police',
          pit: 0, sniper: 0, minSnipers: 0, platforms: [] },
-    7: { target: 7, music: 'chiptune_level3.mp3', boss: 'bylock', speed: 3, fire: 130, kinds: i => i % 3 === 2 ? 'riot' : 'police',
+    7: { target: 7, music: 'chiptune_level3.mp3', boss: 'bylock', speed: 3, fire: 130, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
          bg: 'ankara', pit: 0.55, sniper: 0.5, minSnipers: 3, exile: 'ihrac', stamp: true, civilians: true,
          platforms: [[500, T1, 240, LEDGE], [800, T2, 240, LEDGE], [1400, T1, 300, LEDGE]] },
-    8: { target: 7, music: 'chiptune_level1.mp3', boss: 'feto2', speed: 3.4, fire: 115, kinds: i => i % 2 === 1 ? 'riot' : 'police',
+    8: { target: 7, music: 'chiptune_level1.mp3', boss: 'feto2', speed: 3.4, fire: 115, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
          bg: 'snow', pit: 0.65, sniper: 0.65, minSnipers: 4,
          platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] }
 };
@@ -294,6 +296,8 @@ function createLevel() {
                  ...[...LEVELS[currentLevel].platforms, ...layout.plats].map(([x, up, w, h]) => ({ x, y: height - up, w, h }))];
 
     buildBricks(currentLevel);   // havada kırılabilir tuğlalar: içinden güç ya da kul hakkı çıkar
+    buildSecrets(currentLevel);  // görünmez hazine blokları
+    layout.bags.forEach(([x, up]) => items.push({ x, y: height - up, collected: false }));   // üst raflarda torba
 
     for(let i=0; i<20; i++) {
         const homeX = 1500 + i * 1500;

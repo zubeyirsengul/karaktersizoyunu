@@ -78,12 +78,30 @@ function drawPolice(ctx, en) {
     ctx.beginPath(); ctx.ellipse(16, 16, 15, 4, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#facc15"; ctx.fillRect(-16, 10, 34, 3);     // şerit
     ctx.beginPath(); ctx.arc(4, 6, 4, 0, Math.PI * 2); ctx.fill(); // kasket arması
+    if (en.kind === 'gas') {   // gaz maskesi: gözlük camları ve filtre
+        ctx.fillStyle = "#374151"; ctx.strokeStyle = "#111827"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(-6, 18, 26, 24, 8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#a5f3fc"; ctx.beginPath(); ctx.arc(12, 25, 4.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#4b5563"; ctx.beginPath(); ctx.arc(18, 37, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#84cc16"; ctx.beginPath(); ctx.arc(18, 37, 3, 0, Math.PI * 2); ctx.fill();
+    }
 
     // Ön kol + tabanca: oyuncu yakındaysa kol öne uzanır ve nişan alır
     const aim = en.aim || 0;
     ctx.save(); ctx.translate(-12, 56); ctx.rotate(swing * (1 - aim) - Math.PI / 2 * aim);
     ctx.strokeStyle = "#1e3a8a"; ctx.lineWidth = 13;
     ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 44); ctx.stroke();
+    if (en.kind === 'gas') {   // tabanca yerine kalın gaz atar
+        ctx.restore(); ctx.save(); ctx.translate(-12, 56); ctx.rotate(-1.2 - (en.flash > 0 ? 0.3 : 0));
+        ctx.strokeStyle = "#1e3a8a"; ctx.lineWidth = 13; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 40); ctx.stroke();
+        ctx.fillStyle = "#3f6212"; ctx.strokeStyle = "#1a2e05"; ctx.lineWidth = 2;
+        ctx.fillRect(-9, 30, 18, 46); ctx.strokeRect(-9, 30, 18, 46);
+        ctx.fillStyle = "#1a2e05"; ctx.fillRect(-7, 74, 14, 5);
+        if (en.flash > 0) { ctx.fillStyle = "rgba(190,242,100,0.7)"; ctx.beginPath(); ctx.arc(0, 86, 12, 0, Math.PI * 2); ctx.fill(); }
+        ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.arc(0, 44, 6.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore(); ctx.restore(); ctx.restore();   // atar kolu, yön, dış
+        return;
+    }
     ctx.strokeStyle = "#0b0b0b"; ctx.lineWidth = 1.5;
     ctx.fillStyle = "#374151"; ctx.fillRect(-16, 42, 13, 10); ctx.strokeRect(-16, 42, 13, 10);   // kabza
     ctx.fillStyle = "#9ca3af"; ctx.fillRect(-5, 38, 11, 34); ctx.strokeRect(-5, 38, 11, 34);     // gövde ve namlu
@@ -137,7 +155,7 @@ function killEnemy(en) {
     enemyDeathSound(en);
     const [cry, cryColor] = enemyCryText(en);
     createParticle(en.x + en.w/2, en.y, isPolice ? cry : t("hit"), isPolice ? cryColor : "white", 1.0);
-    $('score').innerText = score += ({ police: 3000, riot: 4000, sniper: 5000, tank: 4000 })[en.kind] || 2000; $('kills').innerText = killedEnemies;
+    $('score').innerText = score += ({ police: 3000, riot: 4000, sniper: 5000, tank: 4000, gas: 4000 })[en.kind] || 2000; $('kills').innerText = killedEnemies;
     if(killedEnemies === Math.ceil(targetKills / 2) && !bossCheckpoint) setMidCheckpoint();
     if(killedEnemies === targetKills) {
         // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: ALEVİ, 2: KURT, 3: FETÖ)
@@ -227,6 +245,81 @@ function drawRiot(ctx, en) {
     ctx.restore();
     ctx.restore();
     ctx.restore();
+}
+
+// --- GAZ BOMBACI: gaz maskeli polis, mesafeyi korur ve oyuncunun ayağına biber gazı kapsülü fırlatır ---
+// Kapsül yere düşünce 3 sn süren yeşil bir gaz bulutu olur; bulutun içinde kalan can kaybeder (üstünden zıplanabilir).
+// Havadaki kapsül kalkanla sektirilir.
+const GAS_G = 0.4, GAS_CLOUD = 180;
+function updateGas(en) {
+    const toPlayer = (player.x + player.w / 2) - (en.x + en.w / 2), dist = Math.abs(toPlayer);
+    let speed = en.speed;
+    if (!player.isDying && dist < 900) {
+        en.dir = Math.sign(toPlayer) || en.dir;
+        // 350-650 px arasında durmaya çalışır: yakınsa geri çekilir, uzaksa yaklaşır
+        const move = dist < 350 ? -en.dir : dist > 650 ? en.dir : 0;
+        speed = move ? speed * 1.1 : 0;
+        if (move && Math.abs(en.x + move * speed - en.homeX) > 450) speed = 0;
+        en.x += move * speed;
+        if (++en.timer > en.interval * 1.3 && dist < 800) {
+            en.timer = 0; en.flash = 10;
+            const sx = en.x + en.w / 2 + en.dir * 40, sy = en.y + 70;
+            const T = 40 + dist / 25, tx = player.x + player.w / 2 + player.vx * 10, ty = player.y + player.h;
+            projectiles.push({ type: 'gas', x: sx, y: sy, vx: (tx - sx) / T, vy: (ty - sy) / T - 0.5 * GAS_G * T,
+                               active: true, life: 400, angle: 0, cloud: 0 });
+            playSfx('hit', { rate: 2.2, vol: 0.35 });
+        }
+    } else {
+        if (en.x - en.homeX > 250) en.dir = -1; else if (en.x - en.homeX < -250) en.dir = 1;
+        en.x += en.dir * speed;
+    }
+    en.x = Math.max(0, Math.min(en.x, WORLD_WIDTH - en.w));
+    en.aim = 0;
+    if (en.flash > 0) en.flash--;
+    en.walkCycle += speed * 0.08;
+    en.lastSpeed = speed;
+}
+function burstGas(p) {
+    p.cloud = GAS_CLOUD; p.vx = 0; p.vy = 0; p.life = GAS_CLOUD;
+    playSfx('hit', { rate: 0.5, vol: 0.4 });
+}
+function updateGasShell(p) {
+    p.life--;
+    if (p.cloud > 0) {   // yerdeki bulut: içindeki oyuncu can kaybeder
+        p.cloud--;
+        const r = gasRadius(p), pcx = player.x + player.w / 2;
+        if (!player.isDying && Math.abs(pcx - p.x) < r + 20 && player.y + player.h > p.y - r * 0.9) die();
+        return;
+    }
+    const prevY = p.y;
+    p.vy += GAS_G; p.y += p.vy; p.angle += 0.3;
+    for (const pl of platforms) {
+        if (p.vy > 0 && p.x > pl.x && p.x < pl.x + pl.w && prevY <= pl.y && p.y >= pl.y) { p.y = pl.y; burstGas(p); return; }
+    }
+    if (player.isDying) return;
+    if (p.x > player.x + 15 && p.x < player.x + player.w - 15 && p.y > player.y && p.y < player.y + player.h) {
+        if (shieldBlocks(p)) blockProjectile(p);
+        else { p.y = player.y + player.h; burstGas(p); die(); }   // bulut ayak hizasında açılır
+    }
+}
+// Bulut önce hızla büyür, sonunda söner
+const gasRadius = p => 105 * Math.min(1, (GAS_CLOUD - p.cloud) / 20) * Math.min(1, p.cloud / 30 + 0.4);
+function drawGasShell(ctx, p) {
+    if (p.cloud > 0) {
+        const r = gasRadius(p), t0 = performance.now() / 1000, a = Math.min(1, p.cloud / 40);
+        for (let i = 0; i < 7; i++) {
+            const ang = i / 7 * Math.PI * 2 + t0 * 0.6, ox = Math.cos(ang) * r * 0.55, oy = -r * 0.45 + Math.sin(ang) * r * 0.3;
+            ctx.fillStyle = `rgba(${i % 2 ? '163,230,53' : '190,242,100'},${0.32 * a})`;
+            ctx.beginPath(); ctx.arc(p.x + ox, p.y + oy, r * (0.45 + 0.1 * Math.sin(t0 * 3 + i)), 0, Math.PI * 2); ctx.fill();
+        }
+        return;
+    }
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
+    ctx.fillStyle = "#4d7c0f"; ctx.fillRect(-8, -13, 16, 26);
+    ctx.fillStyle = "#a3e635"; ctx.fillRect(-8, -4, 16, 6);
+    ctx.fillStyle = "#1f2937"; ctx.fillRect(-5, -17, 10, 5);
+    ctx.restore();
+    ctx.fillStyle = "rgba(190,242,100,0.35)"; ctx.beginPath(); ctx.arc(p.x - p.vx * 2, p.y - p.vy * 2, 7, 0, Math.PI * 2); ctx.fill();
 }
 
 // --- KESKİN NİŞANCI: yüksek platformda diz çökmüş, dürbünlü tüfekli polis ---

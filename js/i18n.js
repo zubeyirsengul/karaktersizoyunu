@@ -150,4 +150,5 @@ function applyLang(newLang) {
     try { $('story-skip').textContent = storyT('skip'); } catch (e) {}
     try { updateBestUi(); } catch (e) {}   // rekor satırı da dile göre (yüklenirken henüz tanımlı olmayabilir)
     try { renderHowto(); } catch (e) {}
+    try { renderLevelSelect(); } catch (e) {}
 }

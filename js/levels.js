@@ -208,7 +208,9 @@ function completeLevel() {
     if(levelCompleted) return;
     saveBest(); updateBestUi();
     levelCompleted = true;
-    $('lang-picker').hidden = true; // Dil sadece başlangıç ekranında seçilir
+    unlockLevel(currentLevel + 1);   // bölüm seçme ekranında sonraki bölüm açılır
+    $('lang-picker').hidden = true;
+    $('levels-btn').hidden = true; // Dil sadece başlangıç ekranında seçilir
     paused = true;
 
     if (currentLevel < MAX_LEVEL) {
@@ -264,6 +266,7 @@ const MAX_LEVEL = 8;
 function goToLevel(n) {
     stopGrannyChant();   // teyzeler sonraki bölüme geçince susar
     if (!storyDone[n]) { $('overlay-screen').style.display = 'none'; playStory(n, () => goToLevel(n)); return; }
+    unlockLevel(n);
     currentLevel = n; targetKills = LEVELS[n].target;
     $('current-level').innerText = n; $('target-kills').innerText = targetKills;
     $('overlay-screen').style.display = 'none'; paused = false;

@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>HIRHIZ - Sesli Edition</title>
-    <link rel="stylesheet" href="css/style.css?v=15">
+    <link rel="stylesheet" href="css/style.css?v=16">
 </head>
 <body>
 
@@ -26,10 +26,14 @@
             <button class="lang-btn" data-lang="ru">RU</button>
         </div>
         <button id="sound-btn" class="lang-btn" type="button"></button>
-        <button id="howto-btn" class="lang-btn" type="button">❓ NASIL OYNANIR?</button>
+        <div class="menu-row">
+            <button id="howto-btn" class="lang-btn" type="button">❓ NASIL OYNANIR?</button>
+            <button id="levels-btn" class="lang-btn" type="button">🗺 BÖLÜM SEÇ</button>
+        </div>
         <button id="start-button" class="primary-btn" data-i18n="start">OYUNU BAŞLAT</button>
     </div>
     <div id="howto"><div id="howto-panel"></div></div>
+    <div id="levels"><div id="levels-panel"></div></div>
     <div id="story"><canvas id="story-canvas"></canvas><button id="story-skip" type="button"></button></div>
 
     <div id="status" class="ui"><span data-i18n="treasure">Hazine</span>: <span id="score">0</span><span id="best-hud"></span></div>
@@ -59,24 +63,25 @@
 <audio id="sfx-pickup"><source src="pickupCoin.wav" type="audio/wav"></audio>
 
 <script src="js/i18n.js"></script>
-<script src="js/core.js?v=15"></script>
-<script src="js/audio.js?v=15"></script>
-<script src="js/render.js?v=15"></script>
-<script src="js/player.js?v=15"></script>
-<script src="js/enemies.js?v=15"></script>
-<script src="js/bosses.js?v=15"></script>
-<script src="js/powerups.js?v=15"></script>
-<script src="js/score.js?v=15"></script>
-<script src="js/levels.js?v=15"></script>
-<script src="js/chapters.js?v=15"></script>
-<script src="js/bricks.js?v=15"></script>
-<script src="js/flight.js?v=15"></script>
-<script src="js/game.js?v=15"></script>
-<script src="js/intro.js?v=15"></script>
-<script src="js/howto.js?v=15"></script>
-<script src="js/story.js?v=15"></script>
-<script src="js/story_chapters.js?v=15"></script>
-<script src="js/input.js?v=15"></script>
-<script src="js/main.js?v=15"></script>
+<script src="js/core.js?v=16"></script>
+<script src="js/audio.js?v=16"></script>
+<script src="js/render.js?v=16"></script>
+<script src="js/player.js?v=16"></script>
+<script src="js/enemies.js?v=16"></script>
+<script src="js/bosses.js?v=16"></script>
+<script src="js/powerups.js?v=16"></script>
+<script src="js/score.js?v=16"></script>
+<script src="js/levels.js?v=16"></script>
+<script src="js/chapters.js?v=16"></script>
+<script src="js/bricks.js?v=16"></script>
+<script src="js/flight.js?v=16"></script>
+<script src="js/game.js?v=16"></script>
+<script src="js/intro.js?v=16"></script>
+<script src="js/howto.js?v=16"></script>
+<script src="js/story.js?v=16"></script>
+<script src="js/story_chapters.js?v=16"></script>
+<script src="js/levelselect.js?v=16"></script>
+<script src="js/input.js?v=16"></script>
+<script src="js/main.js?v=16"></script>
 </body>
 </html>

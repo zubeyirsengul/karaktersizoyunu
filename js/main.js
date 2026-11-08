@@ -11,6 +11,7 @@ document.addEventListener('visibilitychange', () => { if(document.hidden) { setU
 window.onkeydown = e => {
     let k = e.key.toLowerCase();
     if(story) { storyKey(e); return; }
+    if(levelSelectOpen()) { if(e.key === 'Escape') closeLevelSelect(); return; }
     if($('howto').style.display === 'flex') { if(e.key === 'Escape' || e.key === 'Enter') closeHowto(); return; }
     if(e.key === 'Escape' || k === 'p') { setUserPause(!userPaused); return; }
     if(userPaused) return;
@@ -37,10 +38,14 @@ $('overlay-screen').addEventListener('pointerdown', e => {
     setIntroSound(true);
 });
 $('howto-btn').addEventListener('click', () => openHowto(false));
+$('levels-btn').addEventListener('click', openLevelSelect);
+$('levels').addEventListener('click', e => { if (e.target === $('levels')) closeLevelSelect(); });
+renderLevelSelect();
 $('help-btn').addEventListener('click', () => openHowto(false));
 $('howto').addEventListener('click', e => { if (e.target === $('howto')) closeHowto(); });   // panelin dışına tıklayınca kapanır
 renderHowto();
 $('start-button').onclick = () => {
+    startLevelChoice = 1;
     initAudio();
     goFullscreenLandscape();
     if (!howtoSeen()) openHowto(true);   // ilk kez oynayana önce kurallar

@@ -177,8 +177,9 @@ function setUserPause(on) {
     $('pause-btn').textContent = on ? '▶' : '⏸';
 }
 
-function startGame() {
-    if (!storyDone[1]) { playStory(1, startGame); return; }   // önce 1. bölümün hikâyesi
+let startLevelChoice = 1;   // bölüm seçme ekranından seçilen bölüm
+function startGame(n = startLevelChoice) {
+    if (!storyDone[n]) { playStory(n, () => startGame(n)); return; }   // önce bölümün hikâyesi
     initAudio();   // tarayıcılar sesi ancak bir tıklamayla başlatmaya izin verir
     removeIntro();
     $('overlay-screen').style.display = 'none';
@@ -187,7 +188,7 @@ function startGame() {
     $('pause-btn').style.display = 'block';
     $('help-btn').style.display = 'block';
     resizeCanvas();
-    createLevel();
+    goToLevel(n);
     requestAnimationFrame(loop);
     const bgMusic = $('bg-music');
     bgMusic.volume = 0.1; bgMusic.play().catch(()=>{});

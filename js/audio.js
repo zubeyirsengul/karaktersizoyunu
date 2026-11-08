@@ -55,17 +55,16 @@ function pcmToWav(b64, rate) {
 
 // --- SES EFEKTLERİ (Web Audio) ---
 // Gerçek ses kayıtları: çığlıklar, canavar karşılamaları ve teyzeler (oyunun yapımcısının kendi sesi),
-// darbeler (Independent.nu, CC0), FETÖ'nün burun çekme + tükürük sesi (tools/feto_ses.py ile üretildi)
+// darbeler (Independent.nu, CC0), FETÖ'nün "Ya Allah!" sesi (Windows Türkçe yapay sesi)
 const SFX_FILES = {
     cry: ['sfx/uufff.mp3'],                                // polis ölümü
     hit: [1, 2, 3, 4, 5].map(i => `sfx/hit${i}.mp3`),
     greet_alevi: ['sfx/yaali.mp3'],                         // canavarların karşılama sesleri
     greet_kurt: ['sfx/kro.mp3'],
-    greet_feto: ['sfx/feto_greet.mp3'],
+    greet_feto2: ['sfx/feto2_greet.mp3'],                   // FETÖ (4. ve 8. bölüm): "Ya Allah!" (Windows Türkçe yapay sesi Tolga, kalınlaştırılıp yankılandı)
     granny: ['sfx/gotununkili.mp3'],                        // canavar ölünce gelen teyzeler
     yalarim: ['sfx/yalarim.mp3'],                           // 2. bölüm canavarı ölünce ara sahne
     // Recep'in replikleri (kayıt yoksa yapay sese, Gemini, düşer)
-    voice_win: ['sfx/voice/kulhakki.mp3'],                              // bölüm sonu canavarı yenilince
     voice_ouch: ['sfx/ahh.mp3']                                         // vurulunca ve ölünce
 };
 let audioCtx = null;

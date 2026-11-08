@@ -379,7 +379,7 @@ Object.assign(BOSS_TYPES, {
     // BYLOCK: dev akıllı telefon; zıplayıp şok dalgası yapar, kilit simgeleri fırlatır
     bylock: { say: "İNDİRDİN Mİ?", w: 150, h: 230, dw: 150, dh: 230, scale: 1, hp: 20, arena: 900, nameKey: "bylockName", stomp: 55, labelY: 40, update: updateBylock, draw: drawBylock },
     // FETÖ'nün son hâli: aynı saldırılar, daha çok can
-    feto2: { ...BOSS_TYPES.feto, hp: 28, nameKey: "feto2Name", say: "İADE YOK! *SNİF*" }
+    feto2: { ...BOSS_TYPES.feto, hp: 28, nameKey: "feto2Name", say: "YA ALLAH!" }
 });
 
 function bossGround(b) { return height - 60 - b.h; }

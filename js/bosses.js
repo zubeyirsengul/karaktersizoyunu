@@ -46,7 +46,7 @@ const BOSS_TYPES = {
     // Canavar çizimleri büyük tasarlandı (dw x dh); oyunda scale ile küçültülür ki
     // oyuncu (zıplama yüksekliği ~255 px) üzerlerinden atlayıp kafalarına basabilsin
     kurt:  { greet: 'greet_kurt', say: "KROOO!", w: 143, h: 204, dw: 210, dh: 300, scale: 0.68, hp: 16, arena: 900, nameKey: "kurtName", stomp: 60, update: updateKurt, draw: drawKurt },
-    feto:  { greet: 'greet_feto', say: "*SNİF SNİF* ... TÜH!", w: 126, h: 203, dw: 180, dh: 290, scale: 0.7, hp: 20, arena: 900, nameKey: "fetoName", stomp: 55, labelY: 45, update: updateFeto, draw: drawFeto }
+    feto:  { greet: 'greet_feto2', say: "YA ALLAH!", w: 126, h: 203, dw: 180, dh: 290, scale: 0.7, hp: 20, arena: 900, nameKey: "fetoName", stomp: 55, labelY: 45, update: updateFeto, draw: drawFeto }
 };
 function spawnBoss(x) {
     const kind = LEVELS[currentLevel].boss;
@@ -258,9 +258,8 @@ function damageBoss(n) {
     for(let i = 0; i < 30; i++) createParticle(boss.x + Math.random() * boss.w, boss.y + Math.random() * boss.h);
     playSfx('hit', { rate: 0.6, vol: 1 });
     playSfx('cry', { rate: 0.55, vol: 1, delay: 0.08 });   // canavar: kalın, uzun çığlık
-    // Recep "kul hakkı" der; başörtülü teyzeler koşarak gelip kutlar ve sonraki bölüme geçilene kadar tezahürat eder
-    const kd = playSfx('voice_win', { vol: 1, delay: 0.5 });
-    const cx = boss.x + boss.w / 2, after = 0.5 + kd + 0.2;
+    // Başörtülü teyzeler koşarak gelip kutlar ve sonraki bölüme geçilene kadar tezahürat eder
+    const cx = boss.x + boss.w / 2, after = 0.7;
     const O = BOSS_OUTROS[currentLevel];
     if (O) { outro = { O, t: 0, start: Math.round(after * 60), len: 0, cx }; return; }   // önce ara sahne, sonra teyzeler
     celebrate(cx, after);

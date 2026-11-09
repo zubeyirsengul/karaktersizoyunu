@@ -228,27 +228,38 @@ function drawSelo(ctx, b) {
                           wave: b.next === 'aihm' && b.state === 'crouch', angry: b.rage });
     ctx.restore();
 }
-// Hücre: parmaklık yukarıdan iner, Selo içeride gülümseyip bağlama çalar; AİHM "bırakın" der, Recep "tanımıyoruz" der
+// Hücre: parmaklık yukarıdan iner, canavar içeride kalır. Hangi canavarın hücreye girdiği JAILS'te tanımlı
+// (selo burada, ekrem js/ekrem.js'te): içerideki çizim, tabela, parmaklık ardından söylediği replik, zamanlı yazılar.
 const CELL_W = 190, CELL_H = 260;
+const cellTalk = c => c.t > 34 && c.t < (c.talkEnd || 110) ? Math.abs(Math.sin(c.t * 0.4)) : 0;
+const JAILS = {
+    // Selo gülümseyip bağlama çalar; AİHM "bırakın" der, Recep "tanımıyoruz" der
+    selo: { sign: "TUTUKLU", voice: 'selo_baskan',
+            figure: (ctx, c) => drawSeloFigure(ctx, { walk: 0, strum: c.t > 24, talk: cellTalk(c), wave: false }),
+            events: { 70: (c, gy) => createParticle(c.x, gy - CELL_H - 40, t("aihmFree"), "#60a5fa", 2.2),
+                      160: () => createParticle(player.x + player.w / 2, player.y - 40, t("noRecog"), "#ef4444", 2.2) },
+            tick: (c, gy) => { if (c.t > 30 && c.t % 40 === 0) createParticle(c.x + 30, gy - 160, "♪", "#e879f9", 1.4); } }   // içeride bile çalıyor
+};
 // Sahnenin zamanlaması oyun döngüsünde (saniyede 60 kare) ilerler
 function updateSeloCell() {
-    if (!seloCell && boss && boss.dying && boss.kind === 'selo') seloCell = { x: boss.x + boss.w / 2, look: boss.look, t: 0 };
+    if (!seloCell && boss && boss.dying && JAILS[boss.kind]) seloCell = { kind: boss.kind, x: boss.x + boss.w / 2, look: boss.look, t: 0 };
     const c = seloCell;
     if (!c) return;
+    const J = JAILS[c.kind];
     c.t++;
     const gy = height - 60;
     if (c.t === 24) { camShake = Math.max(camShake, 12); playSfx('hit', { rate: 0.4, vol: 1 }); createParticle(c.x, gy - CELL_H - 20, t("jailed"), "#f87171", 1.6); }
-    if (c.t === 34) c.talkEnd = 34 + Math.round((playSfx('selo_baskan', { vol: 1 }) || 1.3) * 60);   // parmaklık ardından bile bağırır
-    if (c.t === 70) createParticle(c.x, gy - CELL_H - 40, t("aihmFree"), "#60a5fa", 2.2);
-    if (c.t === 160) createParticle(player.x + player.w / 2, player.y - 40, t("noRecog"), "#ef4444", 2.2);
-    if (c.t > 30 && c.t % 40 === 0) createParticle(c.x + 30, gy - 160, "♪", "#e879f9", 1.4);   // içeride bile çalıyor
+    if (c.t === 34 && J.voice) c.talkEnd = 34 + Math.round((playSfx(J.voice, { vol: 1 }) || 1.3) * 60);   // parmaklık ardından bile konuşur
+    if (J.events[c.t]) J.events[c.t](c, gy);
+    if (J.tick) J.tick(c, gy);
 }
 function drawSeloCell(ctx) {
     const c = seloCell;
     if (!c) return;
+    const J = JAILS[c.kind];
     const gy = height - 60, drop = Math.min(1, c.t / 24), W = CELL_W, H = CELL_H;
     ctx.save(); ctx.translate(c.x, gy); ctx.scale(c.look || 1, 1);
-    drawSeloFigure(ctx, { walk: 0, strum: c.t > 24, talk: c.t > 34 && c.t < (c.talkEnd || 110) ? Math.abs(Math.sin(c.t * 0.4)) : 0, wave: false });
+    J.figure(ctx, c);
     ctx.restore();
     const y0 = gy - H - (1 - drop) * (1 - drop) * 600;
     ctx.fillStyle = "#4b5563"; ctx.fillRect(c.x - W / 2 - 6, y0 - 14, W + 12, 18);
@@ -257,7 +268,7 @@ function drawSeloCell(ctx) {
     ctx.fillRect(c.x - W / 2, y0 + H * 0.45, W, 8);
     ctx.fillStyle = "#1e3a8a"; ctx.fillRect(c.x - 62, y0 - 44, 124, 28);
     ctx.fillStyle = "#fff"; ctx.font = "bold 16px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText("TUTUKLU", c.x, y0 - 30);
+    ctx.fillText(J.sign, c.x, y0 - 30);
 }
 
 // --- HİKÂYE ---

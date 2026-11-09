@@ -250,6 +250,7 @@ function damageBoss(n) {
     playSfx('hit', { rate: 0.8 + Math.random() * 0.2, vol: 0.7 });
     createParticle(boss.x + boss.w / 2, boss.y + 40, "-" + n, "#fde047", 0.8);
     if(boss.hp > 0) return;
+    if(boss.T.onDefeat && boss.T.onDefeat(boss)) return;   // ör. 10. bölüm: "seçim iptal", canavar yeniden gelir
     boss.dying = true;
     levelEnding = true;
     projectiles = projectiles.filter(p => p.type === 'bullet');   // canavarın saldırıları silinir

@@ -201,6 +201,7 @@ function restartLevel() {
         $('kills').innerText = killedEnemies;
         if(isFlight()) flightSpawnBoss();
         else if(cp.stage === 'gate') spawnGate(); else spawnBoss(player.x + 420);
+        if(cp.rerun && boss && BOSS_TYPES[boss.kind + '2']) { boss.T = BOSS_TYPES[boss.kind + '2']; boss.hp = boss.T.hp; bossCheckpoint.rerun = true; }   // seçim tekrarından devam
     }
 }
 
@@ -264,9 +265,13 @@ const LEVELS = {
     // 9. bölüm: Edirne F tipi cezaevi; canavar SELO (js/selo.js)
     9: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'selo', speed: 3.3, fire: 120, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
          bg: 'prison', pit: 0.6, sniper: 0.6, minSnipers: 4,
-         platforms: [[500, T1, 240, LEDGE], [800, T2, 240, LEDGE], [1100, T1, 180, LEDGE], [1750, T1, 300, LEDGE], [2050, T2, 180, LEDGE]] }
+         platforms: [[500, T1, 240, LEDGE], [800, T2, 240, LEDGE], [1100, T1, 180, LEDGE], [1750, T1, 300, LEDGE], [2050, T2, 180, LEDGE]] },
+    // 10. bölüm: Saraçhane; canavar EKREM, yenilince "seçim tekrarı" ile güçlenip döner (js/ekrem.js)
+    10: { target: 11, music: 'chiptune_level3.mp3', boss: 'ekrem', speed: 3.4, fire: 115, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
+          bg: 'saracane', pit: 0.6, sniper: 0.6, minSnipers: 4,
+          platforms: [[450, T1, 240, LEDGE], [760, T2, 240, LEDGE], [1060, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1950, T2, 300, LEDGE]] }
 };
-const MAX_LEVEL = 9;
+const MAX_LEVEL = 10;
 
 function goToLevel(n) {
     stopGrannyChant();   // teyzeler sonraki bölüme geçince susar

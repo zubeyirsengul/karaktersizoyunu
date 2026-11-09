@@ -1,0 +1,5 @@
+Bu klasöre koyduğun fotoğraflar bölümlerin arka planındaki TV ekranlarında ve gazetelerde görünür.
+
+Dosya adı: <bölüm>-<sıra>.jpg   (ör. 1-1.jpg, 2-3.jpg)
+Sıra, js/newsbg.js içindeki NEWS listesinde o bölümün kaçıncı haberi olduğudur.
+Sadece kullanma hakkın olan fotoğrafları koy (oyun herkese açık yayınlanıyor).

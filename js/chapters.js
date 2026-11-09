@@ -91,6 +91,8 @@ function drawChapterBackground(bg, time) {
             ctx.fillStyle = "#94a3b8"; ctx.fillRect(-6, -7, 12, 2); ctx.fillRect(-6, -2, 12, 2); ctx.fillRect(-6, 3, 8, 2);
             ctx.fillStyle = "rgba(255,255,255,0.9)"; ctx.restore();
         }
+    } else if (bg === 'prison') {
+        drawPrisonBg(time);   // 9. bölüm: js/selo.js
     } else if (bg === 'snow') {
         // Pensilvanya: karlı dağlar, çam ormanı, kırmızı ahır, kar yağışı
         hillLayer(0.08, height * 0.6, 70, 1.7, "#cbd5e1");

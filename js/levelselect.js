@@ -20,7 +20,8 @@ const LEVEL_CARDS = {
     5: { ico: '🔋', boss: 'tankName',    c1: '#1e3a8a', c2: '#60a5fa' },
     6: { ico: '✈️', boss: 'tankerName',  c1: '#0369a1', c2: '#7dd3fc' },
     7: { ico: '🔐', boss: 'bylockName',  c1: '#7f1d1d', c2: '#f87171', puzzle: true },
-    8: { ico: '❄️', boss: 'feto2Name',   c1: '#334155', c2: '#e2e8f0' }
+    8: { ico: '❄️', boss: 'feto2Name',   c1: '#334155', c2: '#e2e8f0' },
+    9: { ico: '🪕', boss: 'seloName',    c1: '#4a044e', c2: '#e879f9' }
 };
 
 // Açılan en yüksek bölüm. Adres çubuğuna ?bolum=hepsi yazılırsa hepsi açılır (deneme için).

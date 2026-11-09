@@ -260,9 +260,13 @@ const LEVELS = {
          pit: 0, sniper: 0, minSnipers: 0, platforms: [] },
     8: { target: 11, music: 'chiptune_level1.mp3', boss: 'feto2', speed: 3.4, fire: 115, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
          bg: 'snow', pit: 0.65, sniper: 0.65, minSnipers: 4,
-         platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] }
+         platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] },
+    // 9. bölüm: Edirne F tipi cezaevi; canavar SELO (js/selo.js)
+    9: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'selo', speed: 3.3, fire: 120, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
+         bg: 'prison', pit: 0.6, sniper: 0.6, minSnipers: 4,
+         platforms: [[500, T1, 240, LEDGE], [800, T2, 240, LEDGE], [1100, T1, 180, LEDGE], [1750, T1, 300, LEDGE], [2050, T2, 180, LEDGE]] }
 };
-const MAX_LEVEL = 8;
+const MAX_LEVEL = 9;
 
 function goToLevel(n) {
     stopGrannyChant();   // teyzeler sonraki bölüme geçince susar
@@ -281,7 +285,7 @@ function createLevel() {
     items = []; enemies = []; projectiles = []; playerProjectiles = []; particles = [];
     killedEnemies = 0; levelCompleted = false; levelEnding = false;
     boss = null; bossCheckpoint = null; midCheckpoint = null; gate = null; grannies = []; screenFlash = 0;
-    hitStop = 0; camShake = 0; outro = null;
+    hitStop = 0; camShake = 0; outro = null; seloCell = null;
     power = { speed: 0, double: 0, hammer: 0, star: 0 }; usedDouble = false;
     levelStartScore = score;
     player.x = 100; player.y = 0; player.vx = 0; player.vy = 0; camX = 0;

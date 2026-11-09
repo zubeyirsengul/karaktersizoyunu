@@ -29,6 +29,9 @@ const PZ_TEXT = {
 };
 const pzT = k => (PZ_TEXT[lang] || PZ_TEXT.en)[k];
 
+// Telefonun altında kayan haber bandı (gerçek olaylar; oyun içi yazı olduğu için Türkçe)
+const PZ_TICKER = "BYLOCK LİSTELERİ AÇIKLANDI • 'MOR BEYİN' UYGULAMASI: 11 BİN 480 KİŞİNİN LİSTEDE YANLIŞLIKLA YER ALDIĞI ORTAYA ÇIKTI • KHK İLE 125 BİNDEN FAZLA KAMU GÖREVLİSİ İHRAÇ EDİLDİ • ÖĞRETMENLER, AKADEMİSYENLER, GAZETECİLER DE LİSTEDE • ";
+
 let pz = null;   // { code, rows: [{guess, marks}], cur, round, guesses, lastRoundGuesses, locked, solved }
 
 function newPuzzleCode() {
@@ -90,6 +93,7 @@ function renderPuzzle() {
             <div class="pz-msg${pz.solved ? ' win' : pz.msg ? ' fail' : ''}">${pz.msg}</div>
           </div>
         </div>
+        <div class="pz-ticker"><b>SON DAKİKA</b><div class="pz-tick-wrap"><span>${PZ_TICKER}</span></div></div>
       </div>`;
     $('puzzle').querySelectorAll('.pz-key').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); puzzleInput(b.dataset.k); }));
     pz.shake = false;

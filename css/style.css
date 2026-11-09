@@ -21,7 +21,7 @@ canvas {
 #levels { position: absolute; inset: 0; z-index: 1100; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); padding: 16px; box-sizing: border-box; }
 #levels-panel { background: #111827; color: #f3f4f6; border: 2px solid var(--gold); border-radius: 16px; max-width: 900px; width: 100%; max-height: 100%; overflow-y: auto; padding: 18px 20px; box-sizing: border-box; text-align: center; }
 #levels-panel h2 { margin: 0 0 14px; color: var(--gold); font-size: 30px; }
-.lvl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.lvl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .lvl-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 130px; padding: 26px 8px 10px; border: 3px solid var(--c2); border-radius: 12px; cursor: pointer; color: #fff; font-family: inherit;
     background: linear-gradient(160deg, var(--c1), #0b0f19 140%); box-shadow: 0 4px 0 rgba(0,0,0,0.5); transition: transform 0.15s; }
 .lvl-card:not(.locked):hover, .lvl-card:not(.locked):active { transform: translateY(-3px) scale(1.03); box-shadow: 0 0 18px var(--c2); }
@@ -168,7 +168,7 @@ canvas {
     #levels-panel { padding: 10px 12px; }
     #levels-panel h2 { font-size: 20px; margin-bottom: 8px; }
     .lvl-grid { gap: 8px; }
-    .lvl-card { min-height: 92px; padding: 20px 6px 6px; }
+    .lvl-card { min-height: 82px; padding: 18px 6px 4px; }
     .lvl-num { font-size: 20px; }
     .lvl-ico { font-size: 24px; }
     .lvl-name { font-size: 12px; }
@@ -226,7 +226,7 @@ body.puzzle #kill-count, body.puzzle #hearts, body.puzzle #ui-layer, body.puzzle
 .pz-msg.win { color: #4ade80; font-size: 18px; text-shadow: 0 0 12px rgba(74,222,128,0.6); animation: pzPop 0.5s; }
 @media (pointer: coarse) and (max-height: 540px), (max-height: 460px) {
     #puzzle { padding: 4px; }
-    .pz-phone { --c: min(44px, calc((100vh - 70px) / 8 - 4px)); border-radius: 14px; border-width: 2px; }
+    .pz-phone { --c: min(44px, calc((100vh - 94px) / 8 - 4px)); border-radius: 14px; border-width: 2px; }
     .pz-bar { padding: 4px 12px; font-size: 15px; }
     .pz-body { gap: 14px; padding: 6px 12px; }
     .pz-board, .pz-row { gap: 4px; }
@@ -237,3 +237,11 @@ body.puzzle #kill-count, body.puzzle #hearts, body.puzzle #ui-layer, body.puzzle
     .pz-key { height: min(42px, 11vh); font-size: 18px; }
     .pz-left, .pz-msg { font-size: 12px; min-height: 0; }
 }
+
+/* 7. bölüm: telefonun altında kayan haber bandı */
+.pz-ticker { display: flex; align-items: center; background: #f8fafc; color: #111827; font-size: 13px; font-weight: bold; overflow: hidden; white-space: nowrap; flex-shrink: 0; }
+.pz-ticker b { background: #dc2626; color: #fff; padding: 5px 10px; flex-shrink: 0; z-index: 1; }
+.pz-tick-wrap { overflow: hidden; flex: 1; }
+.pz-tick-wrap span { display: inline-block; padding-left: 100%; animation: pzTicker 38s linear infinite; }
+@keyframes pzTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@media (pointer: coarse) and (max-height: 540px), (max-height: 460px) { .pz-ticker { font-size: 10px; } .pz-ticker b { padding: 3px 8px; } }

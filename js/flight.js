@@ -265,6 +265,7 @@ function drawFlightBackground(time) {
 function drawFlight() {
     const time = performance.now() / 1000;
     drawFlightBackground(time);
+    drawFlightBanners(time);   // pankart çeken uçaklar (js/newsbg.js)
     ctx.save();
     ctx.translate(-camX, 0);
     items.forEach(it => { if (!it.collected) drawKulHakkiBag(ctx, it.x, it.y + Math.sin(time * 3 + it.x) * 6, 70); });

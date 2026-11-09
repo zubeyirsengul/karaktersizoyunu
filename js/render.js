@@ -233,6 +233,7 @@ function drawBackground() {
         skyline(0.15, height * 0.74, 60, 210, "#1e293b", "rgba(253,230,138,0.35)", 1);
         skyline(0.35, height * 0.88, 80, 260, "#0b1222", "rgba(253,224,71,0.8)", 7);
     }
+    drawNewsBoards(time);   // bölümün olayını anlatan TV ekranları ve gazeteler (js/newsbg.js)
 }
 
 // Zemin ve platformlar: toprak katmanı + çimen (3. bölümde kaldırım)
@@ -321,6 +322,7 @@ function draw() {
         ctx.restore();
     });
     enemies.forEach(en => { if(en.kind === 'sniper') drawSniperLaser(ctx, en); });
+    drawSeloCell(ctx);   // 9. bölüm: hücredeki Selo
     if(boss) drawBoss(ctx, boss);
     grannies.forEach(g => drawGranny(ctx, g));
 
@@ -345,7 +347,7 @@ function draw() {
     projectiles.forEach(p => {
         if(p.type === 'fire') drawFire(ctx, p);
         else if(p.type === 'wave') drawWave(ctx, p);
-        else if(p.type === 'dollar1') (p.skin === 'lock' ? drawLockIcon : drawOneDollar)(ctx, p.x, p.y, p.angle);
+        else if(p.type === 'dollar1') (DOLLAR_SKINS[p.skin] || drawOneDollar)(ctx, p.x, p.y, p.angle);
         else if(p.type === 'bullet') drawBullet(ctx, p);
         else if(p.type === 'gas') drawGasShell(ctx, p);
     });

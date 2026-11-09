@@ -147,6 +147,7 @@ function update() {
     updateBoss();
     updateGate();
     updateOutro();
+    updateSeloCell();   // 9. bölüm: Selo'nun hücre sahnesi
     updateGrannies();
     updatePowers();
     updateChapter();

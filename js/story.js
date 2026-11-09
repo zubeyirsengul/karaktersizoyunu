@@ -137,6 +137,10 @@ function drawBlockPerson(c, a, time) {
     }
     if (C.gold) { blockRect(c, -16, bodyH - 22, 32, 16, '#facc15'); c.fillStyle = '#fef08a'; c.fillRect(-12, bodyH - 20, 12, 4); }
     if (C.cane) { c.fillStyle = '#78350f'; c.fillRect(-3, bodyH - 10, 6, 70); }
+    if (C.saz) {   // bağlama: elde, sapı yukarı
+        c.fillStyle = '#6b3f1d'; c.fillRect(-3, bodyH - 96, 6, 84);
+        blockRect(c, -18, bodyH - 22, 36, 28, '#b45309'); c.fillStyle = '#1c1917'; c.fillRect(-4, bodyH - 12, 8, 8);
+    }
     c.restore();
     if (a.carry) {
         const by = -legH - bodyH - head - 4;
@@ -332,7 +336,7 @@ const STORY_TEXT = {
           s1a: '17 Aralık sabahı... 17/25 polisleri baskın yaptı ve 4\'lü çeteyi içeri tıktı!',
           s1b: 'Reis kurtar bizi! Ayakkabı kutularını da aldılar!',
           s1c: 'Dosyayı kapatacağız! Rüşvet zarflarını hazırlayın, geliyorum!',
-          m1t: 'GÖREV 1: 4\'LÜ ÇETEYİ KURTAR', m1: '7 polisi rüşvetle sustur, kapıdan geç, ALEVİ\'yi yen ve çeteyi kurtar!',
+          m1t: 'GÖREV 1: 4\'LÜ ÇETEYİ KURTAR', m1: '11 polisi rüşvetle sustur, kapıdan geç, ALEVİ\'yi yen ve çeteyi kurtar!',
           s2a: "Bozkırın ortasında bir altın tüccarı belirdi: SARRAF! Yanında altın külçeleri, ayakkabı kutuları...",
           s2b: "Reis, ufak bir hediye... Kutular dolar dolu, altınlar ambargodan kaçak, saatler İsviçre malı!",
           s2c: "Hediye reddedilmez! Ama 17/25 polisleri her şeyi dinliyor... Kimse duymasın!",
@@ -347,7 +351,7 @@ const STORY_TEXT = {
           s1a: 'Morning of December 17... the 17/25 police raided and locked up the Gang of Four!',
           s1b: 'Boss, save us! They took the shoe boxes too!',
           s1c: 'We\'ll close the case! Get the bribe envelopes ready, I\'m coming!',
-          m1t: 'MISSION 1: FREE THE GANG OF FOUR', m1: 'Silence 7 police with bribes, pass the gate, beat ALEVİ and free the gang!',
+          m1t: 'MISSION 1: FREE THE GANG OF FOUR', m1: 'Silence 11 police with bribes, pass the gate, beat ALEVİ and free the gang!',
           s2a: "In the middle of the steppe a gold trader appeared: SARRAF! With gold bars and shoe boxes...",
           s2b: "Boss, a little gift... The boxes are full of dollars, the gold dodged the embargo, the watches are Swiss!",
           s2c: "One never refuses a gift! But the 17/25 police are listening to everything... Nobody must hear!",
@@ -362,7 +366,7 @@ const STORY_TEXT = {
           s1a: 'Le matin du 17 décembre... la police 17/25 a arrêté la Bande des Quatre !',
           s1b: 'Chef, sauve-nous ! Ils ont pris les boîtes à chaussures aussi !',
           s1c: 'On va classer l\'affaire ! Préparez les enveloppes, j\'arrive !',
-          m1t: 'MISSION 1 : LIBÈRE LA BANDE DES QUATRE', m1: 'Achète le silence de 7 policiers, passe la porte, bats ALEVİ et libère la bande !',
+          m1t: 'MISSION 1 : LIBÈRE LA BANDE DES QUATRE', m1: 'Achète le silence de 11 policiers, passe la porte, bats ALEVİ et libère la bande !',
           s2a: "Au milieu de la steppe surgit un marchand d'or : SARRAF ! Avec des lingots et des boîtes à chaussures...",
           s2b: "Chef, un petit cadeau... Les boîtes sont pleines de dollars, l'or a contourné l'embargo, les montres sont suisses !",
           s2c: "On ne refuse jamais un cadeau ! Mais la police 17/25 écoute tout... Que personne n'entende !",
@@ -377,7 +381,7 @@ const STORY_TEXT = {
           s1a: 'Ochtend van 17 december... de 17/25-politie heeft de Bende van Vier opgesloten!',
           s1b: 'Baas, red ons! Ze hebben de schoenendozen ook meegenomen!',
           s1c: 'We sluiten het dossier! Maak de enveloppen klaar, ik kom eraan!',
-          m1t: 'MISSIE 1: BEVRIJD DE BENDE VAN VIER', m1: 'Koop 7 agenten om, ga door de poort, versla ALEVİ en bevrijd de bende!',
+          m1t: 'MISSIE 1: BEVRIJD DE BENDE VAN VIER', m1: 'Koop 11 agenten om, ga door de poort, versla ALEVİ en bevrijd de bende!',
           s2a: "Midden in de steppe verscheen een goudhandelaar: SARRAF! Met goudstaven en schoenendozen...",
           s2b: "Baas, een klein cadeautje... De dozen zitten vol dollars, het goud ontweek het embargo, de horloges zijn Zwitsers!",
           s2c: "Een cadeau weiger je niet! Maar de 17/25-politie luistert alles af... Niemand mag het horen!",
@@ -392,7 +396,7 @@ const STORY_TEXT = {
           s1a: 'Morgen des 17. Dezember... die 17/25-Polizei hat die Viererbande eingesperrt!',
           s1b: 'Chef, rette uns! Sie haben auch die Schuhkartons mitgenommen!',
           s1c: 'Wir schließen die Akte! Macht die Umschläge bereit, ich komme!',
-          m1t: 'MISSION 1: BEFREIE DIE VIERERBANDE', m1: 'Besteche 7 Polizisten, geh durchs Tor, besiege ALEVİ und befreie die Bande!',
+          m1t: 'MISSION 1: BEFREIE DIE VIERERBANDE', m1: 'Besteche 11 Polizisten, geh durchs Tor, besiege ALEVİ und befreie die Bande!',
           s2a: "Mitten in der Steppe tauchte ein Goldhändler auf: SARRAF! Mit Goldbarren und Schuhkartons...",
           s2b: "Chef, ein kleines Geschenk... Die Kartons sind voller Dollar, das Gold hat das Embargo umgangen, die Uhren sind Schweizer!",
           s2c: "Ein Geschenk lehnt man nicht ab! Aber die 17/25-Polizei hört alles mit... Keiner darf es hören!",
@@ -407,7 +411,7 @@ const STORY_TEXT = {
           s1a: 'Утро 17 декабря... полиция 17/25 устроила облаву и посадила Банду четырёх!',
           s1b: 'Шеф, спаси нас! Они забрали и обувные коробки!',
           s1c: 'Мы закроем дело! Готовьте конверты со взятками, я иду!',
-          m1t: 'МИССИЯ 1: СПАСИ БАНДУ ЧЕТЫРЁХ', m1: 'Подкупи 7 полицейских, пройди ворота, победи АЛЕВИ и освободи банду!',
+          m1t: 'МИССИЯ 1: СПАСИ БАНДУ ЧЕТЫРЁХ', m1: 'Подкупи 11 полицейских, пройди ворота, победи АЛЕВИ и освободи банду!',
           s2a: "Посреди степи появился торговец золотом: САРРАФ! С золотыми слитками и обувными коробками...",
           s2b: "Шеф, маленький подарок... Коробки полны долларов, золото обошло эмбарго, часы швейцарские!",
           s2c: "От подарков не отказываются! Но полиция 17/25 всё прослушивает... Чтобы никто не услышал!",

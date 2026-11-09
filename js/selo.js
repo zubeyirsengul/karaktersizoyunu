@@ -69,7 +69,7 @@ function drawPrisonBg(time) {
 }
 
 // --- CANAVAR: SELO ---
-BOSS_TYPES.selo = { say: "SENİ BAŞKAN YAPTIRMAYACAĞIZ!", w: 120, h: 205, scale: 1, hp: 24, arena: 900, nameKey: "seloName", stomp: 55, labelY: 40,
+BOSS_TYPES.selo = { greet: 'selo_baskan', chantDelay: 2.2, say: "SENİ BAŞKAN YAPTIRMAYACAĞIZ!", w: 120, h: 205, scale: 1, hp: 24, arena: 900, nameKey: "seloName", stomp: 55, labelY: 40,
                     update: updateSelo, draw: drawSelo };
 
 function updateSelo(b) {
@@ -82,7 +82,11 @@ function updateSelo(b) {
         if (!player.isDying && Math.abs(dist) < 1400 && ++b.timer > 80) {
             b.timer = 0; b.attacks++;
             b.next = ['saz', 'aihm', 'speech'][b.attacks % 3];
-            b.state = 'crouch'; b.stateT = b.next === 'speech' ? 40 : 30;
+            b.state = 'crouch'; b.stateT = 30;
+            if (b.next === 'speech') {   // bağırır; şok dalgası cümlenin sonunda ("...YAPTIRMAYACAĞIZ!") gelir
+                const d = playSfx('selo_baskan', { vol: 1, rate: b.rage ? 1.12 : 1 });
+                b.stateT = Math.max(40, Math.round((d || 0.7) * 60));
+            }
             const [txt, col] = b.next === 'saz' ? ["♪ ♫ ♪", "#e879f9"] : b.next === 'aihm' ? [t("aihmCry"), "#60a5fa"] : ["SENİ BAŞKAN...", "#fde047"];
             createParticle(b.x + b.w / 2, b.y - 60, txt, col, 1.1);
         }
@@ -214,10 +218,7 @@ function drawSeloFigure(ctx, o) {
 
 let seloCell = null;   // yenilince üstüne inen hücre: bölüm bitene kadar yerinde kalır
 function drawSelo(ctx, b) {
-    if (b.dying) {
-        if (!seloCell) seloCell = { x: b.x + b.w / 2, look: b.look, t: 0 };
-        return;
-    }
+    if (b.dying) return;   // yerine hücredeki Selo çizilir (drawSeloCell)
     const talk = b.talk > 0 ? Math.abs(Math.sin(b.anim * 0.45)) : 0;
     ctx.save();
     bossBaseTransform(ctx, b);
@@ -231,11 +232,13 @@ function drawSelo(ctx, b) {
 const CELL_W = 190, CELL_H = 260;
 // Sahnenin zamanlaması oyun döngüsünde (saniyede 60 kare) ilerler
 function updateSeloCell() {
+    if (!seloCell && boss && boss.dying && boss.kind === 'selo') seloCell = { x: boss.x + boss.w / 2, look: boss.look, t: 0 };
     const c = seloCell;
     if (!c) return;
     c.t++;
     const gy = height - 60;
     if (c.t === 24) { camShake = Math.max(camShake, 12); playSfx('hit', { rate: 0.4, vol: 1 }); createParticle(c.x, gy - CELL_H - 20, t("jailed"), "#f87171", 1.6); }
+    if (c.t === 34) c.talkEnd = 34 + Math.round((playSfx('selo_baskan', { vol: 1 }) || 1.3) * 60);   // parmaklık ardından bile bağırır
     if (c.t === 70) createParticle(c.x, gy - CELL_H - 40, t("aihmFree"), "#60a5fa", 2.2);
     if (c.t === 160) createParticle(player.x + player.w / 2, player.y - 40, t("noRecog"), "#ef4444", 2.2);
     if (c.t > 30 && c.t % 40 === 0) createParticle(c.x + 30, gy - 160, "♪", "#e879f9", 1.4);   // içeride bile çalıyor
@@ -245,7 +248,7 @@ function drawSeloCell(ctx) {
     if (!c) return;
     const gy = height - 60, drop = Math.min(1, c.t / 24), W = CELL_W, H = CELL_H;
     ctx.save(); ctx.translate(c.x, gy); ctx.scale(c.look || 1, 1);
-    drawSeloFigure(ctx, { walk: 0, strum: c.t > 24, talk: c.t > 60 && c.t < 120 ? Math.abs(Math.sin(c.t * 0.4)) : 0, wave: false });
+    drawSeloFigure(ctx, { walk: 0, strum: c.t > 24, talk: c.t > 34 && c.t < (c.talkEnd || 110) ? Math.abs(Math.sin(c.t * 0.4)) : 0, wave: false });
     ctx.restore();
     const y0 = gy - H - (1 - drop) * (1 - drop) * 600;
     ctx.fillStyle = "#4b5563"; ctx.fillRect(c.x - W / 2 - 6, y0 - 14, W + 12, 18);
@@ -370,3 +373,4 @@ const SELO_STORY = {
           e1: 'ФЕТÖ побеждён, Село за решёткой... но запрос об экстрадиции и решение ЕСПЧ всё ещё в пути.' }
 };
 for (const L in SELO_STORY) if (STORY_TEXT[L]) Object.assign(STORY_TEXT[L], SELO_STORY[L]);
+Object.assign(STORY_VOICES, { s9b: 'selo_baskan', s9d: 'selo_kitap' });   // Selo'nun replikleri seslendirildi (Türkçe)

@@ -436,21 +436,30 @@ function playStory(level, onDone) {
     storyEl.style.display = 'block';
     resizeStory();
     story.raf = requestAnimationFrame(storyLoop);
+    storyVoice();
 }
 function storyScene() { return STORIES[story.level][story.i]; }
+// Seslendirilmiş replikler: say.key → ses kaydı (bölüm dosyaları ekler, ör. js/selo.js)
+const STORY_VOICES = {};
+function storyVoice() {
+    stopVoice();
+    const sc = storyScene(), v = sc.say && STORY_VOICES[sc.say.key];
+    if (v) playVoice(v);
+}
 function storyFullText(sc) { return sc.card ? storyT(sc.card.text) : storyT(sc.say.key); }
 
 function storyNext() {
     if (!story) return;
     const sc = storyScene(), full = storyFullText(sc);
     if (story.shown < full.length) { story.shown = full.length; return; }   // önce yazıyı tamamla
-    if (story.i < STORIES[story.level].length - 1) { story.i++; story.t0 = performance.now(); story.shown = 0; }
+    if (story.i < STORIES[story.level].length - 1) { story.i++; story.t0 = performance.now(); story.shown = 0; storyVoice(); }
     else endStory();
 }
 function endStory() {
     if (!story) return;
     cancelAnimationFrame(story.raf);
     const cb = story.onDone;
+    stopVoice();
     story = null;
     storyEl.style.display = 'none';
     cb();

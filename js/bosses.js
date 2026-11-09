@@ -259,7 +259,7 @@ function damageBoss(n) {
     playSfx('hit', { rate: 0.6, vol: 1 });
     playSfx('cry', { rate: 0.55, vol: 1, delay: 0.08 });   // canavar: kalın, uzun çığlık
     // Başörtülü teyzeler koşarak gelip kutlar ve sonraki bölüme geçilene kadar tezahürat eder
-    const cx = boss.x + boss.w / 2, after = 0.7;
+    const cx = boss.x + boss.w / 2, after = boss.T.chantDelay || 0.7;   // Selo hücreden konuşurken teyzeler bekler
     const O = BOSS_OUTROS[currentLevel];
     if (O) { outro = { O, t: 0, start: Math.round(after * 60), len: 0, cx }; return; }   // önce ara sahne, sonra teyzeler
     celebrate(cx, after);

@@ -63,7 +63,9 @@ const SFX_FILES = {
     greet_kurt: ['sfx/kro.mp3'],
     greet_feto2: ['sfx/feto2_greet.mp3'],                   // FETÖ (4. ve 8. bölüm): "Ya Allah!" (Windows Türkçe yapay sesi Tolga, kalınlaştırılıp yankılandı)
     granny: ['sfx/gotununkili.mp3'],                        // canavar ölünce gelen teyzeler
-    yalarim: ['sfx/yalarim.mp3'],                           // 2. bölüm canavarı ölünce ara sahne
+    yalarim: ['sfx/yalarim.mp3'],
+    selo_baskan: ['sfx/selo_baskan.mp3'],                   // 9. bölüm SELO: "Seni başkan yaptırmayacağız!" (Windows Türkçe yapay sesi Tolga, inceltildi)
+    selo_kitap: ['sfx/selo_kitap.mp3'],                     // hikâyede: "Burada da kitap yazarım..."                           // 2. bölüm canavarı ölünce ara sahne
     // Recep'in replikleri (kayıt yoksa yapay sese, Gemini, düşer)
     voice_ouch: ['sfx/ahh.mp3']                                         // vurulunca ve ölünce
 };
@@ -80,6 +82,18 @@ function initAudio() {
 }
 // Rastgele bir kayıt çalar (aynısı art arda gelmez); rate: perde/hız, pan: sol-sağ konum.
 // Dönüş: çalan sesin süresi (saniye), çalamazsa 0
+// Konuşma kanalı: yeni replik başlayınca öncekini susturur (hikâyede sahne geçerken)
+let lastSfxSrc = null, voiceSrc = null;
+function playVoice(kind) {
+    stopVoice();
+    const d = playSfx(kind, { vol: 1 });
+    if (d) voiceSrc = lastSfxSrc;
+    return d;
+}
+function stopVoice() {
+    if (voiceSrc) { try { voiceSrc.stop(); } catch (e) {} }
+    voiceSrc = null;
+}
 function playSfx(kind, { rate = 1, vol = 1, delay = 0, pan = 0 } = {}) {
     if (!audioCtx || !sfxBuffers[kind]) return 0;
     const list = sfxBuffers[kind].map((b, i) => [b, i]).filter(([b, i]) => b && (i !== sfxLast[kind] || sfxBuffers[kind].length < 2));
@@ -88,6 +102,7 @@ function playSfx(kind, { rate = 1, vol = 1, delay = 0, pan = 0 } = {}) {
     sfxLast[kind] = idx;
     const src = audioCtx.createBufferSource();
     src.buffer = buf;
+    lastSfxSrc = src;
     src.playbackRate.value = rate;
     const gain = audioCtx.createGain();
     gain.gain.value = vol;
@@ -132,14 +147,15 @@ function playGunshot(pan = 0, vol = 0.5) {
 // Bir kaydın süresi (yüklenmediyse 0)
 const sfxDuration = kind => ((sfxBuffers[kind] || []).find(b => b) || {}).duration || 0;
 
-// Teyzelerin tezahüratı: bir sonraki bölüme geçilene kadar aralıklarla tekrar eder
+// Teyzelerin tezahüratı: 2 kez söylenir
+const GRANNY_REPEATS = 2;
 let grannyChant = null;
 function startGrannyChant(delay) {
     stopGrannyChant();
-    const token = {};
+    const token = { left: GRANNY_REPEATS };
     grannyChant = token;
     const once = () => {
-        if (grannyChant !== token) return;
+        if (grannyChant !== token || token.left-- <= 0) return;
         const d = playSfx('granny', { vol: 1 });
         token.t = setTimeout(once, ((d || 1.5) + 0.5) * 1000);
     };

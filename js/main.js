@@ -34,7 +34,8 @@ introRAF = requestAnimationFrame(introLoop);
 $('sound-btn').addEventListener('click', () => setIntroSound(!$('sound-btn').dataset.on));
 $('overlay-screen').addEventListener('pointerdown', e => {
     const b = $('sound-btn');
-    if (!b || b.dataset.touched || e.target === b) return;
+    // Düğmelere (BÖLÜM SEÇ, NASIL OYNANIR, dil, ses) basınca ses kendiliğinden açılmaz; sadece boş alana dokununca açılır
+    if (!b || b.dataset.touched || e.target.closest('button')) return;
     b.dataset.touched = '1';
     setIntroSound(true);
 });

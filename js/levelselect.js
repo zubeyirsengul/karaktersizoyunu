@@ -19,7 +19,7 @@ const LEVEL_CARDS = {
     4: { ico: '🗳️', boss: 'fetoName',    c1: '#1e293b', c2: '#94a3b8' },
     5: { ico: '🔋', boss: 'tankName',    c1: '#1e3a8a', c2: '#60a5fa' },
     6: { ico: '✈️', boss: 'tankerName',  c1: '#0369a1', c2: '#7dd3fc' },
-    7: { ico: '📜', boss: 'bylockName',  c1: '#7f1d1d', c2: '#f87171' },
+    7: { ico: '🔐', boss: 'bylockName',  c1: '#7f1d1d', c2: '#f87171', puzzle: true },
     8: { ico: '❄️', boss: 'feto2Name',   c1: '#334155', c2: '#e2e8f0' }
 };
 
@@ -47,7 +47,8 @@ function renderLevelSelect() {
             <span class="lvl-num">${n}</span>
             <span class="lvl-ico">${open ? C.ico : '🔒'}</span>
             <span class="lvl-name">${open ? missionName(n) : lsT('locked')}</span>
-            ${open ? `<span class="lvl-boss">👹 ${t(C.boss)}</span>` : ''}
+            ${open ? `<span class="lvl-boss">${C.puzzle ? '🧩' : '👹'} ${t(C.boss)}</span>` : ''}
+            ${open && bestStars[n] ? `<span class="lvl-stars">${starText(bestStars[n])}</span>` : ''}
         </button>`;
     }
     $('levels-panel').innerHTML = `<h2>${lsT('title')}</h2><div class="lvl-grid">${cards}</div>

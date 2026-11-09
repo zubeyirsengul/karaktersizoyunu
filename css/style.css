@@ -104,6 +104,21 @@ canvas {
 #overlay-screen .story-note { background: rgba(0,0,0,0.72); color: #fde68a; text-shadow: 0 1px 2px #000; }
 #overlay-desc { background: rgba(0,0,0,0.65); padding: 6px 16px; border-radius: 8px; color: #fff; font-weight: bold; text-shadow: 0 1px 3px #000; }
 #overlay-screen .best-line { text-shadow: 0 2px 4px #000, 0 0 8px #000; }
+/* Bölüm sonu karnesi */
+#report { background: rgba(0,0,0,0.78); border: 2px solid var(--gold); border-radius: 14px; padding: 10px 22px 12px; margin: 0 16px 16px; max-width: 520px; }
+#report[hidden], #lang-picker[hidden], #levels-btn[hidden] { display: none; }
+.rp-title { font-size: 14px; font-weight: 900; letter-spacing: 3px; color: var(--gold); }
+.rp-stars { display: flex; justify-content: center; gap: 10px; margin: 2px 0 6px; }
+.rp-star { width: 58px; height: 58px; fill: #3f3f46; stroke: #18181b; stroke-width: 1.2; stroke-linejoin: round; }
+.rp-star.on { fill: #fde047; stroke: #a16207; filter: drop-shadow(0 0 8px rgba(253,224,71,0.8)); animation: starPop 0.45s ease-out; }
+@keyframes starPop { 0% { transform: scale(0.2) rotate(-40deg); } 60% { transform: scale(1.35) rotate(10deg); } 100% { transform: scale(1) rotate(0); } }
+.rp-crit { list-style: none; margin: 0 0 6px; padding: 0; text-align: left; display: inline-block; font-size: 15px; }
+.rp-crit li span { display: inline-block; width: 22px; font-weight: 900; }
+.rp-crit li.ok { color: #bbf7d0; } .rp-crit li.ok span { color: #4ade80; }
+.rp-crit li.no { color: #a1a1aa; } .rp-crit li.no span { color: #f87171; }
+.rp-stats { font-size: 13px; color: #e5e7eb; }
+.rp-stats b { color: #fde68a; }
+.lvl-stars { position: absolute; top: 6px; right: 8px; font-size: 13px; color: #fde047; text-shadow: 0 1px 2px #000; letter-spacing: 1px; }
 #overlay-screen .lang-btn { background: rgba(0,0,0,0.72); text-shadow: 0 1px 2px #000; }
 #overlay-screen .lang-btn.active { background: var(--gold); color: #000; text-shadow: none; }
 
@@ -145,6 +160,10 @@ canvas {
     #lang-picker { gap: 6px; margin-bottom: 8px; }
     .lang-btn { padding: 4px 10px; font-size: 13px; }
     #sound-btn, .menu-row { margin-bottom: 8px; }
+    #report { padding: 6px 14px 8px; margin-bottom: 8px; }
+    .rp-star { width: 36px; height: 36px; }
+    .rp-crit { font-size: 12px; margin-bottom: 2px; }
+    .rp-stats { font-size: 11px; }
     #levels { padding: 6px; }
     #levels-panel { padding: 10px 12px; }
     #levels-panel h2 { font-size: 20px; margin-bottom: 8px; }
@@ -160,3 +179,61 @@ canvas {
     #howto-panel h2 { font-size: 22px; }
 }
 @media (max-width: 560px) { .lvl-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* --- 7. bölüm: BYLOCK şifre bulmacası --- */
+body.puzzle #kill-count, body.puzzle #hearts, body.puzzle #ui-layer, body.puzzle #pause-btn, body.puzzle #help-btn { display: none !important; }
+#puzzle { position: absolute; inset: 0; z-index: 35; display: none; justify-content: center; align-items: center; padding: 12px; box-sizing: border-box;
+    background: radial-gradient(ellipse at 50% 30%, #1e293b 0%, #0b1120 60%, #020617 100%); color: #e2e8f0; font-family: inherit; user-select: none; -webkit-user-select: none; }
+.pz-phone { --c: min(52px, calc((92vh - 110px) / 8 - 6px)); width: min(860px, 100%); max-height: 100%; background: #0f172a; border: 3px solid #14b8a6; border-radius: 22px;
+    box-shadow: 0 0 40px rgba(20,184,166,0.35), inset 0 0 0 2px #020617; overflow: hidden; display: flex; flex-direction: column; }
+.pz-bar { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: linear-gradient(90deg, #0f766e, #115e59); font-size: 20px; letter-spacing: 1px; }
+.pz-bar b { color: #fff; }
+.pz-lock { font-size: 20px; }
+.pz-round { margin-left: auto; font-size: 14px; font-weight: bold; color: #ccfbf1; background: rgba(0,0,0,0.3); padding: 3px 10px; border-radius: 999px; }
+.pz-body { display: grid; grid-template-columns: auto 1fr; gap: 22px; padding: 14px 20px; align-items: center; min-height: 0; }
+.pz-board { display: flex; flex-direction: column; gap: 6px; }
+.pz-row { display: flex; gap: 6px; }
+.pz-row.shake { animation: pzShake 0.35s; }
+@keyframes pzShake { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+.pz-cell { width: var(--c); height: var(--c); display: flex; justify-content: center; align-items: center; border: 2px solid #334155; border-radius: 8px;
+    font-size: calc(var(--c) * 0.55); font-weight: 900; color: #fff; background: #0b1220; box-sizing: border-box; }
+.pz-row.active .pz-cell { border-color: #5eead4; }
+.pz-cell.typed { border-color: #99f6e4; animation: pzPop 0.12s; }
+.pz-cell.g, .pz-cell.y, .pz-cell.x { animation: pzFlip 0.45s both; animation-delay: var(--d); }
+.pz-cell.g { background: #16a34a; border-color: #16a34a; }
+.pz-cell.y { background: #ca8a04; border-color: #ca8a04; }
+.pz-cell.x { background: #3f3f46; border-color: #3f3f46; color: #a1a1aa; }
+@keyframes pzPop { 50% { transform: scale(1.12); } }
+@keyframes pzFlip { 0% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
+.pz-side { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+.pz-sub { margin: 0; font-size: 16px; font-weight: bold; color: #fde68a; text-align: center; }
+.pz-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; font-size: 13px; color: #cbd5e1; }
+.pz-legend i { display: inline-block; width: 13px; height: 13px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; }
+.pz-legend i.g { background: #16a34a; } .pz-legend i.y { background: #ca8a04; } .pz-legend i.x { background: #3f3f46; }
+.pz-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: min(300px, 100%); }
+.pz-key { height: min(54px, 10vh); border: 2px solid #475569; border-radius: 10px; background: #1e293b; color: #fff; font-size: 24px; font-weight: 900; cursor: pointer; font-family: inherit; touch-action: manipulation; }
+.pz-key:active { transform: scale(0.94); }
+.pz-key.g { background: #166534; border-color: #22c55e; }
+.pz-key.y { background: #854d0e; border-color: #eab308; }
+.pz-key.x { background: #18181b; border-color: #27272a; color: #52525b; }
+.pz-key.used { opacity: 0.35; }
+.pz-key.ok { background: #0d9488; border-color: #5eead4; }
+.pz-key.del { background: #7f1d1d; border-color: #f87171; }
+.pz-left { font-size: 15px; color: #cbd5e1; }
+.pz-left b { color: #5eead4; font-size: 18px; }
+.pz-msg { min-height: 22px; font-size: 15px; font-weight: bold; text-align: center; color: #fca5a5; }
+.pz-msg.fail { color: #f87171; font-size: 17px; animation: pzPop 0.4s; }
+.pz-msg.win { color: #4ade80; font-size: 18px; text-shadow: 0 0 12px rgba(74,222,128,0.6); animation: pzPop 0.5s; }
+@media (pointer: coarse) and (max-height: 540px), (max-height: 460px) {
+    #puzzle { padding: 4px; }
+    .pz-phone { --c: min(44px, calc((100vh - 70px) / 8 - 4px)); border-radius: 14px; border-width: 2px; }
+    .pz-bar { padding: 4px 12px; font-size: 15px; }
+    .pz-body { gap: 14px; padding: 6px 12px; }
+    .pz-board, .pz-row { gap: 4px; }
+    .pz-sub { font-size: 12px; }
+    .pz-legend { font-size: 10px; }
+    .pz-side { gap: 5px; }
+    .pz-keys { gap: 5px; width: min(240px, 100%); }
+    .pz-key { height: min(42px, 11vh); font-size: 18px; }
+    .pz-left, .pz-msg { font-size: 12px; min-height: 0; }
+}

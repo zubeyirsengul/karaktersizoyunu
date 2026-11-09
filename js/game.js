@@ -3,6 +3,8 @@
 
 function update() {
     if(!gameStarted || paused || userPaused) return;
+    if(!levelCompleted && !levelEnding && !player.isDying) levelStats.frames++;   // karnedeki süre
+    if(isPuzzle()) return;   // 7. bölüm: bulmaca HTML'de, oyun döngüsü beklemede
     if(isFlight()) { updateFlight(); return; }
     if(camShake > 0) camShake--;
     if(hitStop > 0) { hitStop--; return; }   // vuruş donması: ekran çizilir, oyun bekler

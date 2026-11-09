@@ -13,6 +13,7 @@ window.onkeydown = e => {
     if(story) { storyKey(e); return; }
     if(levelSelectOpen()) { if(e.key === 'Escape') closeLevelSelect(); return; }
     if($('howto').style.display === 'flex') { if(e.key === 'Escape' || e.key === 'Enter') closeHowto(); return; }
+    if(pz && gameStarted && !levelCompleted && !paused) { puzzleKey(e); return; }   // 7. bölüm bulmacası
     if(e.key === 'Escape' || k === 'p') { setUserPause(!userPaused); return; }
     if(userPaused) return;
     if(k==='a' || e.key==='ArrowLeft') keys.a=true; if(k==='d' || e.key==='ArrowRight') keys.d=true; if(k==='s' || e.key==='ArrowDown') keys.s=true;

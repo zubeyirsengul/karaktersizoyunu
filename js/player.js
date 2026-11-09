@@ -91,7 +91,7 @@ function updateHearts() {
 }
 function die() {
     if(player.isDying || levelCompleted || levelEnding || player.invuln > 0 || power.star > 0) return;   // dokunulmazken hasar yok
-    player.hp--;
+    player.hp--; levelStats.lost++;
     updateHearts();
     if(player.hp <= 0) { killPlayer(); return; }
     player.invuln = 90;
@@ -111,7 +111,7 @@ function fallIntoPit() {
     if(player.isDying || levelCompleted || levelEnding) return;
     const free = power.star > 0;
     if(!free && player.hp <= 1) { killPlayer(); return; }
-    if(!free) { player.hp--; updateHearts(); }
+    if(!free) { player.hp--; levelStats.lost++; updateHearts(); }
     const sp = player.safePlat;
     if(sp && platforms.includes(sp)) {
         player.x = Math.max(sp.x + 10, Math.min(sp.x + player.safeOff, sp.x + sp.w - player.w - 10));
@@ -130,6 +130,7 @@ function fallIntoPit() {
 async function killPlayer() {
     // Bölüm bitmek üzereyken artık ölünmez
     if(player.isDying || levelCompleted || levelEnding) return;
+    levelStats.lost += player.hp; levelStats.deaths++;   // karne
     player.hp = 0; updateHearts();
     saveBest();
     player.isDying = true;
@@ -202,7 +203,7 @@ function drawRecep(ctx, o) {
         const hx = bsx - 6 + sw, hy = bsy + 34;
         ctx.strokeStyle = SUIT_D; ctx.lineWidth = 11;
         ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(bsx - 4 + sw / 2, bsy + 17); ctx.lineTo(hx, hy); ctx.stroke();
-        drawShield(ctx, hx - 6, hy - 2, 0.72, o.dir);
+        drawShield(ctx, hx - 6, hy - 2, 0.9, o.dir);
         ctx.fillStyle = SKIN; ctx.beginPath(); ctx.arc(hx, hy - 10, 5.5, 0, Math.PI * 2); ctx.fill();
     }
 
@@ -248,18 +249,25 @@ function drawRecep(ctx, o) {
     ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.lineTo(hx, hy); ctx.stroke();
     drawHammer(ctx, hx, hy, ang, o.bigHammer ? 1.5 : 1, o.dir);
 
-    // Kalkan siper: arka kol öne uzanır, kalkan yüzü ve gövdeyi kapatır
+    // Kalkan siper: arka kol öne-yukarı uzanır; büyük kalkan yukarı eğik durur, yüzü, gövdeyi ve tepeyi kapatır
     if (o.shield) {
         ctx.strokeStyle = SUIT_D; ctx.lineWidth = 11;
-        ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(10, bsy + 14); ctx.lineTo(26, shY + 4); ctx.stroke();
-        drawShield(ctx, 32, shY - 6, 1.3, o.dir);
+        ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(18, bsy - 2); ctx.lineTo(42, shY - 18); ctx.stroke();
+        ctx.save();
+        ctx.translate(60, shY - 36);
+        ctx.rotate(-SHIELD_TILT);   // üst kenar geriye yatar: kalkan öne ve yukarıya bakar
+        drawShield(ctx, 0, 0, 2.0, o.dir);
+        ctx.restore();
     }
 }
 
 // --- KALKAN İLE KORUNMA ---
 // Kalkan kalkıkken oyuncunun baktığı yönden gelen mermi, alev ve dolarlar durur.
+// Kalkan yukarı eğik tutulduğu için tepeden düşen saldırılar (gaz kutusu, nişancı mermisi, alev, dolar) da durur.
+const SHIELD_TILT = 0.55;
 function shieldBlocks(p) {
     if (!player.shield || player.isDying) return false;
+    if ((p.vy || 0) > 0.5 && p.y < player.y + player.h * 0.5) return true;   // yukarıdan geliyor
     // Hızlı gidenlerde (mermi) yönüne, yavaş düşenlerde (dolar, alev) konumuna bakılır
     if (Math.abs(p.vx || 0) > 2) return p.vx * player.dir < 0;
     return (p.x - (player.x + player.w / 2)) * player.dir > -5;

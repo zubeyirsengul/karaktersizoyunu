@@ -293,6 +293,7 @@ function drawPlatform(ctx, p) {
 function draw() {
     ctx.clearRect(0,0,width,height);
     if (isFlight()) { drawFlight(); return; }
+    if (isPuzzle()) return;   // bulmaca ekranı canvas'ın üstünde
     drawBackground();
     ctx.save();
     const sh = camShake > 0 ? camShake : 0;

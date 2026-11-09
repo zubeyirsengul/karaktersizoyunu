@@ -77,7 +77,7 @@ function drawPits(ctx) {
 }
 
 // --- BÖLÜM SONU KAPISI ---
-// 7 polis ölünce oyuncunun önünde büyük bir kapı belirir ve açılır; içinden geçen bölüm sonu canavarıyla karşılaşır.
+// 11 polis ölünce oyuncunun önünde büyük bir kapı belirir ve açılır; içinden geçen bölüm sonu canavarıyla karşılaşır.
 let gate = null, screenFlash = 0;
 function spawnGate() {
     const x = Math.min(player.x + 700, WORLD_WIDTH - 1200);
@@ -226,6 +226,7 @@ function completeLevel() {
         $('start-button').innerText = t("winBtn");
         $('start-button').onclick = () => location.reload();
     }
+    showReport(currentLevel);   // 1-3 yıldızlı bölüm karnesi
     $('overlay-screen').style.display = 'flex';
 }
 
@@ -237,27 +238,27 @@ function completeLevel() {
 // Bölüme özel: item 'tape' (kaset), exile 'surgun'/'ihrac' (ölen bavulla gider), battery (şarj),
 // mode 'flight' (uçuş), stamp (KHK damgası), civilians (zararsız siviller)
 const LEVELS = {
-    1: { target: 7, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, fire: 170, kinds: i => i % 5 === 2 ? 'riot' : 'police',
+    1: { target: 11, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, fire: 170, kinds: i => i % 5 === 2 ? 'riot' : 'police',
          bg: 'hills', pit: 0.35, sniper: 0.3, minSnipers: 2,
          platforms: [[600, T1, 240, LEDGE], [900, T2, 240, LEDGE], [1200, T1, 180, LEDGE], [1900, T1, 300, LEDGE], [2260, T2, 180, LEDGE]] },
-    2: { target: 7, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
+    2: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
          bg: 'steppe', pit: 0.5, sniper: 0.45, minSnipers: 3,
          platforms: [[420, T1, 180, LEDGE], [660, T2, 300, LEDGE], [1020, T1, 240, LEDGE], [1620, T1, 240, LEDGE], [1920, T2, 240, LEDGE]] },
-    3: { target: 7, music: 'chiptune_level1.mp3', boss: 'sayac', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 3 ? 'gas' : 'police',
+    3: { target: 11, music: 'chiptune_level1.mp3', boss: 'sayac', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 3 ? 'gas' : 'police',
          bg: 'villa', pit: 0.5, sniper: 0.45, minSnipers: 3, item: 'tape',
          platforms: [[500, T1, 240, LEDGE], [800, T2, 180, LEDGE], [1040, T1, 180, LEDGE], [1800, T1, 300, LEDGE]] },
-    4: { target: 7, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
+    4: { target: 11, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
          bg: 'city', pit: 0.65, sniper: 0.6, minSnipers: 4, exile: 'surgun',
          platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] },
-    5: { target: 7, music: 'bozkir_dortnal.mp3', boss: 'darbetank', speed: 2.2, fire: 140, kinds: i => i % 2 === 0 ? 'tank' : 'police',
+    5: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'darbetank', speed: 2.2, fire: 140, kinds: i => i % 2 === 0 ? 'tank' : 'police',
          bg: 'coast', pit: 0.5, sniper: 0.4, minSnipers: 2, battery: true,
          platforms: [[600, T1, 240, LEDGE], [1100, T1, 240, LEDGE], [1400, T2, 240, LEDGE]] },
     6: { target: 12, music: 'intro_title.mp3', boss: 'tanker', mode: 'flight', bg: 'sky', speed: 0, fire: 0, kinds: () => 'police',
          pit: 0, sniper: 0, minSnipers: 0, platforms: [] },
-    7: { target: 7, music: 'chiptune_level3.mp3', boss: 'bylock', speed: 3, fire: 130, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
-         bg: 'ankara', pit: 0.55, sniper: 0.5, minSnipers: 3, exile: 'ihrac', stamp: true, civilians: true,
-         platforms: [[500, T1, 240, LEDGE], [800, T2, 240, LEDGE], [1400, T1, 300, LEDGE]] },
-    8: { target: 7, music: 'chiptune_level1.mp3', boss: 'feto2', speed: 3.4, fire: 115, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
+    // 7. bölüm tamamen bulmaca: BYLOCK'un şifresi kırılınca geçilir (js/puzzle.js)
+    7: { target: 0, music: 'chiptune_level3.mp3', mode: 'puzzle', bg: 'ankara', speed: 0, fire: 0, kinds: () => 'police',
+         pit: 0, sniper: 0, minSnipers: 0, platforms: [] },
+    8: { target: 11, music: 'chiptune_level1.mp3', boss: 'feto2', speed: 3.4, fire: 115, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
          bg: 'snow', pit: 0.65, sniper: 0.65, minSnipers: 4,
          platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] }
 };
@@ -267,6 +268,7 @@ function goToLevel(n) {
     stopGrannyChant();   // teyzeler sonraki bölüme geçince susar
     if (!storyDone[n]) { $('overlay-screen').style.display = 'none'; playStory(n, () => goToLevel(n)); return; }
     unlockLevel(n);
+    hideReport(); resetLevelStats();   // karne yeni bölümde sıfırdan
     currentLevel = n; targetKills = LEVELS[n].target;
     $('current-level').innerText = n; $('target-kills').innerText = targetKills;
     $('overlay-screen').style.display = 'none'; paused = false;
@@ -290,8 +292,9 @@ function createLevel() {
     player.w = 100; player.h = 180; player.shield = false;
     $('game-container').classList.remove('shake');
     $('kills').innerText = "0";
-    initChapter(); clearBricks();
+    initChapter(); clearBricks(); closePuzzle();
     if (isFlight()) { createFlight(); return; }
+    if (isPuzzle()) { platforms = []; pits = []; createPuzzle(); return; }
 
     const layout = buildLayout(currentLevel);
     pits = layout.pits;

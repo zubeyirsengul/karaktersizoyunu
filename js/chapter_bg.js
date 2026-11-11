@@ -82,6 +82,8 @@ function drawChapterBackground(bg, time) {
             ctx.fillStyle = "#94a3b8"; ctx.fillRect(-6, -7, 12, 2); ctx.fillRect(-6, -2, 12, 2); ctx.fillRect(-6, 3, 8, 2);
             ctx.fillStyle = "rgba(255,255,255,0.9)"; ctx.restore();
         }
+    } else if (bg === 'emniyet') {
+        drawEmniyetBg(time);   // 2. bölüm: js/saygili.js
     } else if (bg === 'gezi') {
         drawGeziBg(time);   // 1. bölüm: js/gezi.js
     } else if (bg === 'saracane') {

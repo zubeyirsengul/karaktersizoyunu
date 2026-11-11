@@ -1,4 +1,4 @@
-// 1. bölüm (Gezi) gezi.js'te; 3-8. bölümlerin özel içerikleri: arka planlar, yeni düşmanlar, bölüme özel mekanikler, yeni canavarlar
+// 1. bölüm (Gezi) gezi.js'te, 2. bölüm (Bilal'i kurtar) saygili.js'te; 3-8. bölümlerin özel içerikleri: arka planlar, yeni düşmanlar, bölüme özel mekanikler, yeni canavarlar
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 //
 // 3 SIFIRLA      : torbalar yerine ses kasetleri ("MONTAJ!"), canavar PARA SAYMA MAKİNESİ
@@ -47,6 +47,7 @@ function populateChapter() {
 function drawChapterItem(ctx, it) {
     if (it.charger) { drawCharger(ctx, it.x, it.y); return true; }
     if (curLevel().item === 'fidan') { drawFidan(ctx, it.x, it.y); return true; }
+    if (curLevel().item === 'shoebox') { drawShoebox(ctx, it.x, it.y); return true; }
     if (curLevel().item === 'tape') { drawCassette(ctx, it.x, it.y); return true; }
     return false;
 }
@@ -60,7 +61,7 @@ function pickupChapterItem(it) {
     }
     return false;
 }
-const pickupText = () => ({ tape: t("montaj"), fidan: t("fidan") })[curLevel().item] || t("pickup");
+const pickupText = () => ({ tape: t("montaj"), fidan: t("fidan"), shoebox: t("boxPick") })[curLevel().item] || t("pickup");
 
 function drawCassette(ctx, x, y) {
     const tm = performance.now() / 1000, bob = Math.sin(tm * 3 + x) * 5;

@@ -1,5 +1,5 @@
 // Bölüm sonu canavarlarının ortak motoru: doğma, öfke, saldırı mermileri, hasar, çizim ve can barı
-// Canavarların kendileri boss_*.js dosyalarında (kurt, feto, sayac, darbetank, bylock), gezi.js (TOMA), selo.js, ekrem.js, flight.js
+// Canavarların kendileri boss_*.js dosyalarında (feto, sayac, darbetank, bylock), gezi.js (TOMA), saygili.js (SAYGILI), selo.js, ekrem.js, flight.js
 // Teyzeler: grannies.js, canavar sonrası ara sahne: boss_outro.js
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 

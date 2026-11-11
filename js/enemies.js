@@ -158,7 +158,7 @@ function killEnemy(en) {
     $('score').innerText = score += ({ police: 3000, riot: 4000, sniper: 5000, tank: 4000, gas: 4000 })[en.kind] || 2000; $('kills').innerText = killedEnemies;
     if(killedEnemies === Math.ceil(targetKills / 2) && !bossCheckpoint) setMidCheckpoint();
     if(killedEnemies === targetKills) {
-        // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: TOMA, 2: KURT, ...)
+        // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: TOMA, 2: SAYGILI, ...)
         spawnGate();
     }
 }

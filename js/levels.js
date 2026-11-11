@@ -238,15 +238,16 @@ function completeLevel() {
 // bg: arka plan; pit/sniper: çukur ve nişancı olasılığı; minSnipers: en az nişancı sayısı
 // Bölüme özel: item 'tape' (kaset), exile 'surgun'/'ihrac' (ölen bavulla gider), battery (şarj),
 // mode 'flight' (uçuş), stamp (KHK damgası), civilians (zararsız siviller),
-// skins(i, kind): düşmanın görünüşü, item 'fidan', cry: ölünce çıkan yazı, populate: bölüme özel eşya/kişiler
+// skins(i, kind): düşmanın görünüşü, item 'fidan' / 'shoebox', cry: ölünce çıkan yazı, populate: bölüme özel eşya/kişiler
 const LEVELS = {
     // 1. bölüm: Gezi Parkı; polis yok, Gezi kahramanları (skins), Duran Adam, çınar fidanları; canavar TOMA (js/gezi.js)
     1: { target: 11, music: 'chiptune_level1.mp3', boss: 'toma', speed: 1.5, fire: 170, kinds: i => i % 4 === 3 ? 'riot' : 'police',
          skins: (i, kind) => kind === 'riot' ? 'tencere' : GEZI_HEROES[(i - Math.floor((i + 1) / 4)) % 4], item: 'fidan', cry: 'gezCry', populate: () => populateGezi(),
          bg: 'gezi', pit: 0.35, sniper: 0, minSnipers: 0,
          platforms: [[600, T1, 240, LEDGE], [900, T2, 240, LEDGE], [1200, T1, 180, LEDGE], [1900, T1, 300, LEDGE], [2260, T2, 180, LEDGE]] },
-    2: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
-         bg: 'steppe', pit: 0.5, sniper: 0.45, minSnipers: 3,
+    // 2. bölüm: Bilal'i kurtar (17-25 Aralık); ayakkabı kutuları, canavar SAYGILI (js/saygili.js)
+    2: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'saygili', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
+         bg: 'emniyet', item: 'shoebox', pit: 0.5, sniper: 0.45, minSnipers: 3,
          platforms: [[420, T1, 180, LEDGE], [660, T2, 300, LEDGE], [1020, T1, 240, LEDGE], [1620, T1, 240, LEDGE], [1920, T2, 240, LEDGE]] },
     3: { target: 11, music: 'chiptune_level1.mp3', boss: 'sayac', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 3 ? 'gas' : 'police',
          bg: 'villa', pit: 0.5, sniper: 0.45, minSnipers: 3, item: 'tape',

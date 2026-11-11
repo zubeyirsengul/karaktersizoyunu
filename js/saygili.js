@@ -119,31 +119,68 @@ function drawEmniyetBg(time) {
 }
 
 // --- CANAVAR: SAYGILI ---
-// Dev 17/25 polisi: güneş gözlüklü, kalın bıyıklı, apoletli. Yakında: copu kaldırır (uyarı) → indirir.
-// Uzakta: kavisli kelepçe atar. Öfkelenince (can yarıya inince) 1,5 kat hızlı, iki kelepçe birden atar.
-BOSS_TYPES.saygili = { say: "GÖZALTINDASIN!", w: 140, h: 260, scale: 1, hp: 7, arena: 700, nameKey: "saygiliName", stomp: 80, labelY: 40,
-                       update: updateSaygili, draw: drawSaygili };
-const COP_REACH = 250, CUFF_G = 0.35;
+// Dev 17/25 polisi: güneş gözlüklü, kalın bıyıklı, apoletli. Karşılarken "Biz bu ülkenin namusunu kurtardık!" der.
+// Oyuncunun peşinden yürür ve sırayla saldırır:
+//   COP     (yakın): copu omzunun arkasına kaldırır (kırmızı "!") → başının üstünden öne indirir. Ona dönük kalkan durdurur.
+//   HÜCUM   (orta/uzak): çömelir ("!") → copu önde, hızla koşar; çarpan can kaybeder (üstünden zıplanır).
+//   SIÇRAMA (orta): oyuncunun üstüne zıplar, yere inince iki yana şok dalgası; inişten sonra kısa süre sersemler.
+//   KELEPÇE (uzak): kavisli kelepçe atar (öfkeliyken iki tane).
+// Öfkelenince (can yarıya inince) her şeyi 1,5 kat hızlı yapar.
+BOSS_TYPES.saygili = { greet: 'saygili_namus', say: "BİZ BU ÜLKENİN NAMUSUNU KURTARDIK!", w: 140, h: 260, scale: 1, hp: 7, arena: 900,
+                       nameKey: "saygiliName", stomp: 80, labelY: 40, update: updateSaygili, draw: drawSaygili };
+const COP_REACH = 250, CUFF_G = 0.35, LEAP_G = 0.8;
+function sgState(b, s) { b.state = s; b.stateT = 0; }
 function updateSaygili(b) {
-    const pcx = player.x + player.w / 2, dist = pcx - (b.x + b.w / 2), ad = Math.abs(dist);
+    const pcx = player.x + player.w / 2, cx = b.x + b.w / 2, dist = pcx - cx, ad = Math.abs(dist), ground = height - 60 - b.h;
+    const clampX = x => Math.max(b.homeX - b.T.arena, Math.min(x, b.homeX + b.T.arena));
     b.stateT++;
-    if (b.state === 'wind') { if (b.stateT >= 30) { b.state = 'swing'; b.stateT = 0; } return; }
-    if (b.state === 'swing') {
-        if (b.stateT === 5) copHit(b);
-        if (b.stateT >= 18) { b.state = 'walk'; b.stateT = 0; b.cool = 45; }
-        return;
+    switch (b.state) {
+        case 'wind':   if (b.stateT >= 28) sgState(b, 'swing'); return;
+        case 'swing':  if (b.stateT === 5) copHit(b); if (b.stateT >= 18) { sgState(b, 'walk'); b.cool = 35; } return;
+        case 'throw':
+            if (b.stateT === 12) { throwCuffs(b, 0); if (b.rage) throwCuffs(b, 14); }
+            if (b.stateT >= 26) { sgState(b, 'walk'); b.cool = 30; }
+            return;
+        case 'crouch': if (b.stateT >= 24) { sgState(b, 'dash'); playSfx('hit', { rate: 0.5, vol: 0.6 }); } return;
+        case 'dash': {   // copu önde, hızla koşar; arena kenarında ya da oyuncuyu epey geçince durur
+            const nx = clampX(b.x + b.look * 10);
+            const passed = (pcx - (nx + b.w / 2)) * b.look < -220;
+            b.walk = (b.walk || 0) + 0.5; b.moving = true;
+            if (nx === b.x || passed || b.stateT > 70) { sgState(b, 'walk'); b.cool = 45; b.moving = false; }
+            b.x = nx;
+            if (b.stateT % 6 === 0) createParticle(b.x + b.w / 2 - b.look * 40, height - 70);   // toz
+            return;
+        }
+        case 'leap':
+            b.vy += LEAP_G; b.y += b.vy; b.x = clampX(b.x + b.vx);
+            if (b.y >= ground) {   // iniş: şok dalgası
+                b.y = ground; b.vy = 0; sgState(b, 'land');
+                camShake = Math.max(camShake, 14); playSfx('hit', { rate: 0.45, vol: 1 });
+                [-1, 1].forEach(d => projectiles.push({ type: 'wave', x: b.x + b.w / 2 + d * 40, y: height - 60, vx: d * 8, active: true, life: 85, angle: 0 }));
+            }
+            return;
+        case 'land':   if (b.stateT >= 26) { sgState(b, 'walk'); b.cool = 30; } return;   // sersemler: kafasına basma fırsatı
     }
-    if (b.state === 'throw') {
-        if (b.stateT === 12) { throwCuffs(b, 0); if (b.rage) throwCuffs(b, 14); }
-        if (b.stateT >= 26) { b.state = 'walk'; b.stateT = 0; }
-        return;
-    }
+    // Yürüyüş: oyuncunun peşinden gider, sıradaki saldırıyı seçer
     b.look = Math.sign(dist) || b.look;
     if (b.cool > 0) b.cool--;
-    if (!player.isDying && ad < COP_REACH - 20 && b.cool <= 0) { b.state = 'wind'; b.stateT = 0; return; }
-    if (!player.isDying && ad >= COP_REACH && ad < 1300 && ++b.timer > 100) { b.timer = 0; b.state = 'throw'; b.stateT = 0; return; }
-    const sp = ad > 180 ? 1.8 : 0;
-    b.x = Math.max(b.homeX - b.T.arena, Math.min(b.x + b.look * sp, b.homeX + b.T.arena));
+    if (!player.isDying && !(b.cool > 0) && ad < 1300) {   // cool başta tanımsız: "<= 0" yanlış verir
+        const r = Math.random();
+        if (ad < COP_REACH - 20) { sgState(b, 'wind'); return; }
+        if (ad < 650) {
+            if (r < 0.4) { sgState(b, 'crouch'); return; }
+            if (r < 0.7) {
+                sgState(b, 'leap');
+                const T = 2 * 17 / LEAP_G;   // havada kalma süresi (kare)
+                b.vy = -17; b.vx = Math.max(-9, Math.min(9, dist / T));
+                return;
+            }
+            sgState(b, 'throw'); return;
+        }
+        sgState(b, r < 0.6 ? 'throw' : 'crouch'); return;
+    }
+    const sp = ad > 170 ? 2.8 : 0;
+    b.x = clampX(b.x + b.look * sp);
     b.walk = (b.walk || 0) + sp * 0.05; b.moving = sp > 0;
 }
 // Cop iner: önündeki oyuncu can kaybeder; ona dönük kalkan copu durdurur
@@ -198,11 +235,18 @@ function drawSaygili(ctx, b) {
     const H = b.h, wind = b.state === 'wind' ? Math.min(1, b.stateT / 20) : 0, swing = b.state === 'swing' ? Math.min(1, b.stateT / 5) : 0;
     const throwing = b.state === 'throw' ? Math.sin(Math.min(1, b.stateT / 14) * Math.PI) : 0;
     const talk = b.talk > 0 ? Math.abs(Math.sin(b.anim * 0.45)) : 0;
+    const crouch = b.state === 'crouch' ? Math.min(1, b.stateT / 10) : b.state === 'land' ? Math.max(0, 1 - b.stateT / 14) : 0;
+    const air = b.state === 'leap', dash = b.state === 'dash';
     ctx.save();
+    if (air) {   // gölge yerde kalır
+        ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.beginPath(); ctx.ellipse(b.x + b.w / 2, height - 62, 50, 9, 0, 0, Math.PI * 2); ctx.fill();
+    }
     bossBaseTransform(ctx, b);
     ctx.scale(b.look, 1);
-    ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.beginPath(); ctx.ellipse(0, -2, 60, 10, 0, 0, Math.PI * 2); ctx.fill();
-    const legs = drawLegs(ctx, 0, -H, H, 1, b.walk || 0, !!b.moving, false, SAYGILI_LEGS);
+    if (!air) { ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.beginPath(); ctx.ellipse(0, -2, 60, 10, 0, 0, Math.PI * 2); ctx.fill(); }
+    if (crouch) ctx.scale(1 + crouch * 0.08, 1 - crouch * 0.16);   // çömelir / inişte ezilir
+    if (dash) ctx.rotate(0.18);                                     // hücumda öne eğilir
+    const legs = drawLegs(ctx, 0, -H, H, 1, b.walk || 0, !!b.moving, air, SAYGILI_LEGS);
     ctx.translate(0, -H + legs.drop);
     const s = H * 0.64 / 128; ctx.scale(s, s);
     ctx.lineJoin = "round"; ctx.lineCap = "round";
@@ -241,7 +285,9 @@ function drawSaygili(ctx, b) {
     ctx.fillStyle = "#0f172a"; ctx.beginPath(); ctx.ellipse(18, 12, 17, 4.5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#facc15"; ctx.fillRect(-18, 5, 39, 3.5); ctx.beginPath(); ctx.arc(4, 0, 4.5, 0, Math.PI * 2); ctx.fill();
     // Ön kol + cop: kalkar (uyarı) → iner
-    const ang = b.state === 'wind' ? -0.3 - wind * 2.5 : b.state === 'swing' ? -2.8 + swing * 3.6 : sw * 0.6 - 0.2;
+    // Kol açısı: 0 = aşağı, π = yukarı, 3π/2 = ileri. Cop omzun arkasına kalkar, başının üstünden öne iner.
+    const ang = b.state === 'wind' ? 0.2 + wind * 2.3 : b.state === 'swing' ? 2.5 + swing * 2.9
+              : dash || b.state === 'crouch' ? 4.5 : air ? 3.3 : sw * 0.4 - 0.25;
     ctx.save(); ctx.translate(-10, 56); ctx.rotate(ang);
     ctx.strokeStyle = "#1e3a8a"; ctx.lineWidth = 15; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 44); ctx.stroke();
     ctx.fillStyle = "#111827"; ctx.beginPath(); ctx.roundRect(-4, 34, 9, 64, 4); ctx.fill();             // cop
@@ -250,10 +296,10 @@ function drawSaygili(ctx, b) {
     ctx.restore();
     if (b.state === 'swing' && b.stateT < 10) {   // cop izi
         ctx.strokeStyle = `rgba(255,255,255,${0.6 * (1 - b.stateT / 10)})`; ctx.lineWidth = 6;
-        ctx.beginPath(); ctx.arc(-10, 56, 95, -1.9, 0.7); ctx.stroke();
+        ctx.beginPath(); ctx.arc(-10, 56, 95, 2.5 + Math.PI / 2, 2.5 + Math.PI / 2 + 2.9 * swing); ctx.stroke();
     }
     ctx.restore();
-    if (b.state === 'wind' && !b.dying) {   // uyarı işareti
+    if ((b.state === 'wind' || b.state === 'crouch') && !b.dying) {   // uyarı işareti
         ctx.fillStyle = "#ef4444"; ctx.font = "bold 46px Arial"; ctx.textAlign = "center"; ctx.lineWidth = 5; ctx.strokeStyle = "#000";
         ctx.strokeText("!", b.x + b.w / 2, b.y - 92); ctx.fillText("!", b.x + b.w / 2, b.y - 92);
     }

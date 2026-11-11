@@ -64,6 +64,7 @@ const SFX_FILES = {
     yalarim: ['sfx/yalarim.mp3'],
     selo_baskan: ['sfx/selo_baskan.mp3'],                   // 9. bölüm SELO: "Seni başkan yaptırmayacağız!" (Windows Türkçe yapay sesi Tolga, inceltildi)
     selo_kitap: ['sfx/selo_kitap.mp3'],
+    saygili_namus: ['sfx/saygili_namus.mp3'],               // 2. bölüm SAYGILI: "Biz bu ülkenin namusunu kurtardık!" (Tolga, kalınlaştırılıp yankılandı)
     ekrem_guzel: ['sfx/ekrem_guzel.mp3'],                   // 10. bölüm EKREM: "Her şey çok güzel olacak!"
     ekrem_aday: ['sfx/ekrem_aday.mp3'],                     // hikâyede: "15 milyon oyla aday seçildim..."                     // hikâyede: "Burada da kitap yazarım..."                           // 2. bölüm canavarı ölünce ara sahne
     // Recep'in replikleri (kayıt yoksa yapay sese, Gemini, düşer)

@@ -86,11 +86,12 @@ function drawSpeech(ctx, b) {
     ctx.font = "bold 22px Arial";
     const tw = ctx.measureText(text).width + 28;
     ctx.fillStyle = "#fff"; ctx.strokeStyle = "#111"; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.roundRect(x - 10, y - 22, tw, 44, 14); ctx.fill(); ctx.stroke();
+    const bx = Math.max(camX + 10, Math.min(x - 10, camX + width - tw - 10));   // uzun cümle ekrandan taşmasın
+    ctx.beginPath(); ctx.roundRect(bx, y - 22, tw, 44, 14); ctx.fill(); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(x + 4, y + 21); ctx.lineTo(x - 14, y + 44); ctx.lineTo(x + 22, y + 21); ctx.closePath(); ctx.fill();
     ctx.beginPath(); ctx.moveTo(x + 4, y + 22); ctx.lineTo(x - 14, y + 44); ctx.lineTo(x + 22, y + 22); ctx.stroke();
     ctx.fillStyle = "#111"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.fillText(text, x + 4, y + 1);
+    ctx.fillText(text, bx + 14, y + 1);
 }
 
 function fireball(x, y, vx, vy) {

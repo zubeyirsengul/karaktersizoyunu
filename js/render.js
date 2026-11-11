@@ -313,7 +313,9 @@ function draw() {
         const leaves = en.dead && enemyLeaves(en) && en.kind !== 'tank';
         if(en.dead) (leaves ? applyExilePose : applyDeathPose)(ctx, en);
         else if(en.hurt > 0 && Math.floor(en.hurt / 4) % 2) ctx.globalAlpha = 0.4;   // vurulunca yanıp söner
-        if(en.kind === 'riot') drawRiot(ctx, en);
+        if(en.skin) drawGeziHero(ctx, en);   // 1. bölüm: Gezi kahramanları
+        else if(en.kind === 'duran') drawDuran(ctx, en);
+        else if(en.kind === 'riot') drawRiot(ctx, en);
         else if(en.kind === 'sniper') drawSniper(ctx, en);
         else if(en.kind === 'tank') drawTank(ctx, en);
         else if(en.kind === 'civil') drawCivil(ctx, en);
@@ -345,7 +347,8 @@ function draw() {
     });
 
     projectiles.forEach(p => {
-        if(p.type === 'fire') drawFire(ctx, p);
+        if(PROJECTILES[p.type]) PROJECTILES[p.type][1](ctx, p);
+        else if(p.type === 'fire') drawFire(ctx, p);
         else if(p.type === 'wave') drawWave(ctx, p);
         else if(p.type === 'dollar1') (DOLLAR_SKINS[p.skin] || drawOneDollar)(ctx, p.x, p.y, p.angle);
         else if(p.type === 'bullet') drawBullet(ctx, p);

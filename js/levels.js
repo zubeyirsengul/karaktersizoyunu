@@ -77,7 +77,7 @@ function drawPits(ctx) {
 }
 
 // --- BÖLÜM SONU KAPISI ---
-// 11 polis ölünce oyuncunun önünde büyük bir kapı belirir ve açılır; içinden geçen bölüm sonu canavarıyla karşılaşır.
+// 11 düşman ölünce oyuncunun önünde büyük bir kapı belirir ve açılır; içinden geçen bölüm sonu canavarıyla karşılaşır.
 let gate = null, screenFlash = 0;
 function spawnGate() {
     const x = Math.min(player.x + 700, WORLD_WIDTH - 1200);
@@ -237,10 +237,13 @@ function completeLevel() {
 // kinds(i): i. düşmanın türü ('police' tabancalı, 'riot' çevik kuvvet, 'tank' mini tank, 'gas' gaz bombacı)
 // bg: arka plan; pit/sniper: çukur ve nişancı olasılığı; minSnipers: en az nişancı sayısı
 // Bölüme özel: item 'tape' (kaset), exile 'surgun'/'ihrac' (ölen bavulla gider), battery (şarj),
-// mode 'flight' (uçuş), stamp (KHK damgası), civilians (zararsız siviller)
+// mode 'flight' (uçuş), stamp (KHK damgası), civilians (zararsız siviller),
+// skins(i, kind): düşmanın görünüşü, item 'fidan', cry: ölünce çıkan yazı, populate: bölüme özel eşya/kişiler
 const LEVELS = {
-    1: { target: 11, music: 'chiptune_level1.mp3', boss: 'alevi', speed: 1.5, fire: 170, kinds: i => i % 5 === 2 ? 'riot' : 'police',
-         bg: 'hills', pit: 0.35, sniper: 0.3, minSnipers: 2,
+    // 1. bölüm: Gezi Parkı; polis yok, Gezi kahramanları (skins), Duran Adam, çınar fidanları; canavar TOMA (js/gezi.js)
+    1: { target: 11, music: 'chiptune_level1.mp3', boss: 'toma', speed: 1.5, fire: 170, kinds: i => i % 4 === 3 ? 'riot' : 'police',
+         skins: (i, kind) => kind === 'riot' ? 'tencere' : GEZI_HEROES[(i - Math.floor((i + 1) / 4)) % 4], item: 'fidan', cry: 'gezCry', populate: () => populateGezi(),
+         bg: 'gezi', pit: 0.35, sniper: 0, minSnipers: 0,
          platforms: [[600, T1, 240, LEDGE], [900, T2, 240, LEDGE], [1200, T1, 180, LEDGE], [1900, T1, 300, LEDGE], [2260, T2, 180, LEDGE]] },
     2: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'kurt', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
          bg: 'steppe', pit: 0.5, sniper: 0.45, minSnipers: 3,
@@ -297,7 +300,7 @@ function createLevel() {
     player.isDying = false; player.deathAngle = 0; player.opacity = 1; player.mouthOpen = 0; player.dir = 1;
     player.swing = 0; player.swingHit = false;
     player.coyote = 0; player.jumpBuffer = 0; player.jumping = false; player.safePlat = null;
-    player.hp = player.maxHp; player.invuln = 0; player.knock = 0; updateHearts();
+    player.hp = player.maxHp; player.invuln = 0; player.knock = 0; player.slow = 0; updateHearts();
     player.w = 100; player.h = 180; player.shield = false;
     $('game-container').classList.remove('shake');
     $('kills').innerText = "0";
@@ -318,9 +321,10 @@ function createLevel() {
         const homeX = 1500 + i * 1500;
         // 17/25 polisleri: tabancalı polis ya da kalkanlı çevik kuvvet; bölüm ilerledikçe çevik kuvvet artar
         const kind = LEVELS[currentLevel].kinds(i), riot = kind === 'riot', tank = kind === 'tank';
+        const skins = LEVELS[currentLevel].skins;
         const w = tank ? 170 : 120, h = tank ? 96 : 200;
         enemies.push({
-            kind, turnT: 0,
+            kind, turnT: 0, skin: skins ? skins(i, kind) : null,
             x: homeX, y: height - 60 - h, w, h,   // alt kenar zeminde
             timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire * (tank ? 1.3 : 1), dead: false,
             aim: 0, flash: 0,

@@ -13,7 +13,7 @@ const lsT = k => (LS_TEXT[lang] || LS_TEXT.en)[k];
 
 // Kart renkleri ve simgeleri bölümün arka planına göre
 const LEVEL_CARDS = {
-    1: { ico: '⛓️', boss: 'bossName',    c1: '#166534', c2: '#4ade80' },
+    1: { ico: '🌳', boss: 'bossName',    c1: '#166534', c2: '#4ade80' },
     2: { ico: '🪙', boss: 'kurtName',    c1: '#92400e', c2: '#fbbf24' },
     3: { ico: '📼', boss: 'sayacName',   c1: '#581c87', c2: '#c084fc' },
     4: { ico: '🗳️', boss: 'fetoName',    c1: '#1e293b', c2: '#94a3b8' },

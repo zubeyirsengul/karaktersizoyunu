@@ -1,4 +1,4 @@
-// 3-8. bölümlerin özel içerikleri: arka planlar, yeni düşmanlar, bölüme özel mekanikler, yeni canavarlar
+// 1. bölüm (Gezi) gezi.js'te; 3-8. bölümlerin özel içerikleri: arka planlar, yeni düşmanlar, bölüme özel mekanikler, yeni canavarlar
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 //
 // 3 SIFIRLA      : torbalar yerine ses kasetleri ("MONTAJ!"), canavar PARA SAYMA MAKİNESİ
@@ -32,6 +32,7 @@ function updateChapter() {
 // Bölüm başında eşyalar ve ek düşmanlar (createLevel'dan çağrılır)
 function populateChapter() {
     const L = curLevel();
+    if (L.populate) L.populate();   // 1. bölüm: Duran Adam, fidanlar, baretler (gezi.js)
     if (L.battery) for (let i = 0; i < 14; i++) items.push({ x: 2100 + i * 2600, y: height - 210, collected: false, charger: true });
     if (L.civilians) {
         const roles = ['teacher', 'journalist', 'academic', 'student'];
@@ -45,6 +46,7 @@ function populateChapter() {
 // Torba yerine çizilen eşya
 function drawChapterItem(ctx, it) {
     if (it.charger) { drawCharger(ctx, it.x, it.y); return true; }
+    if (curLevel().item === 'fidan') { drawFidan(ctx, it.x, it.y); return true; }
     if (curLevel().item === 'tape') { drawCassette(ctx, it.x, it.y); return true; }
     return false;
 }
@@ -58,7 +60,7 @@ function pickupChapterItem(it) {
     }
     return false;
 }
-const pickupText = () => curLevel().item === 'tape' ? t("montaj") : t("pickup");
+const pickupText = () => ({ tape: t("montaj"), fidan: t("fidan") })[curLevel().item] || t("pickup");
 
 function drawCassette(ctx, x, y) {
     const tm = performance.now() / 1000, bob = Math.sin(tm * 3 + x) * 5;
@@ -129,6 +131,7 @@ function drawSuitcase(ctx, en) {
 }
 // killEnemy'den önce: sivilse ihraç edilir (sayılmaz), true döner
 function chapterKill(en) {
+    if (en.kind === 'duran') { duranHit(en); return true; }   // 1. bölüm: Duran Adam kıpırdamaz
     if (en.kind !== 'civil') {
         if (curLevel().exile === 'ihrac') khkCount++;
         return false;
@@ -142,6 +145,7 @@ function chapterKill(en) {
 }
 function enemyCryText(en) {
     if (en.kind === 'tank') return [t("surrender"), "#f8fafc"];
+    if (curLevel().cry) return [t(curLevel().cry), "#fbbf24"];
     const ex = curLevel().exile;
     if (ex === 'surgun') return [t("exileCry"), "#fbbf24"];
     if (ex === 'ihrac') return [t("expel"), "#ef4444"];

@@ -80,7 +80,9 @@ function updateHammer() {
             }
         });
         hammerBricks(minX, maxX);
-        if(boss && boss.x + 30 < maxX && boss.x + boss.w - 30 > minX) damageBoss(power.hammer > 0 ? 3 : 2);
+        if(boss && boss.x + 30 < maxX && boss.x + boss.w - 30 > minX) {
+            if(boss.T.stompOnly) bossArmor(headX, headY - 60); else damageBoss(power.hammer > 0 ? 3 : 2);
+        }
     }
 }
 
@@ -91,6 +93,12 @@ function updateHearts() {
 }
 function die() {
     if(player.isDying || levelCompleted || levelEnding || player.invuln > 0 || power.star > 0) return;   // dokunulmazken hasar yok
+    if(power.mask > 0) {   // baret + gaz maskesi vuruşu karşılar
+        power.mask--; player.invuln = 60;
+        createParticle(player.x + player.w / 2, player.y, t("maskSaved"), "#facc15", 1.0);
+        playSfx('hit', { rate: 2, vol: 0.5 });
+        return;
+    }
     player.hp--; levelStats.lost++;
     updateHearts();
     if(player.hp <= 0) { killPlayer(); return; }

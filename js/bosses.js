@@ -1,5 +1,5 @@
 // Bölüm sonu canavarlarının ortak motoru: doğma, öfke, saldırı mermileri, hasar, çizim ve can barı
-// Canavarların kendileri boss_*.js dosyalarında (alevi, kurt, feto, sayac, darbetank, bylock), selo.js, ekrem.js, flight.js
+// Canavarların kendileri boss_*.js dosyalarında (kurt, feto, sayac, darbetank, bylock), gezi.js (TOMA), selo.js, ekrem.js, flight.js
 // Teyzeler: grannies.js, canavar sonrası ara sahne: boss_outro.js
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 
@@ -15,7 +15,7 @@ function flameTongue(ctx, cx, baseY, w, h, lean = 0) {
 
 const FIRE_COLORS = ["#dc2626", "#f97316", "#fde047"];
 
-// ALEVİ'nin attığı alev: havadayken kuyruklu top, yere düşünce bir süre yanan ateş
+// Alev (DARBE TANKI ve uçuş bölümü atar): havadayken kuyruklu top, yere düşünce bir süre yanan ateş
 function drawFire(ctx, p) {
     ctx.save();
     if (p.grounded) {
@@ -97,21 +97,15 @@ function fireball(x, y, vx, vy) {
     projectiles.push({ type: 'fire', x, y, vx, vy, active: true, life: 400, angle: 0, grounded: false });
 }
 
-function bossAttack() {
-    const b = boss;
-    b.attacks++;
-    const mx = b.x + b.w / 2, my = b.y + b.h * 0.3;
-    if(b.attacks % 3 === 0) {
-        // Her üçüncü saldırı: oyuncuya doğru üçlü alev
-        const side = Math.sign(player.x + player.w / 2 - mx) || 1;
-        for(let i = 0; i < 3; i++) fireball(mx, my, side * (6 + i * 2.5), -8 + i * 1.5);
-    } else {
-        // Etrafa alev yağmuru
-        const n = 7;
-        for(let i = 0; i < n; i++) {
-            fireball(mx, b.y + 20, -9 + 18 * i / (n - 1) + (Math.random() - 0.5) * 2, -12 - Math.random() * 5);
-        }
-    }
+// Bölüme özel mermiler: PROJECTILES.<tür> = [güncelle(p), çiz(ctx, p)] (ör. gezi.js: su, gaz kapsülü)
+const PROJECTILES = {};
+
+// Zırhlı canavar (T.stompOnly): rüşvet ve balyoz seker, yalnızca üstüne zıplanınca hasar alır
+function bossArmor(x, y) {
+    playSfx('hit', { rate: 2.4, vol: 0.4 });
+    if (boss.armorMsg > 0) return;
+    boss.armorMsg = 90;
+    createParticle(x, y - 30, t("armored"), "#e5e7eb", 1.2);
 }
 
 function updateFire(p) {
@@ -173,17 +167,18 @@ function updateBoss() {
     b.anim++;
     if(b.dying) { if(++b.deathT > 60) boss = null; return; }
     if(b.hurt > 0) b.hurt--;
+    if(b.armorMsg > 0) b.armorMsg--;
     if(b.talk > 0) b.talk--;      // karşılama konuşması bitene kadar saldırmaz
     else {
         b.T.update(b);
-        if(b.rage && b.anim % 2 === 0) b.T.update(b);   // öfkeliyken 1,5 kat hızlı hareket eder ve saldırır
+        if(b.rage && !b.T.calmRage && b.anim % 2 === 0) b.T.update(b);   // öfkeliyken 1,5 kat hızlı (calmRage: canavar kendisi ayarlar)
     }
     if(!b.rage && b.hp <= b.T.hp / 2) enrageBoss(b);
 
     // Temas: üstüne zıplayınca hasar, yandan değince ölüm
     if(!player.isDying && player.x + player.w - 30 > b.x + 40 && player.x + 30 < b.x + b.w - 40 &&
        player.y + player.h > b.y + 30 && player.y < b.y + b.h) {
-        if(player.vy > 0 && player.y + player.h < b.y + b.T.stomp) { player.vy = -22; damageBoss(2); }
+        if(player.vy > 0 && player.y + player.h < b.y + b.T.stomp) { player.vy = -22; damageBoss(b.T.stompDmg || 2); }
         else if(power.star > 0) damageBoss(1);   // dokunulmazken çarpmak canavara hasar verir
         else die();
     }

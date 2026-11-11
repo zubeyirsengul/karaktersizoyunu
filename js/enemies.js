@@ -146,7 +146,7 @@ function killEnemy(en) {
     if(chapterKill(en)) return;   // sivil: ihraç edilir, hedefe sayılmaz
     en.dead = true;
     killedEnemies++;
-    const isPolice = true;   // bütün düşmanlar 17/25 polisi
+    const isPolice = true;   // düşman (1. bölümde Gezi kahramanı, sonra 17/25 polisi)
     // Devrilme animasyonu: oyuncudan uzağa doğru yere yığılır
     en.deathT = 0; en.lastSpeed = 0;
     en.fallDir = Math.sign(en.x + en.w / 2 - (player.x + player.w / 2)) || 1;
@@ -158,7 +158,7 @@ function killEnemy(en) {
     $('score').innerText = score += ({ police: 3000, riot: 4000, sniper: 5000, tank: 4000, gas: 4000 })[en.kind] || 2000; $('kills').innerText = killedEnemies;
     if(killedEnemies === Math.ceil(targetKills / 2) && !bossCheckpoint) setMidCheckpoint();
     if(killedEnemies === targetKills) {
-        // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: ALEVİ, 2: KURT, 3: FETÖ)
+        // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: TOMA, 2: KURT, ...)
         spawnGate();
     }
 }
@@ -405,6 +405,7 @@ function updateBullet(p) {
     }
 }
 function drawBullet(ctx, p) {
+    if (p.skin === 'slogan') { drawSlogan(ctx, p); return; }   // 1. bölüm: slogan balonu
     const d = Math.sign(p.vx) || 1;
     const g = ctx.createLinearGradient(p.x - d * 36, p.y, p.x, p.y);
     g.addColorStop(0, "rgba(253,224,71,0)"); g.addColorStop(1, "rgba(253,224,71,0.85)");

@@ -8,9 +8,10 @@ const POWERS = {
     double: { icon: "⏫", color: "#38bdf8", frames: 720, key: "pwDouble" },   // havada ikinci zıplama
     hammer: { icon: "🔨", color: "#f97316", frames: 600, key: "pwHammer" },   // dev balyoz
     heart:  { icon: "❤️", color: "#ef4444", frames: 0,   key: "pwHeart" },    // +1 can
-    star:   { icon: "⭐", color: "#fde047", frames: 360, key: "pwStar" }      // dokunulmazlık
+    star:   { icon: "⭐", color: "#fde047", frames: 360, key: "pwStar" },     // dokunulmazlık
+    mask:   { icon: "⛑️", color: "#f59e0b", frames: 3,   key: "pwMask" }      // 1. bölüm: baret + gaz maskesi; süre değil 3 vuruş
 };
-const POWER_ORDER = ['speed', 'double', 'hammer', 'heart', 'star'];
+const POWER_ORDER = ['speed', 'double', 'hammer', 'heart', 'star', 'mask'];
 let power = { speed: 0, double: 0, hammer: 0, star: 0 }, usedDouble = false;
 const hammerReach = () => HAMMER_REACH * (power.hammer > 0 ? 1.6 : 1) * (LEVELS[currentLevel].stamp ? 1.3 : 1);   // KHK damgası daha geniş vurur
 
@@ -24,7 +25,7 @@ function grantPower(kind, x, y) {
     playSfx('hit', { rate: 1.6, vol: 0.5 });
 }
 function updatePowers() {
-    for (const k in power) if (power[k] > 0) power[k]--;
+    for (const k in power) if (power[k] > 0 && k !== 'mask') power[k]--;   // baret süreyle değil vuruşla biter
     if (player.grounded) usedDouble = false;
 }
 // Havadayken ikinci zıplama (çift zıplama gücü açıkken)

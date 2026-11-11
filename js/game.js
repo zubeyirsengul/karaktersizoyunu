@@ -13,8 +13,9 @@ function update() {
         let moveDir = (keys.a ? -1 : (keys.d ? 1 : joyDir));
         player.shield = keys.s || shieldHeld;
         if(player.invuln > 0) player.invuln--;
+        if(player.slow > 0) player.slow--;   // 1. bölüm: TOMA'nın gaz bulutu yavaşlatır
         if(player.knock > 0) { player.knock--; player.vx *= 0.9; }   // vurulunca kısa süre geri savrulur
-        else player.vx = moveDir ? moveDir * player.speed * (player.shield ? 0.5 : 1) * (power.speed > 0 ? 1.6 : 1) : player.vx * 0.85;   // kalkanla yavaş, hız gücüyle hızlı
+        else player.vx = moveDir ? moveDir * player.speed * (player.shield ? 0.5 : 1) * (power.speed > 0 ? 1.6 : 1) * (player.slow > 0 ? 0.5 : 1) : player.vx * 0.85;   // kalkanla yavaş, hız gücüyle hızlı
         if(moveDir) player.dir = moveDir;
         // Adım hızı yürüme hızına bağlı: ayaklar yerde kaymaz
         if(player.grounded) player.legCycle += Math.abs(player.vx) * 0.06;
@@ -75,6 +76,7 @@ function update() {
             if(enemyLeaves(en)) { en.dir = en.fallDir; en.walkCycle += 0.4; en.lastSpeed = 5; }   // bavuluyla yürüyüp gider
             return;
         }
+        if(en.kind === 'duran') return;   // 1. bölüm: Duran Adam kıpırdamaz
         if(en.kind === 'riot') { updateRiot(en); enemyContact(en); return; }
         if(en.kind === 'sniper') { updateSniper(en); enemyContact(en); return; }
         if(en.kind === 'tank') { updateTank(en); enemyContact(en); return; }
@@ -112,9 +114,10 @@ function update() {
             en.timer = 0;
             en.flash = 6;
             projectiles.push({ type: 'bullet', x: en.x + en.w / 2 + en.dir * 60, y: en.y + 57,
-                               vx: en.dir * 11, vy: 0, active: true, life: 140, angle: 0 });
+                               vx: en.dir * 11, vy: 0, active: true, life: 140, angle: 0, skin: en.skin ? 'slogan' : null });
             const pan = (en.x + en.w / 2 - camX - width / 2) / (width / 2);
-            playGunshot(pan, Math.max(0.15, 0.6 - Math.abs(toPlayer) / 2000));
+            if(en.skin) playSfx('hit', { rate: 1.6, vol: 0.3, pan });   // Gezi: slogan atar
+            else playGunshot(pan, Math.max(0.15, 0.6 - Math.abs(toPlayer) / 2000));
         }
         enemyContact(en);
     });
@@ -130,13 +133,14 @@ function update() {
         });
         if(boss && !boss.dying && p.active && p.x > boss.x + 40 && p.x < boss.x + boss.w - 40 && p.y > boss.y && p.y < boss.y + boss.h) {
             p.active = false;
-            damageBoss(1);
+            if(boss.T.stompOnly) bossArmor(p.x, p.y); else damageBoss(1);   // zırhlı canavar: yalnızca üstüne zıplanınca
         }
     });
     playerProjectiles = playerProjectiles.filter(p => p.active && p.life > 0);
 
     projectiles.forEach(p => {
         p.x += p.vx;
+        if(PROJECTILES[p.type]) { PROJECTILES[p.type][0](p); return; }   // bölüme özel mermiler (ör. gezi.js)
         if(p.type === 'fire') { updateFire(p); return; }
         if(p.type === 'wave') { updateWave(p); return; }
         if(p.type === 'dollar1') { updateOneDollar(p); return; }

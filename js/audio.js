@@ -59,8 +59,7 @@ function pcmToWav(b64, rate) {
 const SFX_FILES = {
     cry: ['sfx/uufff.mp3'],                                // polis ölümü
     hit: [1, 2, 3, 4, 5].map(i => `sfx/hit${i}.mp3`),
-    greet_alevi: ['sfx/yaali.mp3'],                         // canavarların karşılama sesleri
-    greet_kurt: ['sfx/kro.mp3'],
+    greet_kurt: ['sfx/kro.mp3'],                            // canavarların karşılama sesleri
     greet_feto2: ['sfx/feto2_greet.mp3'],                   // FETÖ (4. ve 8. bölüm): "Ya Allah!" (Windows Türkçe yapay sesi Tolga, kalınlaştırılıp yankılandı)
     granny: ['sfx/gotununkili.mp3'],                        // canavar ölünce gelen teyzeler
     yalarim: ['sfx/yalarim.mp3'],

@@ -63,7 +63,14 @@ const SFX_FILES = {
     granny: ['sfx/gotununkili.mp3'],                        // canavar ölünce gelen teyzeler
     yalarim: ['sfx/yalarim.mp3'],
     cengiz: ['sfx/milletinminakoycaz.mp3'],                 // 3. bölüm sonu: Cengiz "Bu milletin a.. koyacağız"
-    sifirla: ['sfx/sifirla.mp3'],                          // 3. bölüm: sayaç sıfırlama sesi (kodla üretildi: tıkırtı + zil)
+    sifirla: ['sfx/sifirla.mp3'],
+    hasret: ['sfx/hasret.mp3'],                             // 4. bölüm: FETÖ ile karşılaşınca HIRHIZ "Hocam gel bu hasret bitsin"
+    savci: ['sfx/savci.mp3'],                               // 4. bölüm sonu: HIRHIZ "Bir savcı 2 polisle hepinizi bitiririm!" (Windows Türkçe yapay sesi Tolga, kalınlaştırıldı)
+    sonpeygamber: ['sfx/sonpeygamber.mp3'],
+    lutuf: ['sfx/lutuf.mp3'],
+    hashasi: ['sfx/hashasi.mp3'],                           // 6. bölüm sonu: HIRHIZ "Bunlar haşhaşi! Bunlar sülük!" (Tolga)
+    selo_aihm: ['sfx/selo_aihm.mp3'], selo_turku: ['sfx/selo_turku.mp3'],   // 9. bölüm SELO'nun yeni replikleri (Tolga, inceltildi)
+    selo_duvar: ['sfx/selo_duvar.mp3'], selo_kardes: ['sfx/selo_kardes.mp3'],                               // 5. bölüm sonu: HIRHIZ "15 Temmuz Allah'ın bir lütfü!" (Tolga, kalınlaştırılıp yankılandı)                 // 4. bölüm sonu: kutlamaya gelen adam                          // 3. bölüm: sayaç sıfırlama sesi (kodla üretildi: tıkırtı + zil)
     selo_baskan: ['sfx/selo_baskan.mp3'],                   // 9. bölüm SELO: "Seni başkan yaptırmayacağız!" (Windows Türkçe yapay sesi Tolga, inceltildi)
     selo_kitap: ['sfx/selo_kitap.mp3'],
     saygili_namus: ['sfx/saygili_namus.mp3'],               // 2. bölüm SAYGILI: "Biz bu ülkenin namusunu kurtardık!" (Tolga, kalınlaştırılıp yankılandı)

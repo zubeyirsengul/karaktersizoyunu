@@ -7,17 +7,17 @@
 
 const KASA_TEXT = {
     tr: { kasaName: "DEV ÇELİK KASA", kasaClosed: "KAPAK KAPALI! AÇILINCA VUR!", kasaReset: "SIFIRLA!",
-          l3Note: "Paralar sıfırlandı, kasa boşaldı! Sıra sandıkta." },
+          l3Note: "Paralar sıfırlandı, kasa boşaldı! Sıra 15 Temmuz'da." },
     en: { kasaName: "GIANT STEEL SAFE", kasaClosed: "DOOR SHUT! HIT IT WHEN IT OPENS!", kasaReset: "ZERO IT!",
-          l3Note: "The money is zeroed, the safe is empty! Next: the election." },
+          l3Note: "The money is zeroed, the safe is empty! Next: July 15." },
     fr: { kasaName: "COFFRE-FORT GÉANT", kasaClosed: "PORTE FERMÉE ! FRAPPE QUAND ELLE S'OUVRE !", kasaReset: "À ZÉRO !",
-          l3Note: "L'argent est remis à zéro, le coffre est vide ! Prochaine étape : l'élection." },
+          l3Note: "L'argent est remis à zéro, le coffre est vide ! Prochaine étape : le 15 juillet." },
     nl: { kasaName: "REUZENKLUIS", kasaClosed: "DEUR DICHT! SLA TOE ALS HIJ OPENGAAT!", kasaReset: "OP NUL!",
-          l3Note: "Het geld staat op nul, de kluis is leeg! Nu de verkiezingen." },
+          l3Note: "Het geld staat op nul, de kluis is leeg! Nu 15 juli." },
     de: { kasaName: "RIESEN-TRESOR", kasaClosed: "TÜR ZU! SCHLAG ZU, WENN SIE AUFGEHT!", kasaReset: "AUF NULL!",
-          l3Note: "Das Geld ist auf null, der Tresor ist leer! Jetzt die Wahl." },
+          l3Note: "Das Geld ist auf null, der Tresor ist leer! Jetzt der 15. Juli." },
     ru: { kasaName: "ГИГАНТСКИЙ СЕЙФ", kasaClosed: "ДВЕРЦА ЗАКРЫТА! БЕЙ, КОГДА ОТКРОЕТСЯ!", kasaReset: "ОБНУЛИ!",
-          l3Note: "Деньги обнулены, сейф пуст! Дальше — выборы." }
+          l3Note: "Деньги обнулены, сейф пуст! Дальше — 15 июля." }
 };
 for (const L in KASA_TEXT) if (LANGS[L]) Object.assign(LANGS[L], KASA_TEXT[L]);
 

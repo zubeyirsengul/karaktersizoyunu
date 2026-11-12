@@ -64,7 +64,8 @@ function enrageBoss(b) {
     b.rage = true;
     camShake = Math.max(camShake, 14);
     createParticle(b.x + b.w / 2, b.y - 70, t("rage"), "#ef4444", 2.0);
-    if (b.T.greet) playSfx(b.T.greet, { vol: 1, rate: 1.25 });
+    const rs = 'rageSfx' in b.T ? b.T.rageSfx : b.T.greet;   // uzun karşılama sesi olan canavar öfkelenince başka ses çalar
+    if (rs) playSfx(rs, { vol: 1, rate: 1.25 });
 }
 function drawRageAura(ctx, b) {
     if (!b.rage || b.dying) return;
@@ -79,10 +80,12 @@ function drawRageAura(ctx, b) {
     }
 }
 
-// Canavarın karşılama balonu (konuşurken)
+// Canavarın karşılama balonu (konuşurken). T.playerSay: canavar değil HIRHIZ konuşur, balon onun başının üstünde (ör. 4. bölüm)
 function drawSpeech(ctx, b) {
-    if (!(b.talk > 0) || !b.T.say || b.dying) return;
-    const text = b.T.say, x = b.x + b.w / 2 + 30, y = b.y - (b.T.labelY || 35) - 60;
+    if (!(b.talk > 0) || !(b.T.say || b.T.playerSay) || b.dying) return;
+    const ps = !!b.T.playerSay;
+    const text = ps ? t(b.T.playerSay) : b.T.say;
+    const x = ps ? player.x + player.w / 2 + 10 : b.x + b.w / 2 + 30, y = ps ? player.y - 60 : b.y - (b.T.labelY || 35) - 60;
     ctx.font = "bold 22px Arial";
     const tw = ctx.measureText(text).width + 28;
     ctx.fillStyle = "#fff"; ctx.strokeStyle = "#111"; ctx.lineWidth = 3;
@@ -140,7 +143,10 @@ function damageBoss(n) {
     if(!isFlight()) { hitStop = Math.max(hitStop, 3); camShake = Math.max(camShake, 6); }
     playSfx('hit', { rate: 0.8 + Math.random() * 0.2, vol: 0.7 });
     createParticle(boss.x + boss.w / 2, boss.y + 40, "-" + n, "#fde047", 0.8);
-    if(boss.hp > 0) return;
+    if(boss.hp > 0) {
+        if(boss.T.hitSfx && (boss.hits = (boss.hits || 0) + 1) % 3 === 0) playSfx(boss.T.hitSfx, { vol: 1, delay: 0.15 });   // ör. SELO her 3. darbede konuşur
+        return;
+    }
     if(boss.T.onDefeat && boss.T.onDefeat(boss)) return;   // ör. 10. bölüm: "seçim iptal", canavar yeniden gelir
     boss.dying = true;
     levelEnding = true;
@@ -174,7 +180,7 @@ function updateBoss() {
     if(b.dying) { if(++b.deathT > 60) boss = null; return; }
     if(b.hurt > 0) b.hurt--;
     if(b.armorMsg > 0) b.armorMsg--;
-    if(b.talk > 0) b.talk--;      // karşılama konuşması bitene kadar saldırmaz
+    if(b.talk > 0) { b.talk--; if(b.T.playerSay) player.mouthOpen = 0.3 + 0.3 * Math.abs(Math.sin(b.talk * 0.35)); }   // karşılama konuşması bitene kadar saldırmaz (playerSay: HIRHIZ konuşur)
     else {
         b.T.update(b);
         if(b.rage && !b.T.calmRage && b.anim % 2 === 0) b.T.update(b);   // öfkeliyken 1,5 kat hızlı (calmRage: canavar kendisi ayarlar)

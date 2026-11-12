@@ -39,7 +39,11 @@ function buildLayout(level) {
             plats.push([c - 540, T1, 240, LEDGE], [c - 120, T2, 240, LEDGE], [c + 300, T1, 240, LEDGE]);
             spots.push([c, T2]);
             bags.push([c + 70, T2 + 70]);
+        } else if (L.extraPlats) {                                     // bol platformlu bölüm: dinlenme alanında da merdiven
+            plats.push([c - 320, T1, 200, LEDGE], [c + 20, T2, 220, LEDGE]);
+            spots.push([c + 130, T2]); bags.push([c + 130, T2 + 70]);
         } else if (r() < 0.5) plats.push([c - 120, T1, 240, LEDGE]);  // dinlenme alanı, bazen tek raf
+        if (L.extraPlats && k < 18) plats.push([c + 660, T1, 170, LEDGE]);   // desenler arasındaki boşluğa da bir raf
     }
     // Nişancılar: her yüksek yere şansla; bölüm ilerledikçe en az 2 / 3 / 4 tane olacak şekilde tamamlanır
     const rest = [];
@@ -230,6 +234,7 @@ function completeLevel() {
         $('start-button').onclick = () => location.reload();
     }
     showReport(currentLevel);   // 1-3 yıldızlı bölüm karnesi
+    lbAfterLevel();             // dünya sıralaması: isim sorulur ya da skor gönderilir (js/leaderboard.js)
     $('overlay-screen').style.display = 'flex';
 }
 
@@ -256,8 +261,9 @@ const LEVELS = {
     3: { target: 11, music: 'chiptune_level1.mp3', boss: 'kasa', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 3 ? 'gas' : 'police',
          bg: 'villa', pit: 0.5, sniper: 0.45, minSnipers: 3, item: 'tape',
          platforms: [[500, T1, 240, LEDGE], [800, T2, 180, LEDGE], [1040, T1, 180, LEDGE], [1800, T1, 300, LEDGE]] },
+    // 4. bölüm: 15 Temmuz; düşmanlar darbeci askerler (army), bazıları askeri öğrenci (cadet); yenilenler tutuklanır; canavar FETÖ (js/temmuz.js)
     4: { target: 11, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
-         bg: 'city', pit: 0.65, sniper: 0.6, minSnipers: 4, exile: 'surgun',
+         army: true, cadet: i => i % 4 === 0, bg: 'temmuz', pit: 0.65, sniper: 0.6, minSnipers: 4, exile: 'tutuklama',
          platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] },
     5: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'darbetank', speed: 2.2, fire: 140, kinds: i => i % 2 === 0 ? 'tank' : 'police',
          bg: 'coast', pit: 0.5, sniper: 0.4, minSnipers: 2, battery: true,
@@ -267,8 +273,9 @@ const LEVELS = {
     // 7. bölüm tamamen bulmaca: BYLOCK'un şifresi kırılınca geçilir (js/puzzle.js)
     7: { target: 0, music: 'chiptune_level3.mp3', mode: 'puzzle', bg: 'ankara', speed: 0, fire: 0, kinds: () => 'police',
          pit: 0, sniper: 0, minSnipers: 0, platforms: [] },
+    // 8. bölüm: Pensilvanya; bol platform (extraPlats), iki kat tuğla (bricks), canavar FETÖ: SON oyuncuyu kovalar, raflara zıplar; yenilince mezara girer (js/feto_son.js)
     8: { target: 11, music: 'chiptune_level1.mp3', boss: 'feto2', speed: 3.4, fire: 115, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
-         bg: 'snow', pit: 0.65, sniper: 0.65, minSnipers: 4,
+         extraPlats: true, bricks: 3, bg: 'snow', pit: 0.65, sniper: 0.65, minSnipers: 4,
          platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] },
     // 9. bölüm: Edirne F tipi cezaevi; canavar SELO (js/selo.js)
     9: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'selo', speed: 3.3, fire: 120, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
@@ -329,7 +336,7 @@ function createLevel() {
         const skins = LEVELS[currentLevel].skins;
         const w = tank ? 170 : 120, h = tank ? 96 : 200;
         enemies.push({
-            kind, turnT: 0, skin: skins ? skins(i, kind) : null,
+            kind, turnT: 0, skin: skins ? skins(i, kind) : null, cadet: !!(LEVELS[currentLevel].cadet && LEVELS[currentLevel].cadet(i)),
             x: homeX, y: height - 60 - h, w, h,   // alt kenar zeminde
             timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire * (tank ? 1.3 : 1) * diff().fire, dead: false,
             aim: 0, flash: 0,

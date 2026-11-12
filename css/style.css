@@ -250,3 +250,23 @@ body.puzzle #kill-count, body.puzzle #hearts, body.puzzle #ui-layer, body.puzzle
 .pz-tick-wrap span { display: inline-block; padding-left: 100%; animation: pzTicker 38s linear infinite; }
 @keyframes pzTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 @media (pointer: coarse) and (max-height: 540px), (max-height: 460px) { .pz-ticker { font-size: 10px; } .pz-ticker b { padding: 3px 8px; } }
+
+/* Dünya sıralaması */
+#ranks { position: absolute; inset: 0; z-index: 1100; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); padding: 16px; box-sizing: border-box; }
+#ranks-panel { background: #111827; color: #f3f4f6; border: 2px solid var(--gold); border-radius: 16px; max-width: 620px; width: 100%; max-height: 100%; overflow-y: auto; padding: 18px 20px; box-sizing: border-box; text-align: center; }
+#ranks-panel h2 { margin: 0 0 10px; color: var(--gold); font-size: 28px; }
+#ranks-close { margin-top: 14px; }
+.lb-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.lb-table th { color: var(--gold); font-size: 12px; text-transform: uppercase; padding: 4px 6px; border-bottom: 1px solid #374151; }
+.lb-table td { padding: 5px 6px; border-bottom: 1px solid #1f2937; }
+.lb-table td:nth-child(2) { text-align: left; word-break: break-word; }
+.lb-table td:nth-child(3) { color: #fde68a; font-weight: bold; text-align: right; }
+.lb-table tr.me td { background: rgba(253,224,71,0.15); }
+.lb-table small { color: #9ca3af; }
+.lb-msg { color: #d1d5db; }
+.lb-ask { margin: 6px 0; font-size: 14px; }
+.lb-ask b { color: #fde68a; }
+.lb-change { margin-left: 8px; padding: 2px 10px !important; font-size: 12px !important; }
+.lb-box { margin-top: 8px; font-size: 14px; color: #e5e7eb; }
+.lb-form { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 4px 0 8px; }
+.lb-input { font-family: inherit; font-weight: bold; font-size: 16px; padding: 6px 10px; border-radius: 8px; border: 2px solid var(--gold); background: #0b0f19; color: #fff; width: 180px; }

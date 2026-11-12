@@ -1,7 +1,7 @@
 // Haber arka planları: her bölümün arka planında o bölümün olayını anlatan TV "son dakika" ekranları ve gazete sayfaları
 // Görseller kodla çizilir (lisans gerekmez). Fotoğraf yeri: resimler/arkaplan/<bölüm>-<sıra>.jpg dosyası varsa
 // (ör. resimler/arkaplan/2-1.jpg) o ekranda çizim yerine o fotoğraf görünür. Dosya yoksa çizim kalır.
-// Manşetler gerçek olaylara dayanır; tabelalar gibi oyun içi yazı oldukları için Türkçedir.
+// Manşetler gerçek olaylara dayanır; Türkçe yazılır, oyunun diline göre çevirileri js/bgtext.js'tedir (bgT).
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 
 // --- KÜÇÜK ÇİZİMLER (haber karelerinin içi) ---  (x, y, w, h: karenin alanı, t: zaman)
@@ -43,7 +43,7 @@ const NEWS_SCENES = {
         ctx.fillStyle = "#fde68a"; for (let i = 0; i < 6; i++) ctx.fillRect(x + 10 + (i % 3) * 22, y + h * 0.45 + Math.floor(i / 3) * 22, 10, 12);
         ctx.fillStyle = "#e5e7eb"; ctx.fillRect(x + w * 0.42, y + h * 0.52, w * 0.34, h * 0.3);
         ctx.fillStyle = "#1d4ed8"; ctx.fillRect(x + w * 0.42, y + h * 0.64, w * 0.34, 6);
-        ctx.fillStyle = "#1d4ed8"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center"; ctx.fillText("POLİS", x + w * 0.59, y + h * 0.6);
+        ctx.fillStyle = "#1d4ed8"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center"; ctx.fillText(bgT("POLİS"), x + w * 0.59, y + h * 0.6);
         policeLights(x + w * 0.59, y + h * 0.5, t);
         person(x + w * 0.22, y + h * 0.95, 0.9, "#111827", true); person(x + w * 0.32, y + h * 0.95, 0.9, "#334155");
         person(x + w * 0.86, y + h * 0.95, 0.9, "#111827", true);
@@ -103,7 +103,7 @@ const NEWS_SCENES = {
         for (let i = 0; i <= 60; i++) { const px = x + (i / 60) * w, a = Math.sin(i * 0.9 + t * 9) * Math.sin(i * 0.23 + t * 2); ctx.lineTo(px, y + h * 0.35 + a * h * 0.22); }
         ctx.stroke();
         if (typeof drawCassette === 'function') { ctx.save(); ctx.translate(x + w * 0.5 - 60, y + h * 0.58); drawCassette(ctx, 0, 0); ctx.restore(); }
-        ctx.fillStyle = "#fca5a5"; ctx.font = "bold 13px monospace"; ctx.textAlign = "left"; ctx.fillText("● REC  'SIFIRLA'", x + 8, y + 16);
+        ctx.fillStyle = "#fca5a5"; ctx.font = "bold 13px monospace"; ctx.textAlign = "left"; ctx.fillText(bgT("● REC  'SIFIRLA'"), x + 8, y + 16);
     },
     euro(x, y, w, h, t) {
         NEWS_SCENES.counter(x, y, w, h, t);
@@ -139,7 +139,7 @@ const NEWS_SCENES = {
         ctx.fillStyle = "#475569"; ctx.font = "bold 14px Arial"; ctx.textAlign = "center"; ctx.fillText("YSK", x + w / 2, y + h * 0.4);
         ctx.save(); ctx.translate(x + w * 0.5, y + h * 0.68); ctx.rotate(-0.2);
         ctx.strokeStyle = "#dc2626"; ctx.lineWidth = 4; ctx.strokeRect(-56, -16, 112, 32);
-        ctx.fillStyle = "#dc2626"; ctx.font = "bold 20px Arial"; ctx.fillText("RET", 0, 8); ctx.restore();
+        ctx.fillStyle = "#dc2626"; ctx.font = "bold 20px Arial"; ctx.fillText(bgT("RET"), 0, 8); ctx.restore();
     },
     facetime(x, y, w, h, t) {   // stüdyoda spiker telefonu kameraya tutuyor
         ctx.fillStyle = "#0c1445"; ctx.fillRect(x, y, w, h);
@@ -216,7 +216,7 @@ const NEWS_SCENES = {
         ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.arc(x + w * 0.5, y + h * 0.32, h * 0.18, Math.PI, 0); ctx.fill();
         ctx.strokeStyle = "#7f1d1d"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x + w * 0.5, y + h * 0.48, h * 0.08, 0.2, Math.PI - 0.2); ctx.stroke();
         ctx.fillStyle = "#6b7280"; for (let i = 0; i < 7; i++) ctx.fillRect(x + w * (0.2 + i * 0.1), y, 6, h);
-        ctx.fillStyle = "#16a34a"; ctx.font = "bold 22px Arial"; ctx.textAlign = "center"; ctx.fillText("✔ EVET", x + w * 0.5, y + h * 0.9);
+        ctx.fillStyle = "#16a34a"; ctx.font = "bold 22px Arial"; ctx.textAlign = "center"; ctx.fillText(bgT("✔ EVET"), x + w * 0.5, y + h * 0.9);
     },
     book(x, y, w, h, t) {   // "SEHER" kitap kapağı, güneş doğuyor
         ctx.fillStyle = "#292524"; ctx.fillRect(x, y, w, h);
@@ -229,19 +229,10 @@ const NEWS_SCENES = {
 };
 
 // --- BÖLÜMLERİN HABERLERİ ---  type: 'tv' (son dakika) ya da 'paper' (gazete); date: gazetenin tarihi
-const NEWS = {
-    1: [ { type: 'tv', head: "17 ARALIK OPERASYONU: 3 BAKANIN OĞLU GÖZALTINDA", scene: 'raid' },
-         { type: 'paper', date: "18 ARALIK 2013", head: "AYAKKABI KUTULARINDA 4,5 MİLYON DOLAR", scene: 'shoeboxes' },
-         { type: 'tv', head: "BAKAN OĞLUNUN EVİNDE PARA SAYMA MAKİNELERİ", scene: 'counter' } ],
-    2: [ { type: 'tv', head: "SARRAF MİAMİ'DE YAKALANDI", scene: 'miami' },
-         { type: 'paper', date: "21 MART 2016", head: "ALTIN TÜCCARI ABD'DE TUTUKLANDI", scene: 'gold' },
-         { type: 'tv', head: "SARRAF NEW YORK'TA İTİRAFÇI OLDU", scene: 'court' } ],
+const NEWS = {   // 1, 2, 4 ve 10. bölümlerin haberleri kendi dosyalarında (gezi.js, saygili.js, temmuz.js, ekrem.js)
     3: [ { type: 'tv', head: "'SIFIRLA' SES KAYDI İNTERNETE DÜŞTÜ", scene: 'tape' },
          { type: 'paper', date: "25 ŞUBAT 2014", head: "KAYITLARA 'MONTAJ' DEDİ", scene: 'tape' },
          { type: 'tv', head: "KAYITTA: '30 MİLYON AVRO DAHA VAR'", scene: 'euro' } ],
-    4: [ { type: 'tv', head: "SEÇİM GECESİ ELEKTRİKLER KESİLDİ", scene: 'blackout' },
-         { type: 'paper', date: "1 NİSAN 2014", head: "BAKAN: 'KEDİ TRAFOYA GİRDİ'", scene: 'cat' },
-         { type: 'tv', head: "YSK: ANKARA'DA YENİDEN SAYIM YOK", scene: 'ysk' } ],
     5: [ { type: 'tv', head: "CANLI: CUMHURBAŞKANI FACETIME İLE BAĞLANDI", scene: 'facetime' },
          { type: 'paper', date: "16 TEMMUZ 2016", head: "BOĞAZ KÖPRÜSÜ'NDE TANKLAR", scene: 'tanks' },
          { type: 'tv', head: "TRT'DE DARBE BİLDİRİSİ OKUNDU", scene: 'trt' } ],
@@ -292,14 +283,15 @@ function drawNewsTV(x, y, item, photo, t, w = 300, h = 180) {
     if (photo) drawCover(photo, x, y, w, h); else NEWS_SCENES[item.scene](x, y, w, h, t);
     // kanal logosu ve CANLI
     ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.fillRect(x + 6, y + 6, 70, 20);
-    ctx.fillStyle = "#fff"; ctx.font = "bold 12px Arial"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText("HABER", x + 12, y + 16);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 12px Arial"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(bgT("HABER"), x + 12, y + 16, 50);
     if (Math.floor(t * 2) % 2) { ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(x + 64, y + 16, 5, 0, Math.PI * 2); ctx.fill(); }
     // alt bant: SON DAKİKA + manşet + kayan yazı
     const by = y + h - 52;
-    ctx.fillStyle = "#dc2626"; ctx.fillRect(x, by, 92, 20);
-    ctx.fillStyle = "#fff"; ctx.font = "bold 12px Arial"; ctx.fillText("SON DAKİKA", x + 6, by + 10);
+    ctx.font = "bold 12px Arial"; const bk = bgT("SON DAKİKA"), bkw = Math.max(92, ctx.measureText(bk).width + 12);
+    ctx.fillStyle = "#dc2626"; ctx.fillRect(x, by, bkw, 20);
+    ctx.fillStyle = "#fff"; ctx.fillText(bk, x + 6, by + 10);
     ctx.fillStyle = "rgba(255,255,255,0.95)"; ctx.fillRect(x, by + 20, w, 32);
-    const f = fitLines(item.head, w - 12, 2, 15);
+    const f = fitLines(bgT(item.head), w - 12, 2, 15);
     ctx.fillStyle = "#111827"; ctx.font = `bold ${f.size}px Arial`;
     f.lines.forEach((ln, i) => ctx.fillText(ln, x + 6, by + 36 + (i - (f.lines.length - 1) / 2) * (f.size + 1)));
     ctx.restore();
@@ -309,9 +301,9 @@ function drawNewsPaper(x, y, item, photo, t, w = 210, h = 270) {
     ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(-0.03); ctx.translate(-w / 2, -h / 2);
     ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillRect(6, 6, w, h);
     ctx.fillStyle = "#f5f5f0"; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = "#111827"; ctx.font = "bold 26px Georgia"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillText("GÜNDEM", w / 2, 30);
-    ctx.fillRect(10, 36, w - 20, 2); ctx.font = "10px Georgia"; ctx.fillText(item.date || "", w / 2, 48); ctx.fillRect(10, 52, w - 20, 1);
-    const f = fitLines(item.head, w - 20, 3, 22, "Georgia");
+    ctx.fillStyle = "#111827"; ctx.font = "bold 26px Georgia"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillText(bgT("GÜNDEM"), w / 2, 30, w - 20);
+    ctx.fillRect(10, 36, w - 20, 2); ctx.font = "10px Georgia"; ctx.fillText(bgT(item.date || ""), w / 2, 48); ctx.fillRect(10, 52, w - 20, 1);
+    const f = fitLines(bgT(item.head), w - 20, 3, 22, "Georgia");
     ctx.font = `bold ${f.size}px Georgia`; ctx.fillStyle = "#111";
     f.lines.forEach((ln, i) => ctx.fillText(ln, w / 2, 56 + f.size + i * (f.size + 2)));
     const iy = 62 + f.lines.length * (f.size + 2), ih = 100;
@@ -347,7 +339,7 @@ function drawNewsBoards(time) {
 function drawFlightBanners(time) {
     for (let i = 0; i < 2; i++) {
         const P = width + 900, x = width + 300 - ((time * (55 + i * 20) + i * 700) % P), y = height * (0.16 + i * 0.22);
-        const text = FLIGHT_BANNERS[(Math.floor((time * (55 + i * 20) + i * 700) / P) * 2 + i) % FLIGHT_BANNERS.length];
+        const text = bgT(FLIGHT_BANNERS[(Math.floor((time * (55 + i * 20) + i * 700) / P) * 2 + i) % FLIGHT_BANNERS.length]);
         ctx.font = "bold 20px Arial"; const tw = ctx.measureText(text).width + 30;
         ctx.fillStyle = "#e5e7eb"; ctx.fillRect(x, y - 6, 60, 12); ctx.fillRect(x + 20, y - 20, 14, 28); ctx.fillRect(x + 50, y - 14, 8, 10);
         ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x + 60, y); ctx.lineTo(x + 100, y); ctx.stroke();

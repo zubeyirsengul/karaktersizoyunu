@@ -84,7 +84,7 @@ function drawPalace(c, cx, by, s, time) {
     c.fillStyle = stone;
     for (let k = 0; k < 4; k++) c.fillRect(cx - (60 + k * 16) * s, by - 10 * s + k * 6 * s, (120 + k * 32) * s, 6 * s);
     c.font = `bold ${Math.max(10, 16 * s)}px Arial`; c.textAlign = "center"; c.textBaseline = "middle";
-    c.fillStyle = "#fde68a"; c.fillText("KAÇAK SARAY", cx, by + 30 * s);
+    c.fillStyle = "#fde68a"; c.fillText(bgT("KAÇAK SARAY"), cx, by + 30 * s);
     // Bayraklar
     drawTurkishFlag(c, cx, by - 248 * s, s, time);
     drawTurkishFlag(c, cx - 250 * s, by - 176 * s, s * 0.8, time + 1);

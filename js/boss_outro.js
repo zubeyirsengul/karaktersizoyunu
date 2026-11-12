@@ -5,12 +5,18 @@
 //   1) resmi resimler/ klasörüne koy (ör. resimler/bolumsonu3.png), 2) sesi sfx/ klasörüne koy ve audio.js'teki SFX_FILES'a ekle,
 //   3) buraya bir satır yaz: <bölüm>: { img, sfx, bubble (balonda yazan söz), grannies (ardından teyzeler gelsin mi) }
 // style: 'walk' → resim köşeden uzanmaz; karakter (draw) sağdan yürüyerek oyuncunun yanına gelir, balon başının üstünde çıkar.
+// style: 'custom' → { update(o), draw(ctx, o) } bölüm kendi sahnesini oynatır, bitince completeLevel çağırır.
+// fxUpdate/fxDraw: ara sahneye eklenen bölüme özel animasyon. style: 'self' → başka karakter gelmez; yalnızca HIRHIZ konuşur (pre), sonra bölüm biter.
+// bubble: yazı ya da dile göre yazı veren fonksiyon. pre: { sfx, bubble } → karakter gelmeden önce HIRHIZ konuşur (balon başının üstünde).
 const BOSS_OUTROS = {
     2: { img: 'resimler/yalarim.png', sfx: 'yalarim', bubble: 'YALARIM, ISTIRIRIM bi de..', grannies: false },
-    3: { img: 'resimler/cengiz.png', style: 'walk', draw: drawCengiz, sfx: 'cengiz', bubble: 'Bu milletin a. koyacağız', grannies: false }
+    3: { img: 'resimler/cengiz.png', style: 'walk', draw: drawCengiz, sfx: 'cengiz', bubble: 'Bu milletin a. koyacağız', grannies: false },
+    // 4. bölüm js/temmuz.js'te
+    5: { style: 'self', pre: { sfx: 'lutuf', bubble: () => t("lutufSay") } }   // DARBE TANKI yenilince HIRHIZ: "15 Temmuz Allah'ın bir lütfü!"
 };
 const outroImgs = {};
-Object.values(BOSS_OUTROS).forEach(o => { const im = new Image(); im.src = o.img; outroImgs[o.img] = im; });
+Object.values(BOSS_OUTROS).forEach(o => { if (!o.img) return; const im = new Image(); im.src = o.img; outroImgs[o.img] = im; });
+const bubbleText = b => typeof b === 'function' ? b() : b;
 let outro = null;   // { O, t (kare), start (sesin başladığı kare), len (ses + kuyruk, kare), cx }
 const OUTRO_IN = 40, OUTRO_OUT = 30;   // kayarak giriş ve çıkış (kare)
 
@@ -18,6 +24,10 @@ function updateOutro() {
     if (!outro) return;
     const o = outro;
     o.t++;
+    if (o.O.style === 'custom') { o.O.update(o); return; }   // bölüm kendi sahnesini oynatır (ör. 8. bölüm: mezar)
+    if (o.O.fxUpdate) o.O.fxUpdate(o);   // bölüme özel ek animasyon (ör. 6. bölüm: haşhaşiler ve sülükler)
+    if (o.O.pre && updatePreOutro(o)) return;
+    if (o.O.style === 'self') { outro = null; completeLevel(); return; }   // yalnızca HIRHIZ konuşur, sonra bölüm biter
     if (o.O.style === 'walk') { updateWalkOutro(o); return; }
     if (o.t === o.start) {
         const d = playSfx(o.O.sfx, { vol: 1 });
@@ -36,6 +46,10 @@ const easeOutBack = v => { const k = v - 1; return 1 + 2.4 * k * k * k + 1.4 * k
 function drawBossOutro(ctx) {
     const o = outro;
     if (!o) return;
+    if (o.O.style === 'custom') { o.O.draw(ctx, o); return; }
+    if (o.O.fxDraw) o.O.fxDraw(ctx, o);
+    if (o.pre) drawPreOutro(ctx, o);
+    if (o.O.style === 'self') return;
     if (o.O.style === 'walk') { drawWalkOutro(ctx, o); return; }
     const enterT = o.t - (o.start - OUTRO_IN);           // girişten beri geçen kare
     if (enterT < 0) return;
@@ -117,15 +131,17 @@ function drawWalkOutro(ctx, o) {
     const talking = o.arrived && o.t < o.arrived + o.voice;
     o.O.draw(ctx, sx, gy, o.arrived ? 0 : o.walk, talking ? o.t : 0);
     if (!o.arrived) return;
-    // balon: başın üstünde, sözler sesle birlikte harf harf yazılır
-    const text = o.O.bubble, el = o.t - o.arrived;
-    const shown = talking ? Math.max(1, Math.ceil(text.length * el / Math.max(1, o.voice * 0.8))) : text.length;
+    drawHeadBubble(ctx, sx, gy - (o.O.bubbleY || 230), bubbleText(o.O.bubble), o.t - o.arrived, o.voice, talking);
+}
+// Başın üstünde konuşma balonu (sx: konuşanın ekran x'i, top: balonun alt kenarı); sözler sesle birlikte harf harf yazılır
+function drawHeadBubble(ctx, sx, top, text, el, voice, talking) {
+    const shown = talking ? Math.max(1, Math.ceil(text.length * el / Math.max(1, voice * 0.8))) : text.length;
     const fs = 26;
     ctx.save();
     ctx.font = `900 ${fs}px Arial`;
     const lines = wrapBubble(ctx, text, 340);
     const lh = fs * 1.25, bw = Math.max(...lines.map(l => ctx.measureText(l).width)) + fs * 1.4, bh = lines.length * lh + fs * 0.9;
-    const bx = Math.max(10, Math.min(sx - bw * 0.7, width - bw - 10)), by = gy - 230 - bh;
+    const bx = Math.max(10, Math.min(sx - bw * 0.7, width - bw - 10)), by = top - bh;
     const pop = Math.min(1, el / 10);
     ctx.translate(sx, by + bh); ctx.scale(pop, pop); ctx.translate(-sx, -by - bh);
     ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
@@ -137,6 +153,21 @@ function drawWalkOutro(ctx, o) {
     lines.forEach((l, i) => { ctx.fillText(l.slice(0, Math.max(0, left)), bx + fs * 0.7, by + fs * 0.45 + lh * (i + 0.5)); left -= l.length + 1; });
     ctx.restore();
     ctx.textBaseline = "alphabetic";
+}
+// --- ÖNCE HIRHIZ KONUŞUR (O.pre): sesi çalar, sözleri başının üstündeki balonda; bitince asıl ara sahne başlar ---
+// Dönüş: true → ön konuşma sürüyor
+function updatePreOutro(o) {
+    if (o.preDone) return false;
+    if (o.t < o.start) return true;
+    if (!o.pre) { o.pre = { at: o.t }; o.pre.voice = Math.round((playSfx(o.O.pre.sfx, { vol: 1 }) || 3) * 60); }
+    const el = o.t - o.pre.at;
+    if (el < o.pre.voice) player.mouthOpen = 0.35 + 0.35 * Math.abs(Math.sin(el * 0.4));   // HIRHIZ'ın ağzı oynar
+    if (el >= o.pre.voice + 40) { o.preDone = true; o.pre = null; o.start = o.t + 20; }
+    return true;
+}
+function drawPreOutro(ctx, o) {
+    const el = o.t - o.pre.at;
+    drawHeadBubble(ctx, player.x + player.w / 2 - camX, player.y - 20, bubbleText(o.O.pre.bubble), el, o.pre.voice, el < o.pre.voice);
 }
 
 // Cengiz: fotoğraftan oval kesilmiş kafa, koyu takım elbise, kravat, kollar göğüste kavuşturulmuş (fotoğraftaki gibi)

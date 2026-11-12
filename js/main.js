@@ -9,7 +9,9 @@ $('pause-btn').addEventListener('click', () => setUserPause(!userPaused));
 document.addEventListener('visibilitychange', () => { if(document.hidden) { setUserPause(true); saveBest(); } });
 
 window.onkeydown = e => {
+    if(e.target && e.target.tagName === 'INPUT') return;   // sıralamaya isim yazılırken oyun tuşları çalışmaz
     let k = e.key.toLowerCase();
+    if(rankingOpen()) { if(e.key === 'Escape') closeRanking(); return; }
     if(story) { storyKey(e); return; }
     if(levelSelectOpen()) { if(e.key === 'Escape') closeLevelSelect(); return; }
     if($('howto').style.display === 'flex') { if(e.key === 'Escape' || e.key === 'Enter') closeHowto(); return; }
@@ -21,6 +23,7 @@ window.onkeydown = e => {
     if(e.key===' ' && !e.repeat) { jumpHeld = true; jump(); } if(e.key==='Enter') shoot(); if(k==='f' && !e.repeat) hammer();
 };
 window.onkeyup = e => {
+    if(e.target && e.target.tagName === 'INPUT') return;
     let k = e.key.toLowerCase();
     if(e.key === ' ') releaseJump();
     if(k==='a' || e.key==='ArrowLeft') keys.a=false; if(k==='d' || e.key==='ArrowRight') keys.d=false; if(k==='s' || e.key==='ArrowDown') keys.s=false;
@@ -42,6 +45,9 @@ $('overlay-screen').addEventListener('pointerdown', e => {
 $('howto-btn').addEventListener('click', () => openHowto(false));
 $('levels-btn').addEventListener('click', openLevelSelect);
 $('levels').addEventListener('click', e => { if (e.target === $('levels')) closeLevelSelect(); });
+$('rank-btn').addEventListener('click', openRanking);   // dünya sıralaması (js/leaderboard.js)
+$('ranks').addEventListener('click', e => { if (e.target === $('ranks')) closeRanking(); });
+renderRankBtn();
 renderLevelSelect();
 $('help-btn').addEventListener('click', () => openHowto(false));
 $('howto').addEventListener('click', e => { if (e.target === $('howto')) closeHowto(); });   // panelin dışına tıklayınca kapanır

@@ -71,7 +71,7 @@ function drawChapterBackground(bg, time) {
             ctx.fillStyle = "#64748b"; for (let c = 0; c < 8; c++) ctx.fillRect(sx - w / 2 + 14 + c * 36, gb - h + 20, 12, h - 20);
             ctx.fillStyle = "#b91c1c"; ctx.fillRect(sx - 70, gb - h + 34, 140, 36);
             ctx.fillStyle = "#fff"; ctx.font = "bold 22px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.fillText(i % 2 ? "OHAL" : "KHK", sx, gb - h + 53);
+            ctx.fillText(bgT(i % 2 ? "OHAL" : "KHK"), sx, gb - h + 53, 132);
             ctx.fillStyle = "#e30a17"; ctx.fillRect(sx + w / 2 - 30, gb - h - 70, 26, 17); ctx.fillStyle = "#475569"; ctx.fillRect(sx + w / 2 - 32, gb - h - 70, 3, 56);
         });
         ctx.fillStyle = "rgba(255,255,255,0.9)";
@@ -82,6 +82,8 @@ function drawChapterBackground(bg, time) {
             ctx.fillStyle = "#94a3b8"; ctx.fillRect(-6, -7, 12, 2); ctx.fillRect(-6, -2, 12, 2); ctx.fillRect(-6, 3, 8, 2);
             ctx.fillStyle = "rgba(255,255,255,0.9)"; ctx.restore();
         }
+    } else if (bg === 'temmuz') {
+        drawTemmuzBg(time);   // 4. bölüm: js/temmuz.js
     } else if (bg === 'emniyet') {
         drawEmniyetBg(time);   // 2. bölüm: js/saygili.js
     } else if (bg === 'gezi') {

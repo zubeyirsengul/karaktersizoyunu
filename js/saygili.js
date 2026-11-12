@@ -90,7 +90,7 @@ function drawPoliceCar(x, y, s, time, k) {
     ctx.beginPath(); ctx.moveTo(-38, -40); ctx.lineTo(-24, -62); ctx.lineTo(30, -62); ctx.lineTo(44, -40); ctx.fill();
     ctx.fillStyle = "#1e3a5f"; ctx.fillRect(-26, -58, 24, 16); ctx.fillRect(4, -58, 26, 16);
     ctx.fillStyle = "#1d4ed8"; ctx.fillRect(-70, -30, 140, 7);
-    ctx.fillStyle = "#1d4ed8"; ctx.font = "bold 11px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("POLİS", 0, -18);
+    ctx.fillStyle = "#1d4ed8"; ctx.font = "bold 11px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(bgT("POLİS"), 0, -18, 40);
     const on = Math.floor(time * 6 + k) % 2;
     ctx.fillStyle = on ? "#3b82f6" : "#1e3a8a"; ctx.fillRect(-14, -70, 14, 8);
     ctx.fillStyle = on ? "#7f1d1d" : "#ef4444"; ctx.fillRect(0, -70, 14, 8);
@@ -113,7 +113,7 @@ function drawEmniyetBg(time) {
         }
         ctx.fillStyle = "#1e3a8a"; ctx.fillRect(x + w / 2 - 190, b - h - 52, 380, 34);
         ctx.fillStyle = "#fff"; ctx.font = "bold 17px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText("İSTANBUL EMNİYET MÜDÜRLÜĞÜ", sx, b - h - 34);
+        ctx.fillText(bgT("İSTANBUL EMNİYET MÜDÜRLÜĞÜ"), sx, b - h - 34);
         ctx.fillStyle = "#e5e7eb"; ctx.fillRect(x + w - 30, b - h - 150, 4, 150);          // bayrak direği
         ctx.fillStyle = "#e30a17"; ctx.fillRect(x + w - 26, b - h - 148, 70, 46);
         ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x + w + 2, b - h - 125, 13, 0, Math.PI * 2); ctx.fill();
@@ -152,7 +152,7 @@ function drawEmniyetBg(time) {
         ctx.fillStyle = "#facc15"; ctx.fillRect(x, tb - 46, 20, 16); ctx.fillStyle = "#111827"; ctx.fillRect(x + 20, tb - 46, 20, 16);
     }
     ctx.fillStyle = "#111827"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    for (let x = -(off % 300) + 150; x < width; x += 300) { ctx.fillStyle = "#facc15"; ctx.fillRect(x - 50, tb - 46, 100, 16); ctx.fillStyle = "#111827"; ctx.fillText("POLİS - GİRİLMEZ", x, tb - 38); }
+    for (let x = -(off % 300) + 150; x < width; x += 300) { ctx.fillStyle = "#facc15"; ctx.fillRect(x - 50, tb - 46, 100, 16); ctx.fillStyle = "#111827"; ctx.fillText(bgT("POLİS - GİRİLMEZ"), x, tb - 38, 96); }
     ctx.restore(); ctx.textBaseline = "alphabetic";
 }
 

@@ -63,13 +63,15 @@ function drawPrisonBg(time) {
         if (i % 2 === 0) {   // tabela
             ctx.fillStyle = "#1e3a8a"; ctx.fillRect(sx + 120, tb + 30, 240, 46);
             ctx.fillStyle = "#fff"; ctx.font = "bold 20px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.fillText("EDİRNE F TİPİ", sx + 240, tb + 53);
+            ctx.fillText(bgT("EDİRNE F TİPİ"), sx + 240, tb + 53);
         }
     });
 }
 
 // --- CANAVAR: SELO ---
-BOSS_TYPES.selo = { greet: 'selo_baskan', chantDelay: 2.2, say: "SENİ BAŞKAN YAPTIRMAYACAĞIZ!", w: 120, h: 205, scale: 1, hp: 24, arena: 900, nameKey: "seloName", stomp: 55, labelY: 40,
+// Replikler: karşılama "Seni başkan yaptırmayacağız!", bağlamadan önce "Bir türkü de benden!", AİHM yağmurundan önce "AİHM kararını uygulayın!",
+// öfkelenince "Bu duvarlar beni durduramaz!", her 3. darbede "Yaşasın halkların kardeşliği!" (Windows Türkçe yapay sesi Tolga, inceltildi)
+BOSS_TYPES.selo = { greet: 'selo_baskan', rageSfx: 'selo_duvar', hitSfx: 'selo_kardes', chantDelay: 2.2, say: "SENİ BAŞKAN YAPTIRMAYACAĞIZ!", w: 120, h: 205, scale: 1, hp: 24, arena: 900, nameKey: "seloName", stomp: 55, labelY: 40,
                     update: updateSelo, draw: drawSelo };
 
 function updateSelo(b) {
@@ -87,6 +89,8 @@ function updateSelo(b) {
                 const d = playSfx('selo_baskan', { vol: 1, rate: b.rage ? 1.12 : 1 });
                 b.stateT = Math.max(40, Math.round((d || 0.7) * 60));
             }
+            if (b.next === 'saz') playSfx('selo_turku', { vol: 1 });
+            else if (b.next === 'aihm') playSfx('selo_aihm', { vol: 1 });
             const [txt, col] = b.next === 'saz' ? ["♪ ♫ ♪", "#e879f9"] : b.next === 'aihm' ? [t("aihmCry"), "#60a5fa"] : ["SENİ BAŞKAN...", "#fde047"];
             createParticle(b.x + b.w / 2, b.y - 60, txt, col, 1.1);
         }
@@ -308,7 +312,7 @@ Object.assign(STORY_BG, {
         blockRect(c, 40, 40, 70, 110, '#57534e'); blockRect(c, 24, 20, 102, 30, '#44403c');
         c.fillStyle = Math.floor(time * 2) % 2 ? '#fde68a' : '#fbbf24'; c.fillRect(44, 30, 62, 12);
         blockRect(c, 150, 180, 240, 44, '#1e3a8a');
-        c.fillStyle = '#fff'; c.font = 'bold 22px monospace'; c.textAlign = 'center'; c.fillText('EDİRNE F TİPİ', 270, 210);
+        c.fillStyle = '#fff'; c.font = 'bold 22px monospace'; c.textAlign = 'center'; c.fillText(bgT('EDİRNE F TİPİ'), 270, 210);
         storyGround(c, '#57534e', '#44403c');
     }
 });

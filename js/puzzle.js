@@ -93,7 +93,7 @@ function renderPuzzle() {
             <div class="pz-msg${pz.solved ? ' win' : pz.msg ? ' fail' : ''}">${pz.msg}</div>
           </div>
         </div>
-        <div class="pz-ticker"><b>SON DAKİKA</b><div class="pz-tick-wrap"><span>${PZ_TICKER}</span></div></div>
+        <div class="pz-ticker"><b>${bgT("SON DAKİKA")}</b><div class="pz-tick-wrap"><span>${bgT(PZ_TICKER)}</span></div></div>
       </div>`;
     $('puzzle').querySelectorAll('.pz-key').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); puzzleInput(b.dataset.k); }));
     pz.shake = false;

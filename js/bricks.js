@@ -1,8 +1,9 @@
 // Kırılabilir tuğlalar (gökyüzündeki kul hakkı torbalarının yerine) ve Recep'in sırtındaki çuval
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 //
-// Tuğlalar havada asılı bloklardır. Alttan zıplayıp kafa atınca (1), rüşvet zarfıyla (1) ya da balyozla (2) vurulur;
-// her vuruşta biraz daha çatlar, 3 hasarda kırılır (Minecraft gibi). Üstüne basılabilir.
+// Tuğlalar havada asılı bloklardır. Alttan kafa atınca, rüşvet zarfıyla ya da balyozla vurulur; her vuruş yalnızca
+// TEK bir tuğlanın 1 canını götürür (yan yana tuğlalar birlikte çatlamaz), 3 vuruşta kırılır (Minecraft gibi). Üstüne basılabilir.
+// LEVELS[n].bricks: tuğla sıklığı çarpanı (ör. 8. bölümde 2 kat).
 // İçinden rastgele bir güç küresi ya da kul hakkı çıkar; kul hakkı uçup Recep'in çuvalına girer, çuval şişer.
 
 const BRICK = 60, BRICK_HP = 3;
@@ -14,12 +15,14 @@ function buildBricks(level) {
     clearBricks();
     const r = seededRandom(level * 104729 + 7), gy = height - 60;
     const clash = (x, y, w, h) => platforms.some(p => p.y < gy - 1 && x < p.x + p.w + 30 && x + w > p.x - 30 && y < p.y + p.h + 30 && y + h > p.y - 200);
-    for (let i = 0; i < 36; i++) {
-        const x = 700 + i * 1000 + Math.floor(r() * 400);
+    const dens = LEVELS[level].bricks || 1, step = 1000 / dens;
+    for (let i = 0; i < 36 * dens; i++) {
+        let x = 700 + i * step + Math.floor(r() * step * 0.4);
         const n = 1 + Math.floor(r() * 3);                 // 1-3 tuğla yan yana
         const up = 250 + Math.floor(r() * 3) * 30;         // alt kenarı zeminden 250-310: ayaktayken kafaya değmez, zıplayınca değer
         const y = gy - up - BRICK;
-        if (clash(x, y, n * BRICK, BRICK)) continue;       // platformların içine girmesin
+        if (dens > 1 && clash(x, y, n * BRICK, BRICK)) x = [x + 250, x - 250, x + 120].find(nx => !clash(nx, y, n * BRICK, BRICK)) || x;   // sık tuğlalı bölümde boş yer ara
+        if (clash(x, y, n * BRICK, BRICK) || bricks.some(b => Math.abs(b.y - y) < BRICK && b.x < x + n * BRICK + 20 && b.x + BRICK > x - 20)) continue;   // platformların ve başka tuğlaların içine girmesin
         for (let k = 0; k < n; k++) bricks.push({ x: x + k * BRICK, y, hp: BRICK_HP, shake: 0, cd: 0, seed: r() * 100 });
     }
 }
@@ -83,20 +86,28 @@ function breakBrick(b) {
 
 // Oyuncu tuğlaya alttan kafa atar ya da üstüne basar (platform döngüsünden hemen sonra çağrılır)
 function collideBricks() {
-    const pl = player.x + 25, pr = player.x + player.w - 25;
+    const pl = player.x + 25, pr = player.x + player.w - 25, cx = player.x + player.w / 2;
+    let head = null;   // kafa birden çok tuğlaya değerse yalnızca başın tam üstündeki vurulur
     for (const b of bricks) {
         if (pr < b.x || pl > b.x + BRICK) continue;
         const bottom = b.y + BRICK;
         if (player.vy < 0 && player.y < bottom && player.y > bottom + player.vy - 2) {   // kafa attı
-            player.y = bottom; player.vy = 2; player.jumping = false;
-            if (b.hidden) revealSecret(b); else hitBrick(b, 1);
+            if (!head || Math.abs(b.x + BRICK / 2 - cx) < Math.abs(head.x + BRICK / 2 - cx)) head = b;
         } else if (!b.hidden && player.vy >= 0 && player.y + player.h > b.y && player.y + player.h < b.y + player.vy + 10) {   // üstüne bastı
             player.y = b.y - player.h; player.vy = 0; player.grounded = true;
         }
     }
+    if (head) {
+        player.y = head.y + BRICK; player.vy = 2; player.jumping = false;
+        if (head.hidden) revealSecret(head); else hitBrick(head, 1);
+    }
 }
+// Balyoz: menzildeki tuğlalardan yalnızca en yakını 1 can kaybeder
 function hammerBricks(minX, maxX) {
-    bricks.filter(b => !b.secret && b.x < maxX && b.x + BRICK > minX && b.y < player.y + player.h && b.y + BRICK > player.y - 140).forEach(b => hitBrick(b, 2));
+    const cx = player.x + player.w / 2, cy = player.y + player.h * 0.3;
+    const near = bricks.filter(b => !b.secret && b.x < maxX && b.x + BRICK > minX && b.y < player.y + player.h && b.y + BRICK > player.y - 140)
+        .sort((a, b) => Math.hypot(a.x + BRICK / 2 - cx, a.y + BRICK / 2 - cy) - Math.hypot(b.x + BRICK / 2 - cx, b.y + BRICK / 2 - cy));
+    if (near.length) hitBrick(near[0], 1);
 }
 // Rüşvet zarfı tuğlaya çarparsa: true
 function bribeHitsBrick(p) {

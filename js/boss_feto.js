@@ -1,9 +1,10 @@
 // 4. ve 8. bölüm canavarı FETÖ: bastonlu yaşlı adam, 1 dolar savurur, bastonla şok dalgası
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 
-BOSS_TYPES.feto = { greet: 'greet_feto2', say: "YA ALLAH!", w: 126, h: 203, dw: 180, dh: 290, scale: 0.7, hp: 20, arena: 900, nameKey: "fetoName", stomp: 55, labelY: 45, update: updateFeto, draw: drawFeto };
+// 4. bölüm (15 Temmuz): karşılaşınca HIRHIZ "Hocam gel, bu hasret bitsin!" der (sfx/hasret.mp3), FETÖ öfkelenince "Ya Allah!"
+BOSS_TYPES.feto = { greet: 'hasret', playerSay: "hasretSay", rageSfx: 'greet_feto2', w: 126, h: 203, dw: 180, dh: 290, scale: 0.7, hp: 20, arena: 900, nameKey: "fetoName", stomp: 55, labelY: 45, update: updateFeto, draw: drawFeto };
 // FETÖ'nün son hâli (8. bölüm): aynı saldırılar, daha çok can
-BOSS_TYPES.feto2 = { ...BOSS_TYPES.feto, hp: 28, nameKey: "feto2Name", say: "YA ALLAH!" };
+BOSS_TYPES.feto2 = { ...BOSS_TYPES.feto, hp: 28, nameKey: "feto2Name", greet: 'greet_feto2', say: "YA ALLAH!", playerSay: null, rageSfx: 'greet_feto2' };
 
 // FETÖ: bastonlu yaşlı adam. Ağır ağır yaklaşır; avucundan 1 dolarlar savurur,
 // her üçüncü saldırıda bastonunu havaya kaldırıp yere vurur ve iki yana şok dalgası gönderir.

@@ -49,7 +49,7 @@ function drawSaracaneBg(time) {
         for (let r = 0; r < 4; r++) for (let c = 0; c < 12; c++) { ctx.fillStyle = hash(sx * 0.01 + r * 7 + c) > 0.35 ? "#fde68a" : "#1e293b"; ctx.fillRect(sx - w / 2 + 14 + c * 33, b - h + 14 + r * 30, 20, 16); }
         ctx.fillStyle = "#e30a17"; ctx.fillRect(sx - 150, b - h - 50, 300, 30);
         ctx.fillStyle = "#fff"; ctx.font = "bold 15px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText("İSTANBUL BÜYÜKŞEHİR BELEDİYESİ", sx, b - h - 35);
+        ctx.fillText(bgT("İSTANBUL BÜYÜKŞEHİR BELEDİYESİ"), sx, b - h - 35, 290);
     });
     // Kalabalık: başlar, havada telefon ışıkları, bayraklar, pankart
     const cb = height * 0.92, cp = 0.55, coff = camX * cp;
@@ -71,7 +71,7 @@ function drawSaracaneBg(time) {
         if (i % 61 === 0) {   // pankart
             ctx.fillStyle = "#fff"; ctx.fillRect(x - 10, cb - 120, 260, 34);
             ctx.fillStyle = "#b91c1c"; ctx.font = "bold 16px Arial"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-            ctx.fillText("HER ŞEY ÇOK GÜZEL OLACAK", x, cb - 103);
+            ctx.fillText(bgT("HER ŞEY ÇOK GÜZEL OLACAK"), x, cb - 103, 240);
             ctx.fillStyle = "#57534e"; ctx.fillRect(x, cb - 86, 3, 40); ctx.fillRect(x + 236, cb - 86, 3, 40);
         }
     }
@@ -235,7 +235,7 @@ function drawEkrem(ctx, b) {
         const a = Math.min(1, b.stamp / 40), s = 1 + Math.max(0, (b.stamp - 130) / 20);
         ctx.save(); ctx.translate(b.x + b.w / 2, b.y + b.h * 0.45); ctx.rotate(-0.25); ctx.scale(s, s);
         ctx.globalAlpha = a; ctx.strokeStyle = "#dc2626"; ctx.lineWidth = 7; ctx.strokeRect(-95, -32, 190, 64);
-        ctx.fillStyle = "#dc2626"; ctx.font = "bold 46px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("İPTAL", 0, 2);
+        ctx.fillStyle = "#dc2626"; ctx.font = "bold 46px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(bgT("İPTAL"), 0, 2, 176);
         ctx.restore(); ctx.globalAlpha = 1; ctx.textBaseline = "alphabetic";
     }
 }
@@ -266,7 +266,7 @@ Object.assign(STORY_BG, {
         c.fillStyle = '#1e1b4b';
         for (let x = 0; x < STORY_W; x += 96) { c.fillRect(x + 16, 236, 64, 84); c.fillRect(x + 26, 186, 44, 36); }
         blockRect(c, 280, 70, 400, 56, '#fff');
-        c.fillStyle = '#b91c1c'; c.font = 'bold 26px monospace'; c.textAlign = 'center'; c.fillText('HER ŞEY ÇOK GÜZEL OLACAK', 480, 108);
+        c.fillStyle = '#b91c1c'; c.font = 'bold 26px monospace'; c.textAlign = 'center'; c.fillText(bgT('HER ŞEY ÇOK GÜZEL OLACAK'), 480, 108);
         for (let i = 0; i < 26; i++) {
             const x = i * 38 + (i % 2) * 8, j = Math.abs(Math.sin(time * 4 + i)) * 8;
             c.fillStyle = ['#0f172a', '#1e293b', '#312e81'][i % 3]; c.fillRect(x, STORY_GROUND - 64 - j, 30, 64 + j);
@@ -288,12 +288,12 @@ Object.assign(STORY_PROPS, {
         const p = (time * 0.9) % 1, drop = p < 0.25 ? p / 0.25 : 1;
         c.save(); c.translate(480, 150 + drop * 110); c.rotate(-0.2);
         c.globalAlpha = p < 0.25 ? 0.6 : 1; c.strokeStyle = '#dc2626'; c.lineWidth = 10; c.strokeRect(-150, -46, 300, 92);
-        c.fillStyle = '#dc2626'; c.font = 'bold 64px monospace'; c.textAlign = 'center'; c.fillText('İPTAL', 0, 22);
+        c.fillStyle = '#dc2626'; c.font = 'bold 64px monospace'; c.textAlign = 'center'; c.fillText(bgT('İPTAL'), 0, 22);
         c.restore(); c.globalAlpha = 1;
     },
     diploma(c) {   // üstü çizili diploma
         blockRect(c, 360, 230, 240, 160, '#fefce8');
-        c.fillStyle = '#92400e'; c.font = 'bold 22px monospace'; c.textAlign = 'center'; c.fillText('DİPLOMA', 480, 270);
+        c.fillStyle = '#92400e'; c.font = 'bold 22px monospace'; c.textAlign = 'center'; c.fillText(bgT('DİPLOMA'), 480, 270);
         c.fillStyle = '#a8a29e'; for (let i = 0; i < 4; i++) c.fillRect(390, 290 + i * 18, 180, 4);
         c.strokeStyle = '#dc2626'; c.lineWidth = 10; c.beginPath(); c.moveTo(370, 240); c.lineTo(590, 380); c.moveTo(590, 240); c.lineTo(370, 380); c.stroke();
     }
@@ -378,7 +378,7 @@ Object.assign(NEWS_SCENES, {
         for (let i = 0; i < 5; i++) person(x + w * (0.2 + i * 0.15), y + h * 0.6, 0.6, "#111827");
         ctx.save(); ctx.translate(x + w / 2, y + h * 0.3); ctx.rotate(-0.15);
         ctx.strokeStyle = "#fecaca"; ctx.lineWidth = 4; ctx.strokeRect(-60, -18, 120, 36);
-        ctx.fillStyle = "#fecaca"; ctx.font = "bold 24px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("İPTAL", 0, 1); ctx.restore();
+        ctx.fillStyle = "#fecaca"; ctx.font = "bold 24px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(bgT("İPTAL"), 0, 1, 110); ctx.restore();
     },
     margin(x, y, w, h) {   // seçim sonucu çubukları
         ctx.fillStyle = "#f1f5f9"; ctx.fillRect(x, y, w, h);
@@ -389,7 +389,7 @@ Object.assign(NEWS_SCENES, {
     diploma(x, y, w, h) {
         ctx.fillStyle = "#292524"; ctx.fillRect(x, y, w, h);
         ctx.fillStyle = "#fefce8"; ctx.fillRect(x + w * 0.2, y + h * 0.15, w * 0.6, h * 0.7);
-        ctx.fillStyle = "#92400e"; ctx.font = "bold 14px Georgia"; ctx.textAlign = "center"; ctx.fillText("DİPLOMA", x + w / 2, y + h * 0.32);
+        ctx.fillStyle = "#92400e"; ctx.font = "bold 14px Georgia"; ctx.textAlign = "center"; ctx.fillText(bgT("DİPLOMA"), x + w / 2, y + h * 0.32);
         ctx.fillStyle = "#a8a29e"; for (let i = 0; i < 3; i++) ctx.fillRect(x + w * 0.28, y + h * (0.42 + i * 0.12), w * 0.44, 3);
         ctx.strokeStyle = "#dc2626"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x + w * 0.22, y + h * 0.18); ctx.lineTo(x + w * 0.78, y + h * 0.82); ctx.moveTo(x + w * 0.78, y + h * 0.18); ctx.lineTo(x + w * 0.22, y + h * 0.82); ctx.stroke();
     },

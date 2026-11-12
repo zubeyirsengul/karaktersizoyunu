@@ -112,6 +112,7 @@ function updateFlight() {
     projectiles = projectiles.filter(p => p.active && p.life > 0);
 
     if (boss) updateTanker(boss);
+    updateOutro();   // tanker düşünce: "Bunlar haşhaşi, bunlar sülük!" (boss_outro.js, BOSS_OUTROS[6])
     updatePowers();
     checkBest();
 }
@@ -278,6 +279,66 @@ function drawFlight() {
     ctx.restore();
     ctx.globalAlpha = 1;
     if (boss && !boss.dying) drawBossBar(ctx, boss);
+    drawBossOutro(ctx);
     drawPowerHud(ctx);
     drawScreenOverlays(ctx);
 }
+
+// --- BÖLÜM SONU: tanker düşünce HIRHIZ "Bunlar haşhaşi, bunlar sülük!" der (sfx/hashasi.mp3, Tolga) ---
+// Düşen tankerden paraşütle kapüşonlu, hançerli haşhaşiler süzülür; kıvrılan sülükler dökülür. (ekran koordinatında)
+function hashasiFxUpdate(o) {
+    if (!o.fx) {
+        const b = boss, sx = b ? b.x + b.w / 2 - camX : width * 0.7, sy = b ? b.y + b.h / 2 : height * 0.35;
+        o.fx = [];
+        for (let i = 0; i < 5; i++) o.fx.push({ k: 'h', x: sx + (i - 2) * 60, y: sy, vx: (i - 2) * 0.8 - 1.5, vy: -3 - Math.random() * 2, ph: Math.random() * 6, open: 0 });
+        for (let i = 0; i < 12; i++) o.fx.push({ k: 's', x: sx + (Math.random() - 0.5) * 160, y: sy + (Math.random() - 0.5) * 40, vx: (Math.random() - 0.5) * 5 - 1, vy: -5 - Math.random() * 4, ph: Math.random() * 6, rot: Math.random() * 6 });
+    }
+    o.fx.forEach(f => {
+        f.ph += 0.15;
+        if (f.k === 'h') {   // önce düşer, sonra paraşüt açılır ve yavaşça süzülür
+            f.open = Math.min(1, f.open + (f.vy > 1 ? 0.04 : 0));
+            f.vy = Math.min(f.vy + 0.25, 4 - 2.8 * f.open);
+            f.x += f.vx - 1 + Math.sin(f.ph * 0.3) * 0.8 * f.open; f.y += f.vy;
+        } else { f.vy = Math.min(f.vy + 0.12, 2.6); f.x += f.vx * 0.98 - 1; f.vx *= 0.98; f.y += f.vy; f.rot += 0.05; }   // sülükler yavaşça kıvrılarak düşer
+    });
+}
+function drawHashasi(ctx, f) {
+    ctx.save(); ctx.translate(f.x, f.y);
+    const sw = Math.sin(f.ph * 0.3) * 0.15 * f.open;
+    ctx.rotate(sw);
+    if (f.open > 0) {   // paraşüt
+        ctx.globalAlpha = Math.min(1, f.open * 1.5);
+        ctx.fillStyle = "#f8fafc"; ctx.beginPath(); ctx.arc(0, -70, 46 * f.open + 6, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = "#dc2626"; for (let k = -1; k <= 1; k += 2) { ctx.beginPath(); ctx.moveTo(k * 16 * f.open, -70); ctx.arc(0, -70, 46 * f.open + 6, k < 0 ? Math.PI * 1.2 : Math.PI * 1.65, k < 0 ? Math.PI * 1.35 : Math.PI * 1.8); ctx.fill(); }
+        ctx.strokeStyle = "rgba(226,232,240,0.8)"; ctx.lineWidth = 1;
+        [-1, -0.4, 0.4, 1].forEach(k => { ctx.beginPath(); ctx.moveTo(k * (46 * f.open + 6), -70); ctx.lineTo(0, -20); ctx.stroke(); });
+        ctx.globalAlpha = 1;
+    }
+    // kapüşonlu cüppe, gölgede kalan yüz, parlayan gözler, hançer
+    ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.moveTo(-16, 22); ctx.lineTo(0, -22); ctx.lineTo(16, 22); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#292524"; ctx.beginPath(); ctx.arc(0, -22, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#0c0a09"; ctx.beginPath(); ctx.ellipse(0, -20, 7, 6, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#facc15"; ctx.fillRect(-4, -22, 2.5, 2); ctx.fillRect(1.5, -22, 2.5, 2);
+    ctx.fillStyle = "#b91c1c"; ctx.fillRect(-16, 4, 32, 3);   // kuşak
+    ctx.save(); ctx.translate(14, 0); ctx.rotate(-0.8 + Math.sin(f.ph) * 0.3);
+    ctx.fillStyle = "#e5e7eb"; ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(22, 0); ctx.lineTo(0, 2); ctx.fill();
+    ctx.fillStyle = "#78350f"; ctx.fillRect(-6, -2.5, 7, 5);
+    ctx.restore();
+    ctx.restore();
+}
+function drawSuluk(ctx, f) {   // kıvrılan sülük
+    ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot); ctx.scale(1.5, 1.5);
+    ctx.strokeStyle = "#3f2a1d"; ctx.lineWidth = 9; ctx.lineCap = "round";
+    ctx.beginPath();
+    for (let i = 0; i <= 10; i++) { const x = -20 + i * 4, y = Math.sin(f.ph + i * 0.7) * 5; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
+    ctx.stroke();
+    ctx.strokeStyle = "#65a30d"; ctx.lineWidth = 2;
+    ctx.beginPath(); for (let i = 0; i <= 10; i++) { const x = -20 + i * 4, y = Math.sin(f.ph + i * 0.7) * 5 - 2; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); } ctx.stroke();
+    ctx.fillStyle = "#7f1d1d"; ctx.beginPath(); ctx.arc(20, Math.sin(f.ph + 7) * 5, 4.5, 0, Math.PI * 2); ctx.fill();   // vantuz ağız
+    ctx.restore();
+}
+function hashasiFxDraw(ctx, o) {
+    if (!o.fx) return;
+    o.fx.forEach(f => { if (f.y < height + 60) (f.k === 'h' ? drawHashasi : drawSuluk)(ctx, f); });
+}
+BOSS_OUTROS[6] = { style: 'self', pre: { sfx: 'hashasi', bubble: () => t("hashasiSay") }, fxUpdate: hashasiFxUpdate, fxDraw: hashasiFxDraw };

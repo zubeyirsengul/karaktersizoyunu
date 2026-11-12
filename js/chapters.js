@@ -2,7 +2,7 @@
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 //
 // 3 SIFIRLA      : torbalar yerine ses kasetleri ("MONTAJ!"), canavar DEV ÇELİK KASA
-// 4 SANDIK       : rüşvet verilen polis ölmez, bavuluyla sürgüne gider; canavar FETÖ
+// 4 15 TEMMUZ    : temmuz.js (darbeci askerler tutuklanır; canavar FETÖ)
 // 5 FACETIME     : telefonun şarjı azalır, şarj aletleri toplanır; mini tanklar; canavar DARBE TANKI
 // 6 UÇUŞ         : flight.js
 // 7 OHAL         : balyoz yerine KHK damgası; sivilleri de ihraç eder; canavar BYLOCK
@@ -124,6 +124,7 @@ function applyExilePose(ctx, en) {
     ctx.globalAlpha = Math.max(0, Math.min(1, (DEATH_FRAMES - en.deathT) / 15));
 }
 function drawSuitcase(ctx, en) {
+    if (curLevel().exile === 'tutuklama') return;   // 4. bölüm: bavul yok, kelepçe var (drawSoldier)
     const x = en.x + en.w / 2 + en.fallDir * 40, y = en.y + en.h * 0.62;
     ctx.fillStyle = "#78350f"; ctx.fillRect(x - 18, y, 36, 26);
     ctx.fillStyle = "#451a03"; ctx.fillRect(x - 6, y - 6, 12, 6); ctx.fillRect(x - 18, y + 10, 36, 3);
@@ -149,6 +150,7 @@ function enemyCryText(en) {
     if (curLevel().cry) return [t(curLevel().cry), "#fbbf24"];
     const ex = curLevel().exile;
     if (ex === 'surgun') return [t("exileCry"), "#fbbf24"];
+    if (ex === 'tutuklama') return [t("arrestCry"), "#f87171"];
     if (ex === 'ihrac') return [t("expel"), "#ef4444"];
     return [t("policeCry"), "#60a5fa"];
 }

@@ -67,7 +67,7 @@ function geziBanner(x, y, w, h, k, wave) {
     ctx.fillStyle = "#f8fafc"; ctx.fillRect(x, y, w, h);
     ctx.fillStyle = "rgba(0,0,0,0.12)"; ctx.fillRect(x, y + h - 4, w, 4);
     ctx.fillStyle = col; ctx.font = `bold ${Math.floor(h * 0.55)}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(txt, x + w / 2, y + h / 2 + 1 + (wave || 0), w - 8);
+    ctx.fillText(bgT(txt), x + w / 2, y + h / 2 + 1 + (wave || 0), w - 8);
     ctx.textBaseline = "alphabetic";
 }
 // Penguen (oyun ekranında; ayakların ortası x,y)
@@ -101,7 +101,7 @@ function drawGeziBg(time) {
         ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x + w / 2 - 12, b - h + 175, 20, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#e30a17"; ctx.beginPath(); ctx.arc(x + w / 2 - 6, b - h + 175, 16, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#fff"; ctx.font = "bold 20px Arial"; ctx.textAlign = "center"; ctx.fillText("★", x + w / 2 + 16, b - h + 182);
-        ctx.fillStyle = "#1e293b"; ctx.font = "bold 18px Arial"; ctx.fillText("ATATÜRK KÜLTÜR MERKEZİ", sx, b - h - 22);
+        ctx.fillStyle = "#1e293b"; ctx.font = "bold 18px Arial"; ctx.fillText(bgT("ATATÜRK KÜLTÜR MERKEZİ"), sx, b - h - 22);
     });
     // Gezi Parkı: çınarlar ve aralarında çadırlar
     const pb = height * 0.86;
@@ -134,7 +134,7 @@ function drawGeziBg(time) {
         if (hash(i * 2.3) > 0.55) {   // sprey yazı
             ctx.save(); ctx.translate(x + 60, wb - 20); ctx.rotate(-0.06);
             ctx.fillStyle = hash(i) > 0.5 ? "#dc2626" : "#111827"; ctx.font = "bold 24px Impact, Arial"; ctx.textAlign = "left";
-            ctx.fillText(hash(i * 5.1) > 0.5 ? "ÇAPULCU" : "HER YER TAKSİM", 0, 0); ctx.restore();
+            ctx.fillText(bgT(hash(i * 5.1) > 0.5 ? "ÇAPULCU" : "HER YER TAKSİM"), 0, 0); ctx.restore();
         } else geziBanner(x + 40, wb - 44, 200, 34, i + 2, 0);
     }
 }
@@ -266,7 +266,7 @@ function heroLabel(ctx, lb, x, y) {
 // Kahramanların attığı slogan balonu (mermi gibi düz gider)
 const GEZI_SLOGANS = ["HER YER TAKSİM!", "DİRENİŞ!", "ÇAPULCUYUZ!", "HÜKÜMET İSTİFA!"];
 function drawSlogan(ctx, p) {
-    if (p.txt === undefined) p.txt = GEZI_SLOGANS[Math.floor(Math.random() * GEZI_SLOGANS.length)];
+    if (p.txt === undefined) p.txt = bgT(GEZI_SLOGANS[Math.floor(Math.random() * GEZI_SLOGANS.length)]);
     ctx.font = "bold 15px Arial";
     const w = ctx.measureText(p.txt).width + 16, d = Math.sign(p.vx) || 1;
     ctx.fillStyle = "#fff"; ctx.strokeStyle = "#111"; ctx.lineWidth = 2;
@@ -376,10 +376,10 @@ function drawToma(ctx, b) {
     ctx.fillText("TOMA", -62, -78);
     // Sprey yazılar
     ctx.save(); ctx.translate(-70, -140); ctx.rotate(-0.08);
-    ctx.fillStyle = "#dc2626"; ctx.font = "bold 34px Impact, Arial"; ctx.fillText("ÇAPULCU", 0, 0);
+    ctx.fillStyle = "#dc2626"; ctx.font = "bold 34px Impact, Arial"; ctx.fillText(bgT("ÇAPULCU"), 0, 0);
     ctx.fillStyle = "rgba(220,38,38,0.8)"; [-50, -14, 30].forEach(dx => ctx.fillRect(dx, 14, 3, 10 + (dx & 7)));   // akıntılar
     ctx.restore();
-    ctx.fillStyle = "#111827"; ctx.font = "bold 13px Impact, Arial"; ctx.fillText("HER YER TAKSİM", -62, -116);
+    ctx.fillStyle = "#111827"; ctx.font = "bold 13px Impact, Arial"; ctx.fillText(bgT("HER YER TAKSİM"), -62, -116);
     ctx.restore();
     // Kabin (ön): eğik burun, kafesli cam, tepe lambası
     ctx.fillStyle = "#e2e8f0"; ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
@@ -639,7 +639,7 @@ Object.assign(NEWS_SCENES, {
         for (let i = 0; i < 14; i++) person(x + 10 + i * (w - 20) / 13, y + h * (0.85 + (i % 2) * 0.08), 0.75, i % 3 ? "#1f2937" : "#7f1d1d");
         ctx.fillStyle = "#fff"; ctx.fillRect(x + w * 0.2, y + h * 0.2 + Math.sin(t * 3) * 2, w * 0.6, h * 0.2);
         ctx.fillStyle = "#dc2626"; ctx.font = `bold ${Math.floor(h * 0.13)}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText("ÇAPULCUYUZ", x + w / 2, y + h * 0.3 + Math.sin(t * 3) * 2); ctx.textBaseline = "alphabetic";
+        ctx.fillText(bgT("ÇAPULCUYUZ"), x + w / 2, y + h * 0.3 + Math.sin(t * 3) * 2); ctx.textBaseline = "alphabetic";
     },
     duran(x, y, w, h) {   // tek başına duran adam, karşısında AKM
         ctx.fillStyle = "#cbd5e1"; ctx.fillRect(x, y, w, h);

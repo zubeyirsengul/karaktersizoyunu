@@ -241,7 +241,7 @@ function drawRiot(ctx, en) {
     ctx.beginPath(); ctx.moveTo(22, 30 + bob); ctx.lineTo(22, 70 + bob); ctx.stroke();
     ctx.save(); ctx.translate(34, 82 + bob); if (en.dir === -1) ctx.scale(-1, 1); ctx.rotate(-Math.PI / 2);
     ctx.fillStyle = "#fff"; ctx.font = "bold 14px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText("POLİS", 0, 0);
+    ctx.fillText(bgT("POLİS"), 0, 0, 100);
     ctx.restore();
     ctx.restore();
     ctx.restore();
@@ -360,31 +360,35 @@ function drawSniperLaser(ctx, en) {
     ctx.fillStyle = `rgba(239,68,68,${0.5 + 0.5 * k})`;
     ctx.beginPath(); ctx.arc(px, py, 4 + 3 * k, 0, Math.PI * 2); ctx.fill();
 }
+// 4. bölümde (army) asker renkleri: kamuflaj, miğfer
+const SNIPER_COL = { police: ['#172554', '#1e3a8a', '#1e40af', '#1e293b', '#1e3a8a'], army: ['#3a4520', '#4d5b2a', '#4d5b2a', '#36401c', '#4d5b2a'] };
 function drawSniper(ctx, en) {
+    const army = !!LEVELS[currentLevel].army, [cLegB, cLegF, cShirt, cVest, cHat] = SNIPER_COL[army ? 'army' : 'police'];
     ctx.save();
     ctx.translate(en.x + en.w / 2, en.y + en.h);
     ctx.save();
     if (en.dir === -1) ctx.scale(-1, 1);
     ctx.lineCap = "round"; ctx.lineJoin = "round";
     // Bacaklar: arka diz yerde, ön ayak basık
-    ctx.strokeStyle = "#172554"; ctx.lineWidth = 14;
+    ctx.strokeStyle = cLegB; ctx.lineWidth = 14;
     ctx.beginPath(); ctx.moveTo(-2, -50); ctx.lineTo(-8, -8); ctx.lineTo(-40, -6); ctx.stroke();
-    ctx.strokeStyle = "#1e3a8a";
+    ctx.strokeStyle = cLegF;
     ctx.beginPath(); ctx.moveTo(2, -50); ctx.lineTo(28, -40); ctx.lineTo(30, -6); ctx.stroke();
     ctx.fillStyle = "#0a0a0a";
     ctx.beginPath(); ctx.ellipse(36, -4, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(-46, -4, 10, 5, 0, 0, Math.PI * 2); ctx.fill();
     // Gövde: lacivert gömlek, siyah yelek
-    ctx.fillStyle = "#1e40af"; ctx.beginPath(); ctx.roundRect(-17, -112, 34, 66, 9); ctx.fill();
-    ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.roundRect(-15, -104, 30, 46, 6); ctx.fill();
+    ctx.fillStyle = cShirt; ctx.beginPath(); ctx.roundRect(-17, -112, 34, 66, 9); ctx.fill();
+    ctx.fillStyle = cVest; ctx.beginPath(); ctx.roundRect(-15, -104, 30, 46, 6); ctx.fill();
     ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(-6, -96, 3.5, 0, Math.PI * 2); ctx.fill();
-    chestPlate(ctx, 0, -78, en.dir);
+    if (army) { ctx.fillStyle = "#e30a17"; ctx.fillRect(-8, -84, 14, 9); } else chestPlate(ctx, 0, -78, en.dir);
     // Kafa: bıyık, bere
     ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.ellipse(6, -126, 14, 15, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#3f2a1d"; ctx.beginPath(); ctx.ellipse(13, -118, 7, 2.5, 0.1, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(13, -128, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#1e3a8a"; ctx.beginPath(); ctx.ellipse(2, -138, 17, 7, -0.2, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(-6, -139, 2.5, 0, Math.PI * 2); ctx.fill();
+    if (army) { ctx.fillStyle = cHat; ctx.beginPath(); ctx.ellipse(5, -132, 19, 17, 0, Math.PI, 0); ctx.fill(); ctx.fillRect(-14, -134, 38, 5); }   // miğfer
+    else { ctx.fillStyle = cHat; ctx.beginPath(); ctx.ellipse(2, -138, 17, 7, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(-6, -139, 2.5, 0, Math.PI * 2); ctx.fill(); }
     // Tüfek ve kollar: omuzdan oyuncuya doğru döner
     ctx.save(); ctx.translate(6, -100); ctx.rotate(en.aimAng || 0);
     ctx.fillStyle = "#3f2a1d"; ctx.fillRect(-16, -3, 18, 9);                        // dipçik
@@ -396,7 +400,7 @@ function drawSniper(ctx, en) {
         for (let i = 0; i < 10; i++) { const r = i % 2 ? 4 : 12, a = i * Math.PI / 5; ctx.lineTo(72 + Math.cos(a) * r, Math.sin(a) * r * 0.7); }
         ctx.closePath(); ctx.fill();
     }
-    ctx.strokeStyle = "#1e40af"; ctx.lineWidth = 10;
+    ctx.strokeStyle = cShirt; ctx.lineWidth = 10;
     ctx.beginPath(); ctx.moveTo(0, 6); ctx.lineTo(10, 10); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(-2, 4); ctx.lineTo(34, 6); ctx.stroke();
     ctx.fillStyle = "#f2c79b"; ctx.beginPath(); ctx.arc(34, 5, 5, 0, Math.PI * 2); ctx.fill();

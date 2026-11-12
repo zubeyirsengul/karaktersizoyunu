@@ -311,10 +311,11 @@ function draw() {
     enemies.forEach(en => {
         if(en.dead && en.deathT >= DEATH_FRAMES) return;
         ctx.save();
-        const leaves = en.dead && enemyLeaves(en) && en.kind !== 'tank';
+        const leaves = en.dead && enemyLeaves(en) && en.kind !== 'tank';   // 4. bölümde tutuklanan asker kelepçeli yürüyüp gider
         if(en.dead) (leaves ? applyExilePose : applyDeathPose)(ctx, en);
         else if(en.hurt > 0 && Math.floor(en.hurt / 4) % 2) ctx.globalAlpha = 0.4;   // vurulunca yanıp söner
-        if(en.skin) drawGeziHero(ctx, en);   // 1. bölüm: Gezi kahramanları
+        if(LEVELS[currentLevel].army && drawArmy(ctx, en)) {}   // 4. bölüm: darbeci askerler (js/temmuz.js)
+        else if(en.skin) drawGeziHero(ctx, en);   // 1. bölüm: Gezi kahramanları
         else if(en.kind === 'duran') drawDuran(ctx, en);
         else if(en.kind === 'riot') drawRiot(ctx, en);
         else if(en.kind === 'sniper') { drawSniper(ctx, en); if(en.nameKey && !en.dead) drawEnemyName(ctx, en); }

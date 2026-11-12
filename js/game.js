@@ -58,11 +58,12 @@ function update() {
     items.forEach(it => {
         if(!it.collected && !(it.rise > 0) && Math.hypot(player.x + player.w/2 - it.x, player.y + player.h/2 - it.y) < 100) {
             it.collected = true;
-            if(it.power) { grantPower(it.power, it.x, it.y); score += 1000; $('score').innerText = score; return; }
+            if(it.power) { grantPower(it.power, it.x, it.y); addScore(1000); $('score').innerText = score; return; }
             if(pickupChapterItem(it)) return;
-            score += 5000; 
+            addScore(5000); 
             $('score').innerText = score;
             $('sfx-pickup').currentTime = 0; $('sfx-pickup').play().catch(()=>{});
+            if(LEVELS[currentLevel].item === 'tape') playSfx('sifirla', { vol: 0.6 });   // 3. bölüm: kaset alınınca sayaç sıfırlanır
             player.mouthOpen = 1.0;
             createParticle(it.x, it.y, pickupText(), "#22c55e", 0.8);
         }
@@ -127,13 +128,14 @@ function update() {
         if(bribeHitsBrick(p)) return;
         enemies.forEach(en => {
             if(!en.dead && p.active && p.x > en.x && p.x < en.x + en.w && p.y > en.y && p.y < en.y + en.h) {
-                if(en.kind === 'riot' && p.vx * en.dir < 0) riotBlock(p);   // kalkana önden çarptı
+                if(LEVELS[currentLevel].noBribe) { p.active = false; refuseBribe(en, p); }   // 1. bölüm: "Biz rüşvet almayız!"
+                else if(en.kind === 'riot' && p.vx * en.dir < 0) riotBlock(p);   // kalkana önden çarptı
                 else { p.active = false; killEnemy(en); }
             }
         });
         if(boss && !boss.dying && p.active && p.x > boss.x + 40 && p.x < boss.x + boss.w - 40 && p.y > boss.y && p.y < boss.y + boss.h) {
             p.active = false;
-            if(boss.T.stompOnly) bossArmor(p.x, p.y); else damageBoss(1);   // zırhlı canavar: yalnızca üstüne zıplanınca
+            if(bossShielded(boss)) bossArmor(p.x, p.y); else damageBoss(1);   // zırhlı canavar: yalnızca üstüne zıplanınca
         }
     });
     playerProjectiles = playerProjectiles.filter(p => p.active && p.life > 0);

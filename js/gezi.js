@@ -9,22 +9,22 @@
 
 // --- METİNLER (oyun içi) ---
 const GEZI_TEXT = {
-    tr: { gezCry: "ÇAPULCU!", fidan: "ÇINAR!", pwMask: "BARET + MASKE!", maskSaved: "BARET KORUDU!", duranHit: "KIPIRDAMIYOR!",
+    tr: { noBribe: "BİZ RÜŞVET ALMAYIZ!", gezCry: "ÇAPULCU!", fidan: "ÇINAR!", pwMask: "BARET + MASKE!", maskSaved: "BARET KORUDU!", duranHit: "KIPIRDAMIYOR!",
           armored: "ZIRHLI! ÜSTÜNE ZIPLA!", slowed: "BİBER GAZI!", duranName: "DURAN ADAM",
           hero_carsi: "ÇARŞI", hero_kirmizi: "KIRMIZILI KADIN", hero_sema: "SEMAZEN", hero_capulcu: "ÇAPULCU", hero_tencere: "TENCERE TAVA" },
-    en: { gezCry: "ÇAPULCU!", fidan: "PLANE TREE!", pwMask: "HARD HAT + MASK!", maskSaved: "HARD HAT SAVED YOU!", duranHit: "HE WON'T MOVE!",
+    en: { noBribe: "WE DON'T TAKE BRIBES!", gezCry: "ÇAPULCU!", fidan: "PLANE TREE!", pwMask: "HARD HAT + MASK!", maskSaved: "HARD HAT SAVED YOU!", duranHit: "HE WON'T MOVE!",
           armored: "ARMOURED! JUMP ON IT!", slowed: "PEPPER GAS!", duranName: "STANDING MAN",
           hero_carsi: "ÇARŞI", hero_kirmizi: "LADY IN RED", hero_sema: "WHIRLING DERVISH", hero_capulcu: "ÇAPULCU", hero_tencere: "POTS & PANS" },
-    fr: { gezCry: "ÇAPULCU !", fidan: "PLATANE !", pwMask: "CASQUE + MASQUE !", maskSaved: "LE CASQUE T'A SAUVÉ !", duranHit: "IL NE BOUGE PAS !",
+    fr: { noBribe: "ON NE PREND PAS DE POTS-DE-VIN !", gezCry: "ÇAPULCU !", fidan: "PLATANE !", pwMask: "CASQUE + MASQUE !", maskSaved: "LE CASQUE T'A SAUVÉ !", duranHit: "IL NE BOUGE PAS !",
           armored: "BLINDÉ ! SAUTE DESSUS !", slowed: "GAZ POIVRÉ !", duranName: "L'HOMME DEBOUT",
           hero_carsi: "ÇARŞI", hero_kirmizi: "LA FEMME EN ROUGE", hero_sema: "DERVICHE", hero_capulcu: "ÇAPULCU", hero_tencere: "CASSEROLES" },
-    nl: { gezCry: "ÇAPULCU!", fidan: "PLATAAN!", pwMask: "HELM + MASKER!", maskSaved: "HELM HIELP!", duranHit: "HIJ BEWEEGT NIET!",
+    nl: { noBribe: "WIJ NEMEN GEEN SMEERGELD AAN!", gezCry: "ÇAPULCU!", fidan: "PLATAAN!", pwMask: "HELM + MASKER!", maskSaved: "HELM HIELP!", duranHit: "HIJ BEWEEGT NIET!",
           armored: "GEPANTSERD! SPRING EROP!", slowed: "PEPERGAS!", duranName: "STAANDE MAN",
           hero_carsi: "ÇARŞI", hero_kirmizi: "VROUW IN HET ROOD", hero_sema: "DERWISJ", hero_capulcu: "ÇAPULCU", hero_tencere: "POTTEN & PANNEN" },
-    de: { gezCry: "ÇAPULCU!", fidan: "PLATANE!", pwMask: "HELM + MASKE!", maskSaved: "DER HELM HAT GESCHÜTZT!", duranHit: "ER RÜHRT SICH NICHT!",
+    de: { noBribe: "WIR NEHMEN KEIN SCHMIERGELD!", gezCry: "ÇAPULCU!", fidan: "PLATANE!", pwMask: "HELM + MASKE!", maskSaved: "DER HELM HAT GESCHÜTZT!", duranHit: "ER RÜHRT SICH NICHT!",
           armored: "GEPANZERT! SPRING DRAUF!", slowed: "PFEFFERGAS!", duranName: "STEHENDER MANN",
           hero_carsi: "ÇARŞI", hero_kirmizi: "FRAU IN ROT", hero_sema: "DERWISCH", hero_capulcu: "ÇAPULCU", hero_tencere: "TÖPFE & PFANNEN" },
-    ru: { gezCry: "ЧАПУЛДЖУ!", fidan: "ПЛАТАН!", pwMask: "КАСКА + МАСКА!", maskSaved: "КАСКА СПАСЛА!", duranHit: "ОН НЕ ДВИГАЕТСЯ!",
+    ru: { noBribe: "МЫ ВЗЯТОК НЕ БЕРЁМ!", gezCry: "ЧАПУЛДЖУ!", fidan: "ПЛАТАН!", pwMask: "КАСКА + МАСКА!", maskSaved: "КАСКА СПАСЛА!", duranHit: "ОН НЕ ДВИГАЕТСЯ!",
           armored: "БРОНЯ! ПРЫГАЙ СВЕРХУ!", slowed: "ПЕРЦОВЫЙ ГАЗ!", duranName: "СТОЯЩИЙ ЧЕЛОВЕК",
           hero_carsi: "ЧАРШЫ", hero_kirmizi: "ЖЕНЩИНА В КРАСНОМ", hero_sema: "ДЕРВИШ", hero_capulcu: "ЧАПУЛДЖУ", hero_tencere: "КАСТРЮЛИ" }
 };
@@ -39,6 +39,16 @@ function populateGezi() {
                                          dead: false, hp: 1, maxHp: 1, hurt: 0, walkCycle: 0, lastSpeed: 0, said: 0 }));
     for (let i = 0; i < 10; i++) items.push({ x: 2700 + i * 2700, y: height - 140, collected: false });   // çınar fidanları
     MASK_X.forEach(x => items.push({ x, y: height - 300, collected: false, power: 'mask' }));
+}
+// 1. bölümde rüşvet işlemez: para düşmana çarpınca geri seker, üstünde "Biz rüşvet almayız!" yazar
+function refuseBribe(en, p) {
+    for (let i = 0; i < 5; i++)
+        particles.push({ x: p.x, y: p.y, vx: -Math.sign(p.vx) * (1 + Math.random() * 3), vy: -2 - Math.random() * 3,
+                         life: 0.4, maxLife: 0.4, size: 3 + Math.random() * 3, text: null, color: "#fde047" });
+    playSfx('hit', { rate: 1.9, vol: 0.3 });
+    if (en.refused && performance.now() - en.refused < 900) return;
+    en.refused = performance.now();
+    createParticle(en.x + en.w / 2, en.y - 40, t("noBribe"), "#f8fafc", 1.4);
 }
 // Duran Adam: rüşvete de balyoza da tepki vermez
 function duranHit(en) {
@@ -487,11 +497,11 @@ Object.assign(STORY_BG, {
         c.fillStyle = '#fde047'; c.fillRect(820, 36, 56, 56);
         blockRect(c, 60, 150, 470, 290, '#64748b');
         for (let x = 76; x < 520; x += 24) { c.fillStyle = '#475569'; c.fillRect(x, 166, 8, 260); }
-        const ban = [['ÇAPULCU', '#dc2626'], ['HER YER TAKSİM', '#111827'], ['DİREN GEZİ', '#16a34a']];
+        const ban = [[storyT('banCapulcu'), '#dc2626'], [storyT('banTaksim'), '#111827'], [storyT('banDiren'), '#16a34a']];
         ban.forEach(([txt, col], k) => {
             const y = 180 + k * 70 + Math.round(Math.sin(time * 3 + k)) * PX;
             blockRect(c, 96 + (k % 2) * 40, y, 340, 48, '#f8fafc');
-            c.fillStyle = col; c.font = 'bold 28px monospace'; c.textAlign = 'center'; c.fillText(txt, 266 + (k % 2) * 40, y + 34);
+            c.fillStyle = col; c.textAlign = 'center'; fitFont(c, txt, 28, 320); c.fillText(txt, 266 + (k % 2) * 40, y + 34);
         });
         [[600, 1], [760, 1.2], [900, 0.9]].forEach(([x, s]) => {   // çınarlar
             blockRect(c, x - 10 * s, STORY_GROUND - 120 * s, 20 * s, 120 * s, '#6b4f2a');
@@ -511,8 +521,10 @@ Object.assign(STORY_PROPS, {
         c.fillStyle = '#bae6fd'; c.fillRect(346, 166, 268, 158);
         c.fillStyle = '#f8fafc'; c.fillRect(346, 284, 268, 40);
         for (let k = 0; k < 3; k++) storyPenguin(c, 400 + k * 80, 300, 0.8, time * 6 + k);
-        c.fillStyle = '#dc2626'; c.fillRect(346, 166, 110, 24);
-        c.fillStyle = '#fff'; c.font = 'bold 16px monospace'; c.textAlign = 'left'; c.fillText('BELGESEL', 354, 184);
+        const doc = storyT('docu');
+        c.font = 'bold 16px monospace'; const dw = Math.min(250, c.measureText(doc).width + 16);
+        c.fillStyle = '#dc2626'; c.fillRect(346, 166, dw, 24);
+        c.fillStyle = '#fff'; c.textAlign = 'left'; fitFont(c, doc, 16, dw - 16); c.fillText(doc, 354, 184);
         const x0 = ((time * 70) % (STORY_W + 300)) - 200;
         for (let k = 0; k < 4; k++) storyPenguin(c, x0 + k * 60, STORY_GROUND, 1.3, time * 8 + k);
     },
@@ -522,14 +534,20 @@ Object.assign(STORY_PROPS, {
         blockRect(c, x + 40, STORY_GROUND - 170, 120, 120, '#e2e8f0');
         c.fillStyle = '#1e3a5f'; c.fillRect(x + 80, STORY_GROUND - 160, 64, 44);
         c.fillStyle = '#1d4ed8'; c.fillRect(x - 200, STORY_GROUND - 110, 360, 12);
-        c.fillStyle = '#dc2626'; c.font = 'bold 34px monospace'; c.textAlign = 'center'; c.fillText('ÇAPULCU', x - 80, STORY_GROUND - 132);
-        c.fillStyle = '#111827'; c.font = 'bold 18px monospace'; c.fillText('HER YER TAKSİM', x - 80, STORY_GROUND - 70);
+        c.fillStyle = '#dc2626'; c.textAlign = 'center'; fitFont(c, storyT('banCapulcu'), 34, 220); c.fillText(storyT('banCapulcu'), x - 80, STORY_GROUND - 132);
+        c.fillStyle = '#111827'; fitFont(c, storyT('banTaksim'), 18, 220); c.fillText(storyT('banTaksim'), x - 80, STORY_GROUND - 70);
         [x - 150, x - 60, x + 110].forEach(wx => { blockRect(c, wx - 24, STORY_GROUND - 48, 48, 48, '#111827', false); c.fillStyle = '#9ca3af'; c.fillRect(wx - 8, STORY_GROUND - 32, 16, 16); });
         blockRect(c, x + 60, STORY_GROUND - 196, 40, 26, '#64748b');
         c.fillStyle = '#475569'; c.fillRect(x + 96, STORY_GROUND - 192, 70, 12);
         c.fillStyle = Math.floor(time * 5) % 2 ? '#3b82f6' : '#ef4444'; c.fillRect(x + 40, STORY_GROUND - 184, 24, 12);
     }
 });
+// Yazı kutuya sığmazsa yazı tipi küçülür (çevirilerde metin uzayabilir)
+function fitFont(c, txt, size, maxW) {
+    c.font = `bold ${size}px monospace`;
+    const w = c.measureText(txt).width;
+    if (w > maxW) c.font = `bold ${Math.floor(size * maxW / w)}px monospace`;
+}
 function storyPenguin(c, x, y, s, ph) {
     const b = Math.round(Math.abs(Math.sin(ph)) * 2) * PX;
     c.fillStyle = '#f59e0b'; c.fillRect(x - 12 * s, y - 4 * s, 10 * s, 4 * s); c.fillRect(x + 4 * s, y - 4 * s, 10 * s, 4 * s);
@@ -557,42 +575,48 @@ const GEZI_STORY = {
           s1c: 'Birkaç çapulcu! Ne yaparlarsa yapsınlar, kararımızı verdik!',
           s1d: 'Ülke sokaktaydı... ama o gece bazı kanallar penguen belgeseli yayınladı.',
           s1e: 'Çapulcular TOMA\'yı bile boyamış: üstünde kocaman "HER YER TAKSİM" yazıyor!',
-          m1t: 'GÖREV 1: GEZİ PARKI', m1: '11 çapulcuyu rüşvetle sustur, çınar fidanlarını topla, kapıdan geç ve TOMA\'nın üstüne zıplayarak onu durdur! Gaz bulutuna girme: yavaşlatır. Baret 3 vuruş korur.' },
+          m1t: 'GÖREV 1: GEZİ PARKI', m1: '11 çapulcuyu sustur: rüşvet almıyorlar! Balyozla vur ya da üstlerine zıpla. Çınar fidanlarını topla, kapıdan geç ve TOMA\'nın üstüne zıplayarak onu durdur! Gaz bulutuna girme: yavaşlatır. Baret 3 vuruş korur.',
+          banCapulcu: 'ÇAPULCU', banTaksim: 'HER YER TAKSİM', banDiren: 'DİREN GEZİ', docu: 'BELGESEL' },
     en: { capulcu: 'ÇAPULCU', duran: 'STANDING MAN',
           s1a: 'May 2013, Taksim. Gezi Park\'s plane trees were to be cut down for a mall dressed up as old barracks...',
           s1b: 'Hands off the trees! Everywhere is Taksim, everywhere is resistance!',
           s1c: 'A few looters! Let them do what they like, our decision is made!',
           s1d: 'The whole country was in the streets... but that night some channels aired a penguin documentary.',
           s1e: 'The protesters even painted the TOMA: it now reads "EVERYWHERE IS TAKSIM" in huge letters!',
-          m1t: 'MISSION 1: GEZİ PARK', m1: 'Bribe 11 protesters into silence, collect the plane saplings, pass the gate and stop the TOMA by jumping on it! Avoid the gas cloud: it slows you down. The hard hat blocks 3 hits.' },
+          m1t: 'MISSION 1: GEZİ PARK', m1: 'Silence 11 protesters: they don\'t take bribes! Use the hammer or jump on them. Collect the plane saplings, pass the gate and stop the TOMA by jumping on it! Avoid the gas cloud: it slows you down. The hard hat blocks 3 hits.',
+          banCapulcu: 'CHAPULLER', banTaksim: 'EVERYWHERE IS TAKSIM', banDiren: 'RESIST, GEZI!', docu: 'DOCUMENTARY' },
     fr: { capulcu: 'ÇAPULCU', duran: 'L\'HOMME DEBOUT',
           s1a: 'Mai 2013, Taksim. Les platanes du parc Gezi devaient être abattus pour un centre commercial déguisé en caserne...',
           s1b: 'Ne touchez pas aux arbres ! Partout c\'est Taksim, partout c\'est la résistance !',
           s1c: 'Quelques pillards ! Qu\'ils fassent ce qu\'ils veulent, notre décision est prise !',
           s1d: 'Tout le pays était dans la rue... mais ce soir-là, certaines chaînes diffusaient un documentaire sur les pingouins.',
           s1e: 'Les manifestants ont même tagué le TOMA : on y lit en grand « PARTOUT C\'EST TAKSIM » !',
-          m1t: 'MISSION 1 : LE PARC GEZI', m1: 'Achète le silence de 11 manifestants, ramasse les jeunes platanes, passe la porte et arrête le TOMA en sautant dessus ! Évite le nuage de gaz : il te ralentit. Le casque bloque 3 coups.' },
+          m1t: 'MISSION 1 : LE PARC GEZI', m1: 'Fais taire 11 manifestants : ils refusent les pots-de-vin ! Frappe au marteau ou saute-leur dessus. Ramasse les jeunes platanes, passe la porte et arrête le TOMA en sautant dessus ! Évite le nuage de gaz : il te ralentit. Le casque bloque 3 coups.',
+          banCapulcu: 'PILLARD', banTaksim: 'PARTOUT C\'EST TAKSIM', banDiren: 'RÉSISTE, GEZI !', docu: 'DOCUMENTAIRE' },
     nl: { capulcu: 'ÇAPULCU', duran: 'STAANDE MAN',
           s1a: 'Mei 2013, Taksim. De platanen van het Gezipark zouden gekapt worden voor een winkelcentrum vermomd als kazerne...',
           s1b: 'Blijf van de bomen af! Overal is Taksim, overal is verzet!',
           s1c: 'Een paar plunderaars! Laat ze maar doen, ons besluit staat vast!',
           s1d: 'Het hele land stond op straat... maar die avond zonden sommige zenders een pinguïndocumentaire uit.',
           s1e: 'De demonstranten hebben zelfs de TOMA beklad: er staat nu in koeienletters "OVERAL IS TAKSIM"!',
-          m1t: 'MISSIE 1: GEZIPARK', m1: 'Koop 11 demonstranten om, verzamel de jonge platanen, ga door de poort en stop de TOMA door erop te springen! Vermijd de gaswolk: die vertraagt je. De helm houdt 3 klappen tegen.' },
+          m1t: 'MISSIE 1: GEZIPARK', m1: 'Leg 11 demonstranten het zwijgen op: ze nemen geen smeergeld aan! Gebruik de moker of spring erop. Verzamel de jonge platanen, ga door de poort en stop de TOMA door erop te springen! Vermijd de gaswolk: die vertraagt je. De helm houdt 3 klappen tegen.',
+          banCapulcu: 'PLUNDERAAR', banTaksim: 'OVERAL IS TAKSIM', banDiren: 'HOU VOL, GEZI!', docu: 'DOCUMENTAIRE' },
     de: { capulcu: 'ÇAPULCU', duran: 'STEHENDER MANN',
           s1a: 'Mai 2013, Taksim. Die Platanen im Gezi-Park sollten für ein Einkaufszentrum im Kasernen-Look gefällt werden...',
           s1b: 'Finger weg von den Bäumen! Überall ist Taksim, überall ist Widerstand!',
           s1c: 'Ein paar Plünderer! Sollen sie machen, was sie wollen, wir haben entschieden!',
           s1d: 'Das ganze Land war auf der Straße... doch an jenem Abend zeigten manche Sender eine Pinguin-Doku.',
           s1e: 'Die Demonstranten haben sogar den TOMA besprüht: Darauf steht riesig „ÜBERALL IST TAKSIM"!',
-          m1t: 'MISSION 1: GEZI-PARK', m1: 'Besteche 11 Demonstranten, sammle die Platanen-Setzlinge, geh durchs Tor und stoppe den TOMA, indem du draufspringst! Meide die Gaswolke: Sie bremst dich. Der Helm hält 3 Treffer ab.' },
+          m1t: 'MISSION 1: GEZI-PARK', m1: 'Bring 11 Demonstranten zum Schweigen: Sie nehmen kein Schmiergeld! Nimm den Hammer oder spring drauf. Sammle die Platanen-Setzlinge, geh durchs Tor und stoppe den TOMA, indem du draufspringst! Meide die Gaswolke: Sie bremst dich. Der Helm hält 3 Treffer ab.',
+          banCapulcu: 'PLÜNDERER', banTaksim: 'ÜBERALL IST TAKSIM', banDiren: 'GEZI, WEHR DICH!', docu: 'DOKU' },
     ru: { capulcu: 'ЧАПУЛДЖУ', duran: 'СТОЯЩИЙ ЧЕЛОВЕК',
           s1a: 'Май 2013 года, Таксим. Платаны парка Гези собирались вырубить ради торгового центра в виде старой казармы...',
           s1b: 'Не трогайте деревья! Везде Таксим, везде сопротивление!',
           s1c: 'Кучка мародёров! Пусть делают что хотят, мы всё решили!',
           s1d: 'Вся страна вышла на улицы... а некоторые каналы в ту ночь показывали фильм про пингвинов.',
           s1e: 'Протестующие даже разрисовали ТОМА: теперь на ней огромными буквами «ВЕЗДЕ ТАКСИМ»!',
-          m1t: 'МИССИЯ 1: ПАРК ГЕЗИ', m1: 'Подкупи 11 протестующих, собери саженцы платанов, пройди ворота и останови ТОМА, прыгнув на неё! Избегай газового облака: оно замедляет. Каска выдерживает 3 удара.' }
+          m1t: 'МИССИЯ 1: ПАРК ГЕЗИ', m1: 'Утихомирь 11 протестующих: взяток они не берут! Бей кувалдой или прыгай на них. Собери саженцы платанов, пройди ворота и останови ТОМА, прыгнув на неё! Избегай газового облака: оно замедляет. Каска выдерживает 3 удара.',
+          banCapulcu: 'МАРОДЁР', banTaksim: 'ВЕЗДЕ ТАКСИМ', banDiren: 'ДЕРЖИСЬ, ГЕЗИ!', docu: 'ДОКУМЕНТАЛКА' }
 };
 for (const L in GEZI_STORY) if (STORY_TEXT[L]) Object.assign(STORY_TEXT[L], GEZI_STORY[L]);
 

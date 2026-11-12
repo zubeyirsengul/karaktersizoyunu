@@ -151,4 +151,5 @@ function applyLang(newLang) {
     try { updateBestUi(); } catch (e) {}   // rekor satırı da dile göre (yüklenirken henüz tanımlı olmayabilir)
     try { renderHowto(); } catch (e) {}
     try { renderLevelSelect(); } catch (e) {}
+    try { renderDiffPicker(); } catch (e) {}
 }

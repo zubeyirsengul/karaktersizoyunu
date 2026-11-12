@@ -54,7 +54,7 @@ function showReport(n) {
         <div class="rp-title">${rpT('title')}</div>
         <div class="rp-stars">${[0, 1, 2].map(i => `<svg class="rp-star" viewBox="0 0 24 24"><path d="M12 1.8l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.9l-6.4 3.5 1.4-7.1-5.3-5 7.2-.9z"/></svg>`).join('')}</div>
         <ul class="rp-crit">${crit}</ul>
-        <div class="rp-stats">${P ? P.stats : `❤️ ${rpT('lost')}: <b>${S.lost}</b> · 💀 ${rpT('deaths')}: <b>${S.deaths}</b>`} · ⏱ ${rpT('time')}: <b>${fmtTime(S.frames)}</b>
+        <div class="rp-stats">${P ? P.stats : `❤️ ${rpT('lost')}: <b>${S.lost}</b> · 💀 ${rpT('deaths')}: <b>${S.deaths}</b>`} · ⏱ ${rpT('time')}: <b>${fmtTime(S.frames)}</b> · 🎚 ${dfT('label')}: <b>${dfT(difficulty)}${diffMult(difficulty)}</b>
             ${prevBest ? ` · ${rpT('best')}: <b>${starText(Math.max(prevBest, stars))}</b>` : ''}</div>`;
     $('report').hidden = false;
     reportTimers.forEach(clearTimeout); reportTimers = [];

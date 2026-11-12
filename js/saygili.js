@@ -1,4 +1,4 @@
-// 2. bölüm: BİLAL'İ KURTAR (17-25 Aralık 2013). 17/25 polisleri baskında; bakan oğulları gözaltında,
+// 2. bölüm: 4'LÜ ÇETEYİ KURTAR (17-25 Aralık 2013). 17/25 polisleri baskında; bakan oğulları gözaltında,
 // ayakkabı kutularından dolar çıktı, 25 Aralık'ta sıra Bilal'e geldi.
 // Oyunda: 11 polis → kapı → canavar SAYGILI (dev polis: 260 boy, polisler 200; 7 can; kafasına zıplanabilsin diye daha uzun değil). Yakına gelince copunu kaldırıp vurur (önden kalkan durdurur),
 // uzaktayken kavisli kelepçe atar. Torbaların yerine ayakkabı kutuları toplanır.
@@ -8,20 +8,58 @@
 
 // --- METİNLER (oyun içi) ---
 const SAYGILI_TEXT = {
-    tr: { saygiliName: "SAYGILI", boxPick: "AYAKKABI KUTUSU!", copBlocked: "COP KALKANA ÇARPTI!",
-          l2Note: "Bilal kurtuldu, dosya kapandı! Sıra 25 Aralık kasetlerinde." },
-    en: { saygiliName: "SAYGILI", boxPick: "SHOE BOX!", copBlocked: "BATON BLOCKED!",
-          l2Note: "Bilal is free, case closed! Next up: the December 25 tapes." },
-    fr: { saygiliName: "SAYGILI", boxPick: "BOÎTE À CHAUSSURES !", copBlocked: "MATRAQUE BLOQUÉE !",
-          l2Note: "Bilal est libre, affaire classée ! Place aux cassettes du 25 décembre." },
-    nl: { saygiliName: "SAYGILI", boxPick: "SCHOENENDOOS!", copBlocked: "KNUPPEL GEBLOKKEERD!",
-          l2Note: "Bilal is vrij, dossier gesloten! Nu de banden van 25 december." },
-    de: { saygiliName: "SAYGILI", boxPick: "SCHUHKARTON!", copBlocked: "KNÜPPEL ABGEWEHRT!",
-          l2Note: "Bilal ist frei, Akte geschlossen! Jetzt die Bänder vom 25. Dezember." },
-    ru: { saygiliName: "САЙГЫЛЫ", boxPick: "ОБУВНАЯ КОРОБКА!", copBlocked: "ДУБИНКА ОТБИТА!",
-          l2Note: "Билал на свободе, дело закрыто! Теперь записи 25 декабря." }
+    tr: { sniperName: "KÖPRÜNÜN ÜSTÜNDEKİ SINAYPIRCI", saygiliName: "SAYGILI", boxPick: "AYAKKABI KUTUSU!", copBlocked: "COP KALKANA ÇARPTI!",
+          l2Note: "4'lü çete ve Bilal kurtuldu, dosya kapandı! Sıra 25 Aralık kasetlerinde." },
+    en: { sniperName: "SINAYPIRCI ON THE BRIDGE", saygiliName: "SAYGILI", boxPick: "SHOE BOX!", copBlocked: "BATON BLOCKED!",
+          l2Note: "The Gang of Four and Bilal are free, case closed! Next up: the December 25 tapes." },
+    fr: { sniperName: "LE SINAYPIRCI DU PONT", saygiliName: "SAYGILI", boxPick: "BOÎTE À CHAUSSURES !", copBlocked: "MATRAQUE BLOQUÉE !",
+          l2Note: "La bande des quatre et Bilal sont libres, affaire classée ! Place aux cassettes du 25 décembre." },
+    nl: { sniperName: "SINAYPIRCI OP DE BRUG", saygiliName: "SAYGILI", boxPick: "SCHOENENDOOS!", copBlocked: "KNUPPEL GEBLOKKEERD!",
+          l2Note: "De bende van vier en Bilal zijn vrij, dossier gesloten! Nu de banden van 25 december." },
+    de: { sniperName: "SINAYPIRCI AUF DER BRÜCKE", saygiliName: "SAYGILI", boxPick: "SCHUHKARTON!", copBlocked: "KNÜPPEL ABGEWEHRT!",
+          l2Note: "Die Viererbande und Bilal sind frei, Akte geschlossen! Jetzt die Bänder vom 25. Dezember." },
+    ru: { sniperName: "СЫНАЙПЫРДЖЫ НА МОСТУ", saygiliName: "САЙГЫЛЫ", boxPick: "ОБУВНАЯ КОРОБКА!", copBlocked: "ДУБИНКА ОТБИТА!",
+          l2Note: "Банда четырёх и Билал на свободе, дело закрыто! Теперь записи 25 декабря." }
 };
 for (const L in SAYGILI_TEXT) if (LANGS[L]) Object.assign(LANGS[L], SAYGILI_TEXT[L]);
+
+// --- KÖPRÜ VE SINAYPIRCI ---
+// Her köprünün ortasında diz çökmüş "Köprünün Üstündeki SINAYPIRCI" durur (2 can; lazerle nişan alır, çapraz ateş eder).
+// Köprü bir alt raf (T1) yüksekliğinde: yerden zıplanarak çıkılır, altından yürünür.
+function populateSaygili() {
+    platforms.filter(p => p.kind === 'bridge').forEach(p => {
+        const x = p.x + p.w / 2;
+        enemies.push({ kind: 'sniper', nameKey: 'sniperName', x: x - 45, y: p.y - 120, w: 90, h: 120, dead: false, homeX: x,
+                       dir: -1, laser: 0, cool: 60 + Math.floor(Math.random() * 60), flash: 0, aimAng: 0, mx: x, my: p.y - 60,
+                       walkCycle: 0, lastSpeed: 0, hp: 2, maxHp: 2, hurt: 0 });
+    });
+}
+// Asma köprü: iki kule, sarkan halatlar, askılar, korkuluklu tabliye; kuleler yere iner
+function drawBridge(ctx, p) {
+    const gy = height - 60, x0 = p.x, x1 = p.x + p.w, top = p.y, TW = 26, TH = 170;
+    ctx.save();
+    [x0 - 6, x1 - TW + 6].forEach(tx => {                                   // kuleler
+        ctx.fillStyle = "#94a3b8"; ctx.fillRect(tx, top - TH, TW, gy - top + TH);
+        ctx.fillStyle = "#64748b"; ctx.fillRect(tx + TW - 7, top - TH, 7, gy - top + TH);
+        ctx.fillStyle = "#cbd5e1"; ctx.fillRect(tx - 4, top - TH - 10, TW + 8, 12);
+        ctx.fillStyle = "#475569"; ctx.fillRect(tx + 6, top - TH + 30, TW - 12, 26); ctx.fillRect(tx + 6, top - TH + 80, TW - 12, 26);
+        ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(tx + TW / 2, top - TH - 14, 4, 0, Math.PI * 2); ctx.fill();   // uçak ikaz lambası
+    });
+    const ax = x0 - 6 + TW / 2, bx = x1 + 6 - TW / 2, ay = top - TH + 4, sag = top - 26;
+    const cable = u => { const xx = ax + (bx - ax) * u; return [xx, ay + (sag - ay) * (1 - Math.pow(2 * u - 1, 2))]; };
+    ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1.5;                       // askılar
+    for (let u = 0.08; u < 0.95; u += 0.07) { const [xx, yy] = cable(u); ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx, top); ctx.stroke(); }
+    ctx.strokeStyle = "#f8fafc"; ctx.lineWidth = 4;                         // ana halat
+    ctx.beginPath(); for (let u = 0; u <= 1.001; u += 0.05) { const [xx, yy] = cable(u); u ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); } ctx.stroke();
+    ctx.fillStyle = "#475569"; ctx.fillRect(x0, top, p.w, p.h);             // tabliye
+    ctx.fillStyle = "#1f2937"; ctx.fillRect(x0, top, p.w, 6);
+    ctx.fillStyle = "#facc15"; for (let x = x0 + 10; x < x1 - 20; x += 40) ctx.fillRect(x, top + 2, 18, 2);   // yol çizgisi
+    ctx.fillStyle = "#334155"; ctx.fillRect(x0, top + p.h - 8, p.w, 8);
+    ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 2;                         // korkuluk
+    ctx.beginPath(); ctx.moveTo(x0, top - 18); ctx.lineTo(x1, top - 18); ctx.stroke();
+    for (let x = x0 + 4; x <= x1 - 4; x += 16) { ctx.beginPath(); ctx.moveTo(x, top - 18); ctx.lineTo(x, top); ctx.stroke(); }
+    ctx.restore();
+}
 
 // --- AYAKKABI KUTUSU (torbaların yerine): kapağı aralık, içinden dolar destesi görünür ---
 function drawShoebox(ctx, x, y) {
@@ -312,11 +350,47 @@ Object.assign(PIX_FACES, {
     saygili: { pal: { k: '#1e3a8a', y: '#fbbf24', s: '#e8b48f', g: '#0f172a', b: '#292524', m: '#7c2d12' },
                rows: ['kkkkkkkk', 'kkkyykkk', 'kkkkkkkk', 'ssssssss', 'sgggsggg', 'ssssssss', 'sbbbbbbs', 'ssmmmmss'] }
 });
+// Makaralı teyp: iki makara döner, bant akar, ses dalgaları çıkar; üstünde "4'LÜ ÇETE" etiketi
+Object.assign(STORY_PROPS, {
+    reel(c, time) {
+        const cx = 480, top = 200;
+        blockRect(c, cx - 150, STORY_GROUND - 40, 300, 40, '#78350f');                 // masa
+        blockRect(c, cx - 130, top, 260, 200, '#1f2937');                                // teyp gövdesi
+        c.fillStyle = '#374151'; c.fillRect(cx - 118, top + 150, 236, 38);
+        [-1, 1].forEach((s, k) => {                                                       // makaralar
+            const rx = cx + s * 62, ry = top + 70, R = 48;
+            c.fillStyle = '#9ca3af'; c.beginPath(); c.arc(rx, ry, R, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#7c2d12'; c.beginPath(); c.arc(rx, ry, R - 8 - k * 10, 0, Math.PI * 2); c.fill();   // sarılı bant
+            c.fillStyle = '#e5e7eb'; c.beginPath(); c.arc(rx, ry, 12, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = '#e5e7eb'; c.lineWidth = 6;
+            for (let i = 0; i < 3; i++) {                                                 // dönen kollar
+                const a = time * 4 + i * Math.PI * 2 / 3;
+                c.beginPath(); c.moveTo(rx, ry); c.lineTo(rx + Math.cos(a) * (R - 10), ry + Math.sin(a) * (R - 10)); c.stroke();
+            }
+        });
+        c.strokeStyle = '#7c2d12'; c.lineWidth = 3;                                       // bant
+        c.beginPath(); c.moveTo(cx - 62, top + 118); c.lineTo(cx - 20, top + 140); c.lineTo(cx + 20, top + 140); c.lineTo(cx + 62, top + 118); c.stroke();
+        blockRect(c, cx - 26, top + 132, 52, 16, '#d1d5db');                             // kafa
+        [cx - 96, cx - 70, cx + 70, cx + 96].forEach((bx, i) => { c.fillStyle = i === 2 ? '#dc2626' : '#e5e7eb'; c.fillRect(bx - 9, top + 160, 18, 18); });
+        c.fillStyle = Math.floor(time * 3) % 2 ? '#ef4444' : '#7f1d1d'; c.fillRect(cx - 6, top + 162, 12, 12);   // KAYIT lambası
+        const lab = storyT('gang');                                                        // etiket
+        c.font = 'bold 20px monospace'; const lw = c.measureText(lab).width + 24;
+        blockRect(c, cx - lw / 2, top - 34, lw, 30, '#fde047');
+        c.fillStyle = '#111827'; c.textAlign = 'center'; c.fillText(lab, cx, top - 12);
+        for (let i = 0; i < 3; i++) {                                                     // ses dalgaları
+            const r = 30 + ((time * 60 + i * 30) % 90), a = 1 - r / 120;
+            c.strokeStyle = `rgba(253,224,71,${a})`; c.lineWidth = 4;
+            [-1, 1].forEach(s => { c.beginPath(); c.arc(cx + s * 140, top + 90, r, s > 0 ? -0.6 : Math.PI - 0.6, s > 0 ? 0.6 : Math.PI + 0.6); c.stroke(); });
+        }
+    }
+});
 Object.assign(STORY_CAST, {
     bilal:   { pix: 'bilal', suit: '#334155', arm: '#334155', leg: '#1e293b', shoe: '#000', tie: '#0ea5e9', hand: '#eac39f' },
     saygili: { pix: 'saygili', suit: '#1e40af', arm: '#1e40af', leg: '#1e3a8a', shoe: '#000', tie: '#111827', hand: '#e8b48f', badge: true, scale: 1.25 }
 });
 STORIES[2] = [
+    { bg: 'jail', props: ['reel'], say: { key: 's2t' },
+      actors: [{ who: 'g1', x: 90, dir: 1 }, { who: 'g2', x: 190, dir: 1 }, { who: 'g3', x: 770, dir: -1 }, { who: 'g4', x: 870, dir: -1 }] },
     { bg: 'jail', props: ['shoeboxes'], say: { key: 's2a' },
       actors: [{ who: 'police', x: 60, to: 260, dir: 1 }, { who: 'police', x: -120, to: 120, dir: 1 }] },
     { bg: 'jail', props: ['shoeboxes'], say: { who: 'saygili', key: 's2b' },
@@ -327,42 +401,42 @@ STORIES[2] = [
     { bg: 'card', card: { title: 'm2t', text: 'm2' } }
 ];
 const SAYGILI_STORY = {
-    tr: { bilal: 'BİLAL', saygili: 'SAYGILI',
+    tr: { bilal: 'BILAL', s2t: "17 Aralık 2013. Makara dönüyor, kayıt çalıyor: 4'lü çetenin telefon konuşmaları dinleniyor!", saygili: 'SAYGILI',
           s2a: '17 Aralık 2013. 17/25 polisleri sabah baskınlarına çıktı: bakan oğulları gözaltında, ayakkabı kutuları dolar dolu!',
           s2b: 'Talimat savcıdan! 25 Aralık\'ta sıra Bilal\'de!',
           s2c: 'Babacığım, polisler kapıda! Ne yapayım?',
           s2d: 'Oğlum, kimseye bir şey söyleme! Ayakkabı kutularını topla, geliyorum!',
-          m2t: 'GÖREV 2: BİLAL\'İ KURTAR', m2: '17/25 polislerini rüşvetle sustur, ayakkabı kutularını topla, kapıdan geç ve SAYGILI\'yı yen! Yakına gelince copla vurur, uzaktan kelepçe atar: kalkanı kaldır!' },
-    en: { bilal: 'BİLAL', saygili: 'SAYGILI',
+          m2t: 'GÖREV 2: 4\'LÜ ÇETEYİ KURTAR', m2: '17/25 polislerini rüşvetle sustur, ayakkabı kutularını topla, kapıdan geç ve SAYGILI\'yı yen! Yakına gelince copla vurur, uzaktan kelepçe atar: kalkanı kaldır!' },
+    en: { bilal: 'BILAL', s2t: "December 17, 2013. The reels are spinning, the tape is playing: the Gang of Four's phone calls were wiretapped!", saygili: 'SAYGILI',
           s2a: 'December 17, 2013. The 17/25 police launched dawn raids: ministers\' sons detained, shoe boxes stuffed with dollars!',
           s2b: 'Orders from the prosecutor! On December 25 it\'s Bilal\'s turn!',
           s2c: 'Daddy, the police are at the door! What do I do?',
           s2d: 'Son, don\'t tell anyone anything! Collect the shoe boxes, I\'m coming!',
-          m2t: 'MISSION 2: SAVE BİLAL', m2: 'Bribe the 17/25 police, collect the shoe boxes, pass the gate and beat SAYGILI! Up close he swings his baton, from afar he throws handcuffs: raise your shield!' },
-    fr: { bilal: 'BİLAL', saygili: 'SAYGILI',
+          m2t: 'MISSION 2: SAVE THE GANG OF FOUR', m2: 'Bribe the 17/25 police, collect the shoe boxes, pass the gate and beat SAYGILI! Up close he swings his baton, from afar he throws handcuffs: raise your shield!' },
+    fr: { bilal: 'BILAL', s2t: "17 décembre 2013. Les bobines tournent, la bande défile : les appels de la bande des quatre étaient sur écoute !", saygili: 'SAYGILI',
           s2a: '17 décembre 2013. La police 17/25 lance ses descentes à l\'aube : fils de ministres arrêtés, boîtes à chaussures pleines de dollars !',
           s2b: 'Ordre du procureur ! Le 25 décembre, c\'est le tour de Bilal !',
           s2c: 'Papa, la police est à la porte ! Qu\'est-ce que je fais ?',
           s2d: 'Mon fils, ne dis rien à personne ! Ramasse les boîtes à chaussures, j\'arrive !',
-          m2t: 'MISSION 2 : SAUVE BİLAL', m2: 'Achète la police 17/25, ramasse les boîtes à chaussures, passe la porte et bats SAYGILI ! De près il frappe à la matraque, de loin il lance des menottes : lève ton bouclier !' },
-    nl: { bilal: 'BİLAL', saygili: 'SAYGILI',
+          m2t: 'MISSION 2 : SAUVE LA BANDE DES QUATRE', m2: 'Achète la police 17/25, ramasse les boîtes à chaussures, passe la porte et bats SAYGILI ! De près il frappe à la matraque, de loin il lance des menottes : lève ton bouclier !' },
+    nl: { bilal: 'BILAL', s2t: "17 december 2013. De spoelen draaien, de band speelt: de telefoontjes van de bende van vier werden afgeluisterd!", saygili: 'SAYGILI',
           s2a: '17 december 2013. De 17/25-politie doet invallen bij dageraad: ministerszonen opgepakt, schoenendozen vol dollars!',
           s2b: 'Bevel van de officier! Op 25 december is Bilal aan de beurt!',
           s2c: 'Papa, de politie staat voor de deur! Wat moet ik doen?',
           s2d: 'Jongen, zeg niemand iets! Pak de schoenendozen, ik kom eraan!',
-          m2t: 'MISSIE 2: RED BİLAL', m2: 'Koop de 17/25-politie om, verzamel de schoenendozen, ga door de poort en versla SAYGILI! Dichtbij slaat hij met zijn knuppel, van ver gooit hij handboeien: schild omhoog!' },
-    de: { bilal: 'BİLAL', saygili: 'SAYGILI',
+          m2t: 'MISSIE 2: RED DE BENDE VAN VIER', m2: 'Koop de 17/25-politie om, verzamel de schoenendozen, ga door de poort en versla SAYGILI! Dichtbij slaat hij met zijn knuppel, van ver gooit hij handboeien: schild omhoog!' },
+    de: { bilal: 'BILAL', s2t: "17. Dezember 2013. Die Spulen drehen sich, das Band läuft: Die Telefonate der Viererbande wurden abgehört!", saygili: 'SAYGILI',
           s2a: '17. Dezember 2013. Die 17/25-Polizei startet Razzien im Morgengrauen: Ministersöhne festgenommen, Schuhkartons voller Dollar!',
           s2b: 'Anordnung vom Staatsanwalt! Am 25. Dezember ist Bilal dran!',
           s2c: 'Papa, die Polizei steht vor der Tür! Was soll ich tun?',
           s2d: 'Sohn, sag niemandem etwas! Sammle die Schuhkartons ein, ich komme!',
-          m2t: 'MISSION 2: RETTE BİLAL', m2: 'Besteche die 17/25-Polizei, sammle die Schuhkartons, geh durchs Tor und besiege SAYGILI! Aus der Nähe schlägt er mit dem Knüppel, aus der Ferne wirft er Handschellen: Schild hoch!' },
-    ru: { bilal: 'БИЛАЛ', saygili: 'САЙГЫЛЫ',
+          m2t: 'MISSION 2: RETTE DIE VIERERBANDE', m2: 'Besteche die 17/25-Polizei, sammle die Schuhkartons, geh durchs Tor und besiege SAYGILI! Aus der Nähe schlägt er mit dem Knüppel, aus der Ferne wirft er Handschellen: Schild hoch!' },
+    ru: { bilal: 'БИЛАЛ', s2t: "17 декабря 2013 года. Бобины крутятся, плёнка играет: телефоны банды четырёх прослушивались!", saygili: 'САЙГЫЛЫ',
           s2a: '17 декабря 2013 года. Полиция 17/25 провела утренние облавы: сыновья министров задержаны, обувные коробки набиты долларами!',
           s2b: 'Приказ прокурора! 25 декабря очередь Билала!',
           s2c: 'Папочка, полиция у дверей! Что мне делать?',
           s2d: 'Сынок, никому ничего не говори! Собери обувные коробки, я иду!',
-          m2t: 'МИССИЯ 2: СПАСИ БИЛАЛА', m2: 'Подкупи полицию 17/25, собери обувные коробки, пройди ворота и победи САЙГЫЛЫ! Вблизи он бьёт дубинкой, издалека бросает наручники: подними щит!' }
+          m2t: 'МИССИЯ 2: СПАСИ БАНДУ ЧЕТЫРЁХ', m2: 'Подкупи полицию 17/25, собери обувные коробки, пройди ворота и победи САЙГЫЛЫ! Вблизи он бьёт дубинкой, издалека бросает наручники: подними щит!' }
 };
 for (const L in SAYGILI_STORY) if (STORY_TEXT[L]) Object.assign(STORY_TEXT[L], SAYGILI_STORY[L]);
 

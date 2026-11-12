@@ -1,7 +1,7 @@
 // 1. bölüm (Gezi) gezi.js'te, 2. bölüm (Bilal'i kurtar) saygili.js'te; 3-8. bölümlerin özel içerikleri: arka planlar, yeni düşmanlar, bölüme özel mekanikler, yeni canavarlar
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 //
-// 3 SIFIRLA      : torbalar yerine ses kasetleri ("MONTAJ!"), canavar PARA SAYMA MAKİNESİ
+// 3 SIFIRLA      : torbalar yerine ses kasetleri ("MONTAJ!"), canavar DEV ÇELİK KASA
 // 4 SANDIK       : rüşvet verilen polis ölmez, bavuluyla sürgüne gider; canavar FETÖ
 // 5 FACETIME     : telefonun şarjı azalır, şarj aletleri toplanır; mini tanklar; canavar DARBE TANKI
 // 6 UÇUŞ         : flight.js
@@ -9,7 +9,7 @@
 // 8 PENSİLVANYA  : karlı çiftlik; canavar FETÖ'nün son hâli
 
 //
-// Arka planlar: chapter_bg.js, canavarlar: boss_sayac.js, boss_darbetank.js, boss_bylock.js
+// Arka planlar: chapter_bg.js, canavarlar: boss_kasa.js, boss_darbetank.js, boss_bylock.js
 
 const curLevel = () => LEVELS[currentLevel];
 

@@ -17,7 +17,7 @@ function createFlight() {
 
 function flightSpawnBoss() {
     const T = BOSS_TYPES.tanker;
-    boss = { kind: 'tanker', T, x: camX + width + 60, y: height * 0.25, w: T.w, h: T.h, hp: T.hp, dir: -1, look: -1,
+    boss = { kind: 'tanker', T, x: camX + width + 60, y: height * 0.25, w: T.w, h: T.h, hp: bossMaxHp({ T }), dir: -1, look: -1,
              timer: 0, attacks: 0, hurt: 0, anim: 0, dying: false, deathT: 0, state: 'enter', run: 0, crouch: 0, recover: 0, vx: 0, vy: 0 };
     flight.jets = [];
     bossCheckpoint = { score, stage: 'boss' };
@@ -30,7 +30,7 @@ function flightKillJet(j) {
     j.dead = true; j.deathT = 0;
     killedEnemies++;
     $('kills').innerText = killedEnemies;
-    $('score').innerText = score += 3000;
+    $('score').innerText = addScore(3000);
     createParticle(j.x, j.y - 20, t("surrender"), "#f8fafc", 1.0);
     playSfx('hit', { rate: 0.9, vol: 0.6 });
     if (killedEnemies === targetKills && !boss) flightSpawnBoss();
@@ -67,7 +67,7 @@ function updateFlight() {
     items.forEach(it => {
         if (!it.collected && Math.hypot(player.x + player.w / 2 - it.x, player.y + player.h / 2 - it.y) < 90) {
             it.collected = true;
-            $('score').innerText = score += 5000;
+            $('score').innerText = addScore(5000);
             $('sfx-pickup').currentTime = 0; $('sfx-pickup').play().catch(() => {});
             createParticle(it.x, it.y, t("pickup"), "#22c55e", 0.8);
         }

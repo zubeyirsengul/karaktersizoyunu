@@ -62,6 +62,8 @@ const SFX_FILES = {
     greet_feto2: ['sfx/feto2_greet.mp3'],                   // canavar karşılama sesi; FETÖ (4. ve 8. bölüm): "Ya Allah!" (Windows Türkçe yapay sesi Tolga, kalınlaştırılıp yankılandı)
     granny: ['sfx/gotununkili.mp3'],                        // canavar ölünce gelen teyzeler
     yalarim: ['sfx/yalarim.mp3'],
+    cengiz: ['sfx/milletinminakoycaz.mp3'],                 // 3. bölüm sonu: Cengiz "Bu milletin a.. koyacağız"
+    sifirla: ['sfx/sifirla.mp3'],                          // 3. bölüm: sayaç sıfırlama sesi (kodla üretildi: tıkırtı + zil)
     selo_baskan: ['sfx/selo_baskan.mp3'],                   // 9. bölüm SELO: "Seni başkan yaptırmayacağız!" (Windows Türkçe yapay sesi Tolga, inceltildi)
     selo_kitap: ['sfx/selo_kitap.mp3'],
     saygili_namus: ['sfx/saygili_namus.mp3'],               // 2. bölüm SAYGILI: "Biz bu ülkenin namusunu kurtardık!" (Tolga, kalınlaştırılıp yankılandı)

@@ -262,6 +262,7 @@ function drawPlatform(ctx, p) {
     const th = THEMES[LEVELS[currentLevel].bg];
     const x0 = Math.max(p.x, camX - 40), x1 = Math.min(p.x + p.w, camX + width + 40);
     if (x1 <= x0) return;
+    if (p.kind === 'bridge') { drawBridge(ctx, p); return; }   // 2. bölüm: SINAYPIRCI'nın köprüsü (saygili.js)
     if (p.h < 100) { drawBrickLedge(ctx, p); return; }   // zemin değil: tuğla raf
     const g = ctx.createLinearGradient(0, p.y, 0, p.y + Math.min(p.h, 220));
     g.addColorStop(0, th.ground[0]); g.addColorStop(1, th.ground[1]);
@@ -316,7 +317,7 @@ function draw() {
         if(en.skin) drawGeziHero(ctx, en);   // 1. bölüm: Gezi kahramanları
         else if(en.kind === 'duran') drawDuran(ctx, en);
         else if(en.kind === 'riot') drawRiot(ctx, en);
-        else if(en.kind === 'sniper') drawSniper(ctx, en);
+        else if(en.kind === 'sniper') { drawSniper(ctx, en); if(en.nameKey && !en.dead) drawEnemyName(ctx, en); }
         else if(en.kind === 'tank') drawTank(ctx, en);
         else if(en.kind === 'civil') drawCivil(ctx, en);
         else drawPolice(ctx, en);

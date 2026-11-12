@@ -125,7 +125,7 @@ function submitGuess() {
         pz.msg = pzT('win');
         levelEnding = true;
         renderPuzzle();
-        setTimeout(() => { if (pz && pz.solved) { score += 50000; $('score').innerText = score; completeLevel(); } }, 2400);
+        setTimeout(() => { if (pz && pz.solved) { addScore(50000); $('score').innerText = score; completeLevel(); } }, 2400);
         return;
     }
     if (pz.rows.length >= PZ_TRIES) {

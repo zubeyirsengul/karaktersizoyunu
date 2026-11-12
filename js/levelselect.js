@@ -15,7 +15,7 @@ const lsT = k => (LS_TEXT[lang] || LS_TEXT.en)[k];
 const LEVEL_CARDS = {
     1: { ico: '🌳', boss: 'bossName',    c1: '#166534', c2: '#4ade80' },
     2: { ico: '👞', boss: 'saygiliName', c1: '#9a3412', c2: '#fdba74' },
-    3: { ico: '📼', boss: 'sayacName',   c1: '#581c87', c2: '#c084fc' },
+    3: { ico: '💰', boss: 'kasaName',    c1: '#581c87', c2: '#c084fc' },
     4: { ico: '🗳️', boss: 'fetoName',    c1: '#1e293b', c2: '#94a3b8' },
     5: { ico: '🔋', boss: 'tankName',    c1: '#1e3a8a', c2: '#60a5fa' },
     6: { ico: '✈️', boss: 'tankerName',  c1: '#0369a1', c2: '#7dd3fc' },
@@ -69,6 +69,7 @@ const levelSelectOpen = () => $('levels').style.display === 'flex';
 
 function pickLevel(n) {
     closeLevelSelect();
+    if (gameStarted) { goToLevel(n); return; }   // bölüm sonu ekranından: oyun zaten çalışıyor
     startLevelChoice = n;
     initAudio();
     goFullscreenLandscape();

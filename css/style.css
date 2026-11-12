@@ -106,7 +106,10 @@ canvas {
 #overlay-screen .best-line { text-shadow: 0 2px 4px #000, 0 0 8px #000; }
 /* Bölüm sonu karnesi */
 #report { background: rgba(0,0,0,0.78); border: 2px solid var(--gold); border-radius: 14px; padding: 10px 22px 12px; margin: 0 16px 16px; max-width: 520px; }
-#report[hidden], #lang-picker[hidden], #levels-btn[hidden] { display: none; }
+#report[hidden], #lang-picker[hidden], #levels-btn[hidden], #diff-picker[hidden] { display: none; }
+#diff-picker { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-bottom: 16px; }
+#diff-picker .diff-label { color: #fff; font-weight: bold; background: rgba(0,0,0,0.72); padding: 6px 10px; border-radius: 8px; }
+#diff-picker small { font-size: 0.75em; margin-left: 3px; opacity: 0.85; }
 .rp-title { font-size: 14px; font-weight: 900; letter-spacing: 3px; color: var(--gold); }
 .rp-stars { display: flex; justify-content: center; gap: 10px; margin: 2px 0 6px; }
 .rp-star { width: 58px; height: 58px; fill: #3f3f46; stroke: #18181b; stroke-width: 1.2; stroke-linejoin: round; }
@@ -158,6 +161,7 @@ canvas {
     #overlay-desc { margin: 4px 0; font-size: 14px; }
     .best-line { font-size: 14px; margin: 0 0 6px; }
     #lang-picker { gap: 6px; margin-bottom: 8px; }
+    #diff-picker { gap: 6px; margin-bottom: 8px; }
     .lang-btn { padding: 4px 10px; font-size: 13px; }
     #sound-btn, .menu-row { margin-bottom: 8px; }
     #report { padding: 6px 14px 8px; margin-bottom: 8px; }

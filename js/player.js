@@ -81,7 +81,7 @@ function updateHammer() {
         });
         hammerBricks(minX, maxX);
         if(boss && boss.x + 30 < maxX && boss.x + boss.w - 30 > minX) {
-            if(boss.T.stompOnly) bossArmor(headX, headY - 60); else damageBoss(power.hammer > 0 ? 3 : 2);
+            if(bossShielded(boss)) bossArmor(headX, headY - 60); else damageBoss(power.hammer > 0 ? 3 : 2);
         }
     }
 }

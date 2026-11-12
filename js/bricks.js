@@ -43,7 +43,7 @@ function revealSecret(b) {
     const cx = b.x + BRICK / 2;
     for (let i = 0; i < 4; i++) flyers.push({ x: cx, y: b.y, vx: (i - 1.5) * 2.5, vy: -10 - Math.random() * 3, t: 0 });
     for (let i = 0; i < 16; i++) debris.push({ x: cx, y: b.y + BRICK / 2, vx: (Math.random() - 0.5) * 10, vy: -3 - Math.random() * 6, size: 5 + Math.random() * 5, life: 45, color: Math.random() < 0.5 ? "#fde047" : "#fff7ae" });
-    $('score').innerText = score += 10000;
+    $('score').innerText = addScore(10000);
     createParticle(cx, b.y - 40, t("secret"), "#fde047", 2.0);
     playSfx('hit', { rate: 1.9, vol: 0.6 });
     camShake = Math.max(camShake, 6);
@@ -78,7 +78,7 @@ function breakBrick(b) {
     } else {
         flyers.push({ x: cx, y: cy, vx: (Math.random() - 0.5) * 4, vy: -9, t: 0 });
     }
-    $('score').innerText = score += 500;
+    $('score').innerText = addScore(500);
 }
 
 // Oyuncu tuğlaya alttan kafa atar ya da üstüne basar (platform döngüsünden hemen sonra çağrılır)
@@ -121,7 +121,7 @@ function updateBricks() {
         if (Math.hypot(tx - f.x, ty - f.y) < 26) {
             f.done = true;
             sackFill++;
-            $('score').innerText = score += 5000;
+            $('score').innerText = addScore(5000);
             $('sfx-pickup').currentTime = 0; $('sfx-pickup').play().catch(() => {});
             player.mouthOpen = 1.0;
             createParticle(tx, player.y - 10, pickupText(), "#22c55e", 0.8);

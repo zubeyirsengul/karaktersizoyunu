@@ -88,7 +88,7 @@ BOSS_TYPES.ekrem2 = { ...BOSS_TYPES.ekrem, hp: 22, nameKey: "ekrem2Name", onDefe
 
 function ekremRerun(b) {
     if (b.T !== BOSS_TYPES.ekrem) return false;
-    b.T = BOSS_TYPES.ekrem2; b.hp = b.T.hp; b.rage = false;
+    b.T = BOSS_TYPES.ekrem2; b.hp = bossMaxHp(b); b.rage = false;
     if (bossCheckpoint) bossCheckpoint.rerun = true;   // ölünce seçim tekrarından devam
     b.hurt = 150; b.state = 'walk'; b.timer = 0; b.stamp = 150;   // "İPTAL" damgası, kısa dokunulmazlık
     projectiles = projectiles.filter(p => p.type === 'bullet');

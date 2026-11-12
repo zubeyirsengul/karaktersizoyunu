@@ -9,6 +9,8 @@
 //   ÜST kat (T2): yalnızca bir alt raftan çıkılır; alt rafın tam üstüne gelmez (kafa çarpmasın).
 // Raflar tuğla gibi katıdır: alttan zıplayan kafasını çarpar.
 const LEDGE = 30, T1 = 240, T2 = 380;
+// 2. bölüm: üstünde SINAYPIRCI duran köprüler (orta noktaları; iki desen arasındaki boşluğa, bir polisin tam üstüne gelir)
+const BRIDGE_W = 420, SAYGILI_BRIDGES = [4500, 9000, 13500];
 let pits = [];
 function seededRandom(seed) {
     let s = seed % 2147483647; if (s <= 0) s += 2147483646;
@@ -201,7 +203,7 @@ function restartLevel() {
         $('kills').innerText = killedEnemies;
         if(isFlight()) flightSpawnBoss();
         else if(cp.stage === 'gate') spawnGate(); else spawnBoss(player.x + 420);
-        if(cp.rerun && boss && BOSS_TYPES[boss.kind + '2']) { boss.T = BOSS_TYPES[boss.kind + '2']; boss.hp = boss.T.hp; bossCheckpoint.rerun = true; }   // seçim tekrarından devam
+        if(cp.rerun && boss && BOSS_TYPES[boss.kind + '2']) { boss.T = BOSS_TYPES[boss.kind + '2']; boss.hp = bossMaxHp(boss); bossCheckpoint.rerun = true; }   // seçim tekrarından devam
     }
 }
 
@@ -211,7 +213,7 @@ function completeLevel() {
     levelCompleted = true;
     unlockLevel(currentLevel + 1);   // bölüm seçme ekranında sonraki bölüm açılır
     $('lang-picker').hidden = true;
-    $('levels-btn').hidden = true; // Dil sadece başlangıç ekranında seçilir
+    $('diff-picker').hidden = true; $('overlay-desc').hidden = true; // Dil ve zorluk sadece başlangıç ekranında seçilir; bölüm sonunda BÖLÜM SEÇ açık kalır
     paused = true;
 
     if (currentLevel < MAX_LEVEL) {
@@ -240,16 +242,18 @@ function completeLevel() {
 // mode 'flight' (uçuş), stamp (KHK damgası), civilians (zararsız siviller),
 // skins(i, kind): düşmanın görünüşü, item 'fidan' / 'shoebox', cry: ölünce çıkan yazı, populate: bölüme özel eşya/kişiler
 const LEVELS = {
-    // 1. bölüm: Gezi Parkı; polis yok, Gezi kahramanları (skins), Duran Adam, çınar fidanları; canavar TOMA (js/gezi.js)
+    // 1. bölüm: Gezi Parkı; rüşvet işlemez (noBribe), polis yok, Gezi kahramanları (skins), Duran Adam, çınar fidanları; canavar TOMA (js/gezi.js)
     1: { target: 11, music: 'chiptune_level1.mp3', boss: 'toma', speed: 1.5, fire: 170, kinds: i => i % 4 === 3 ? 'riot' : 'police',
-         skins: (i, kind) => kind === 'riot' ? 'tencere' : GEZI_HEROES[(i - Math.floor((i + 1) / 4)) % 4], item: 'fidan', cry: 'gezCry', populate: () => populateGezi(),
+         skins: (i, kind) => kind === 'riot' ? 'tencere' : GEZI_HEROES[(i - Math.floor((i + 1) / 4)) % 4], item: 'fidan', cry: 'gezCry', populate: () => populateGezi(), noBribe: true,
          bg: 'gezi', pit: 0.35, sniper: 0, minSnipers: 0,
          platforms: [[600, T1, 240, LEDGE], [900, T2, 240, LEDGE], [1200, T1, 180, LEDGE], [1900, T1, 300, LEDGE], [2260, T2, 180, LEDGE]] },
-    // 2. bölüm: Bilal'i kurtar (17-25 Aralık); ayakkabı kutuları, canavar SAYGILI (js/saygili.js)
+    // 2. bölüm: 4'lü çeteyi kurtar (17-25 Aralık); ayakkabı kutuları, köprülerde SINAYPIRCI, canavar SAYGILI (js/saygili.js)
     2: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'saygili', speed: 2.5, fire: 150, kinds: i => i % 3 === 2 ? 'riot' : i % 4 === 1 ? 'gas' : 'police',
-         bg: 'emniyet', item: 'shoebox', pit: 0.5, sniper: 0.45, minSnipers: 3,
-         platforms: [[420, T1, 180, LEDGE], [660, T2, 300, LEDGE], [1020, T1, 240, LEDGE], [1620, T1, 240, LEDGE], [1920, T2, 240, LEDGE]] },
-    3: { target: 11, music: 'chiptune_level1.mp3', boss: 'sayac', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 3 ? 'gas' : 'police',
+         bg: 'emniyet', item: 'shoebox', pit: 0.5, sniper: 0, minSnipers: 0, populate: () => populateSaygili(),
+         platforms: [[420, T1, 180, LEDGE], [660, T2, 300, LEDGE], [1020, T1, 240, LEDGE], [1620, T1, 240, LEDGE], [1920, T2, 240, LEDGE],
+                     ...SAYGILI_BRIDGES.map(x => [x - BRIDGE_W / 2, T1, BRIDGE_W, LEDGE, 'bridge'])] },
+    // 3. bölüm: Paraları Sıfırla; kasetler, canavar DEV ÇELİK KASA (js/boss_kasa.js), sonunda Cengiz gelir (boss_outro.js)
+    3: { target: 11, music: 'chiptune_level1.mp3', boss: 'kasa', speed: 2.8, fire: 145, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 3 ? 'gas' : 'police',
          bg: 'villa', pit: 0.5, sniper: 0.45, minSnipers: 3, item: 'tape',
          platforms: [[500, T1, 240, LEDGE], [800, T2, 180, LEDGE], [1040, T1, 180, LEDGE], [1800, T1, 300, LEDGE]] },
     4: { target: 11, music: 'chiptune_level3.mp3', boss: 'feto', speed: 3.2, fire: 125, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
@@ -301,7 +305,7 @@ function createLevel() {
     player.isDying = false; player.deathAngle = 0; player.opacity = 1; player.mouthOpen = 0; player.dir = 1;
     player.swing = 0; player.swingHit = false;
     player.coyote = 0; player.jumpBuffer = 0; player.jumping = false; player.safePlat = null;
-    player.hp = player.maxHp; player.invuln = 0; player.knock = 0; player.slow = 0; updateHearts();
+    player.maxHp = diff().hp; player.hp = player.maxHp; player.invuln = 0; player.knock = 0; player.slow = 0; updateHearts();
     player.w = 100; player.h = 180; player.shield = false;
     $('game-container').classList.remove('shake');
     $('kills').innerText = "0";
@@ -312,7 +316,7 @@ function createLevel() {
     const layout = buildLayout(currentLevel);
     pits = layout.pits;
     platforms = [...groundSegments(pits),
-                 ...[...LEVELS[currentLevel].platforms, ...layout.plats].map(([x, up, w, h]) => ({ x, y: height - up, w, h }))];
+                 ...[...LEVELS[currentLevel].platforms, ...layout.plats].map(([x, up, w, h, kind]) => ({ x, y: height - up, w, h, kind }))];   // kind 'bridge': köprü olarak çizilir
 
     buildBricks(currentLevel);   // havada kırılabilir tuğlalar: içinden güç ya da kul hakkı çıkar
     buildSecrets(currentLevel);  // görünmez hazine blokları
@@ -327,11 +331,11 @@ function createLevel() {
         enemies.push({
             kind, turnT: 0, skin: skins ? skins(i, kind) : null,
             x: homeX, y: height - 60 - h, w, h,   // alt kenar zeminde
-            timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire * (tank ? 1.3 : 1), dead: false,
+            timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire * (tank ? 1.3 : 1) * diff().fire, dead: false,
             aim: 0, flash: 0,
             homeX: homeX,                          // Devriye merkezi
             dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
-            speed: LEVELS[currentLevel].speed * (riot ? 0.7 : tank ? 0.8 : 1),   // bölüm ilerledikçe hızlanır; çevik kuvvet yavaş
+            speed: LEVELS[currentLevel].speed * (riot ? 0.7 : tank ? 0.8 : 1) * diff().speed,   // bölüm ilerledikçe hızlanır; çevik kuvvet yavaş
             walkCycle: Math.random() * Math.PI * 2,
             hp: riot ? 2 : 1, maxHp: riot ? 2 : 1, hurt: 0   // çevik kuvvet 2 vuruşta düşer
         });

@@ -1,5 +1,5 @@
 // Bölüm sonu canavarlarının ortak motoru: doğma, öfke, saldırı mermileri, hasar, çizim ve can barı
-// Canavarların kendileri boss_*.js dosyalarında (feto, sayac, darbetank, bylock), gezi.js (TOMA), saygili.js (SAYGILI), selo.js, ekrem.js, flight.js
+// Canavarların kendileri boss_*.js dosyalarında (feto, kasa, darbetank, bylock), gezi.js (TOMA), saygili.js (SAYGILI), selo.js, ekrem.js, flight.js
 // Teyzeler: grannies.js, canavar sonrası ara sahne: boss_outro.js
 // (index.html bu dosyaları sırayla yükler; tanımlar paylaşılır, yükleme anında çalışan kod main.js'tedir)
 
@@ -48,7 +48,7 @@ function spawnBoss(x) {
     const kind = LEVELS[currentLevel].boss;
     const T = BOSS_TYPES[kind], w = T.w, h = T.h;
     x = Math.min(x, WORLD_WIDTH - w - 100);
-    boss = { kind, T, x, y: height - 60 - h, w, h, homeX: x, hp: T.hp, dir: -1, look: -1,
+    boss = { kind, T, x, y: height - 60 - h, w, h, homeX: x, hp: bossMaxHp({ T }), dir: -1, look: -1,
              timer: 0, charge: 0, attacks: 0, hurt: 0, anim: 0, dying: false, deathT: 0,
              state: 'walk', stateT: 0, vx: 0, vy: 0, run: 0, crouch: 0, recover: 0 };
     enemies = enemies.filter(en => en.dead || Math.abs(en.x - x) > 1500);   // arenada polis kalmasın
@@ -101,12 +101,14 @@ function fireball(x, y, vx, vy) {
 // Bölüme özel mermiler: PROJECTILES.<tür> = [güncelle(p), çiz(ctx, p)] (ör. gezi.js: su, gaz kapsülü)
 const PROJECTILES = {};
 
-// Zırhlı canavar (T.stompOnly): rüşvet ve balyoz seker, yalnızca üstüne zıplanınca hasar alır
+// Zırhlı canavar (T.stompOnly): rüşvet ve balyoz seker, yalnızca üstüne zıplanınca hasar alır.
+// T.armored(b): o an tamamen zırhlı mı (ör. 3. bölüm kasası kapağı kapalıyken); T.armorKey: ekranda çıkan uyarı
+const bossShielded = b => b.T.stompOnly || !!(b.T.armored && b.T.armored(b));
 function bossArmor(x, y) {
     playSfx('hit', { rate: 2.4, vol: 0.4 });
     if (boss.armorMsg > 0) return;
     boss.armorMsg = 90;
-    createParticle(x, y - 30, t("armored"), "#e5e7eb", 1.2);
+    createParticle(x, y - 30, t(boss.T.armorKey || "armored"), "#e5e7eb", 1.2);
 }
 
 function updateFire(p) {
@@ -143,7 +145,7 @@ function damageBoss(n) {
     boss.dying = true;
     levelEnding = true;
     projectiles = projectiles.filter(p => p.type === 'bullet');   // canavarın saldırıları silinir
-    $('score').innerText = score += 20000;
+    $('score').innerText = addScore(20000);
     $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
     for(let i = 0; i < 30; i++) createParticle(boss.x + Math.random() * boss.w, boss.y + Math.random() * boss.h);
     playSfx('hit', { rate: 0.6, vol: 1 });
@@ -155,7 +157,10 @@ function damageBoss(n) {
     celebrate(cx, after);
 }
 // Teyzeler koşarak gelir, tezahürat eder; ardından bölüm biter
+// Teyzeler yalnızca bu bölümlerin sonunda gelir; diğer bölümlerin sonuna kendi karakterleri gelecek (boss_outro.js)
+const GRANNY_LEVELS = [1];
 function celebrate(cx, chantAt) {
+    if (!GRANNY_LEVELS.includes(currentLevel)) { setTimeout(completeLevel, Math.max(2500, chantAt * 1000 + 1800)); return; }
     spawnGrannies(cx);
     startGrannyChant(chantAt);
     setTimeout(completeLevel, Math.max(3000, (chantAt + sfxDuration('granny')) * 1000 + 1000));
@@ -174,12 +179,15 @@ function updateBoss() {
         b.T.update(b);
         if(b.rage && !b.T.calmRage && b.anim % 2 === 0) b.T.update(b);   // öfkeliyken 1,5 kat hızlı (calmRage: canavar kendisi ayarlar)
     }
-    if(!b.rage && b.hp <= b.T.hp / 2) enrageBoss(b);
+    if(!b.rage && b.hp <= bossMaxHp(b) / 2) enrageBoss(b);
 
     // Temas: üstüne zıplayınca hasar, yandan değince ölüm
     if(!player.isDying && player.x + player.w - 30 > b.x + 40 && player.x + 30 < b.x + b.w - 40 &&
        player.y + player.h > b.y + 30 && player.y < b.y + b.h) {
-        if(player.vy > 0 && player.y + player.h < b.y + b.T.stomp) { player.vy = -22; damageBoss(b.T.stompDmg || 2); }
+        if(player.vy > 0 && player.y + player.h < b.y + b.T.stomp) {
+            player.vy = -22;
+            if(b.T.armored && b.T.armored(b)) bossArmor(player.x + player.w / 2, b.y); else damageBoss(b.T.stompDmg || 2);
+        }
         else if(power.star > 0) damageBoss(1);   // dokunulmazken çarpmak canavara hasar verir
         else die();
     }
@@ -237,12 +245,12 @@ function drawBossBar(ctx, b) {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fillRect(x - 4, y - 4, w + 8, 26);
     ctx.fillStyle = "#dc2626";
-    ctx.fillRect(x, y, w * b.hp / b.T.hp, 18);
+    ctx.fillRect(x, y, w * b.hp / bossMaxHp(b), 18);
     ctx.fillStyle = "#fff";
     ctx.font = "bold 16px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(t(b.T.nameKey) + "  " + b.hp + " / " + b.T.hp, width / 2, y + 9);
+    ctx.fillText(t(b.T.nameKey) + "  " + b.hp + " / " + bossMaxHp(b), width / 2, y + 9);
     ctx.textBaseline = "alphabetic";
 }
 

@@ -19,7 +19,7 @@ function grantPower(kind, x, y) {
     const P = POWERS[kind];
     if (kind === 'heart') {
         if (player.hp < player.maxHp) { player.hp++; updateHearts(); }
-        else { score += 5000; $('score').innerText = score; }      // canlar doluysa puan
+        else { addScore(5000); $('score').innerText = score; }      // canlar doluysa puan
     } else power[kind] = P.frames;
     createParticle(x, y - 30, t(P.key), P.color, 1.4);
     playSfx('hit', { rate: 1.6, vol: 0.5 });

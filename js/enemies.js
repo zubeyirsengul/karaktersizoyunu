@@ -155,7 +155,7 @@ function killEnemy(en) {
     enemyDeathSound(en);
     const [cry, cryColor] = enemyCryText(en);
     createParticle(en.x + en.w/2, en.y, isPolice ? cry : t("hit"), isPolice ? cryColor : "white", 1.0);
-    $('score').innerText = score += ({ police: 3000, riot: 4000, sniper: 5000, tank: 4000, gas: 4000 })[en.kind] || 2000; $('kills').innerText = killedEnemies;
+    $('score').innerText = addScore(({ police: 3000, riot: 4000, sniper: 5000, tank: 4000, gas: 4000 })[en.kind] || 2000); $('kills').innerText = killedEnemies;
     if(killedEnemies === Math.ceil(targetKills / 2) && !bossCheckpoint) setMidCheckpoint();
     if(killedEnemies === targetKills) {
         // Hedef tamamlanınca kapı açılır; içinden geçince bölüm sonu canavarı (1: TOMA, 2: SAYGILI, ...)
@@ -338,9 +338,19 @@ function updateSniper(en) {
     if (++en.laser >= SNIPER_AIM) {
         const d = Math.hypot(px - en.mx, py - en.my) || 1;
         projectiles.push({ type: 'bullet', x: en.mx, y: en.my, vx: (px - en.mx) / d * 13, vy: (py - en.my) / d * 13, active: true, life: 120, angle: 0 });
-        en.flash = 6; en.laser = 0; en.cool = LEVELS[currentLevel].fire;
+        en.flash = 6; en.laser = 0; en.cool = LEVELS[currentLevel].fire * diff().fire;
         playGunshot((cx - camX - width / 2) / (width / 2), 0.55);
     }
+}
+// Özel isimli düşmanın başının üstünde adı (ör. 2. bölüm: "Köprünün Üstündeki SINAYPIRCI")
+function drawEnemyName(ctx, en) {
+    const txt = t(en.nameKey), x = en.x + en.w / 2, y = en.y - 34 + Math.sin(performance.now() / 300) * 3;
+    ctx.save(); ctx.globalAlpha = 1;
+    ctx.font = "bold 18px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const w = ctx.measureText(txt).width + 16;
+    ctx.fillStyle = "rgba(127,29,29,0.85)"; ctx.beginPath(); ctx.roundRect(x - w / 2, y - 13, w, 26, 6); ctx.fill();
+    ctx.fillStyle = "#fde047"; ctx.fillText(txt, x, y);
+    ctx.restore(); ctx.textBaseline = "alphabetic";
 }
 function drawSniperLaser(ctx, en) {
     if (!(en.laser > 0) || en.dead) return;

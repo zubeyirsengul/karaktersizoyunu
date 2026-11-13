@@ -23,26 +23,31 @@ function buildLayout(level) {
     // Polisler 1500 + i*1500'de durur; desenler ve çukurlar aralarına (c) yerleşir. Başlangıç bölgesi elle tasarlandı.
     for (let k = 1; k < 19; k++) {
         const c = 2250 + k * 1500;
+        let hasPit = false;
         if (r() < pitChance) {
             const w = 140 + Math.floor(r() * 50);
             pitList.push({ x: c - w / 2, w, filled: false });
+            hasPit = true;
         }
+        // Not: çukurun tam üstünde alçak raf olursa yerden atlanamaz (kafa rafa çarpar, çukura düşülür).
+        // Bu yüzden çukur varsa uzun köprü ortası açık iki parça olur, tek raf yana kayar. r() sırası değişmez.
         const kind = Math.floor(r() * 4);
         if (kind === 0) {                                              // piramit: alt raf → üst raf → alt raf
             plats.push([c - 480, T1, 240, LEDGE], [c - 180, T2, 300, LEDGE], [c + 180, T1, 240, LEDGE]);
-            spots.push([c - 30, T2]);
+            spots.push([c - 30, T2, hasPit]);
             bags.push([c + 60, T2 + 70]);                              // tepeye çıkana ödül
         } else if (kind === 1) {                                       // çukurun üstünden geçen uzun köprü
-            plats.push([c - 360, T1, 720, LEDGE]);
-            spots.push([c + 240, T1]);
+            if (hasPit) plats.push([c - 360, T1, 250, LEDGE], [c + 110, T1, 250, LEDGE]);   // ortası açık: yerden de atlanır
+            else plats.push([c - 360, T1, 720, LEDGE]);
+            spots.push([c + 240, T1, hasPit]);
         } else if (kind === 2) {                                       // iki alt raf, ortada yüksek ada
             plats.push([c - 540, T1, 240, LEDGE], [c - 120, T2, 240, LEDGE], [c + 300, T1, 240, LEDGE]);
-            spots.push([c, T2]);
+            spots.push([c, T2, hasPit]);
             bags.push([c + 70, T2 + 70]);
         } else if (L.extraPlats) {                                     // bol platformlu bölüm: dinlenme alanında da merdiven
             plats.push([c - 320, T1, 200, LEDGE], [c + 20, T2, 220, LEDGE]);
-            spots.push([c + 130, T2]); bags.push([c + 130, T2 + 70]);
-        } else if (r() < 0.5) plats.push([c - 120, T1, 240, LEDGE]);  // dinlenme alanı, bazen tek raf
+            spots.push([c + 130, T2, hasPit]); bags.push([c + 130, T2 + 70]);
+        } else if (r() < 0.5) plats.push([hasPit ? c - 480 : c - 120, T1, 240, LEDGE]);  // dinlenme alanı, bazen tek raf (çukur varsa yanında)
         if (L.extraPlats && k < 18) plats.push([c + 660, T1, 170, LEDGE]);   // desenler arasındaki boşluğa da bir raf
     }
     // Nişancılar: her yüksek yere şansla; bölüm ilerledikçe en az 2 / 3 / 4 tane olacak şekilde tamamlanır
@@ -50,6 +55,15 @@ function buildLayout(level) {
     spots.forEach(s => (r() < sniperChance ? snipers : rest).push(s));
     const minSnipers = L.minSnipers;
     while (snipers.length < minSnipers && rest.length) snipers.push(rest.splice(Math.floor(r() * rest.length), 1)[0]);
+    // Bölümün ilk nişancısı çukursuz bir yerde olsun: yeni tehlike önce ucuz bir yerde görülür
+    // (çukurlu ilk nişancı, boştaki en yakın çukursuz yere taşınır; ilk nişancı çukursuz olana dek)
+    for (let guard = 0; guard < 20; guard++) {
+        const first = snipers.reduce((a, s) => !a || s[0] < a[0] ? s : a, null);
+        if (!first || !first[2]) break;
+        const safe = rest.filter(s => !s[2]).sort((a, b) => a[0] - b[0])[0];
+        if (!safe) { if (snipers.length > minSnipers) { snipers.splice(snipers.indexOf(first), 1); continue; } break; }   // yer yoksa fazlaysa kaldır
+        snipers[snipers.indexOf(first)] = safe; rest.splice(rest.indexOf(safe), 1);   // çukurlu yer boş kalır
+    }
     return { plats, pits: pitList, snipers, bags };
 }
 // Zemin, çukurlar dışında kalan parçalardan oluşur
@@ -89,6 +103,8 @@ function spawnGate() {
     const x = Math.min(player.x + 700, WORLD_WIDTH - 1200);
     gate = { x, w: 190, h: 290, open: 0, passed: false };
     fillPitsNear(x - 400, x + 2600);                 // kapı ve canavar alanı düz zemin olsun
+    // Canavardan önce nefes: kapıya giden yoldaki ekran dışı düşmanlar çekilir (görünenler kalır, birden kaybolmaz)
+    enemies = enemies.filter(en => en.dead || en.x < player.x || en.x > x + 2600 || en.x - player.x < width / 2 + 150);
     bossCheckpoint = { score, stage: 'gate' };      // ölünce kapıdan devam
     createParticle(player.x + player.w / 2, player.y - 30, t("doorOpen"), "#fde047", 2.5);
     playSfx('hit', { rate: 0.35, vol: 0.8 });       // ağır kapı gümbürtüsü
@@ -276,7 +292,8 @@ const LEVELS = {
     // 8. bölüm: Pensilvanya; bol platform (extraPlats), iki kat tuğla (bricks), canavar FETÖ: SON oyuncuyu kovalar, raflara zıplar; yenilince mezara girer (js/feto_son.js)
     8: { target: 11, music: 'chiptune_level1.mp3', boss: 'feto2', speed: 3.4, fire: 115, kinds: i => i % 2 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
          extraPlats: true, bricks: 3, bg: 'snow', pit: 0.65, sniper: 0.65, minSnipers: 4,
-         platforms: [[500, T1, 180, LEDGE], [740, T2, 240, LEDGE], [1040, T1, 240, LEDGE], [1700, T1, 180, LEDGE], [1940, T2, 300, LEDGE]] },
+         // 4. bölümden farklı başlangıç: iniş-çıkışlı merdiven
+         platforms: [[450, T1, 220, LEDGE], [740, T2, 220, LEDGE], [1040, T1, 160, LEDGE], [1290, T2, 200, LEDGE], [1600, T1, 260, LEDGE], [1950, T2, 240, LEDGE]] },
     // 9. bölüm: Edirne F tipi cezaevi; canavar SELO (js/selo.js)
     9: { target: 11, music: 'bozkir_dortnal.mp3', boss: 'selo', speed: 3.3, fire: 120, kinds: i => i % 3 === 1 ? 'riot' : i % 4 === 2 ? 'gas' : 'police',
          bg: 'prison', pit: 0.6, sniper: 0.6, minSnipers: 4,
@@ -335,14 +352,16 @@ function createLevel() {
         const kind = LEVELS[currentLevel].kinds(i), riot = kind === 'riot', tank = kind === 'tank';
         const skins = LEVELS[currentLevel].skins;
         const w = tank ? 170 : 120, h = tank ? 96 : 200;
+        // Bölüm içi tempo: ilk iki düşman yavaş ve seyrek ateş eder (ısınma), 9.'dan sonrakiler daha hızlı (bölümün sonu zorlaşır)
+        const ramp = i < 2 ? 0.75 : i >= 8 ? 1.12 : 1, fireRamp = i < 2 ? 1.3 : i >= 8 ? 0.9 : 1;
         enemies.push({
             kind, turnT: 0, skin: skins ? skins(i, kind) : null, cadet: !!(LEVELS[currentLevel].cadet && LEVELS[currentLevel].cadet(i)),
             x: homeX, y: height - 60 - h, w, h,   // alt kenar zeminde
-            timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire * (tank ? 1.3 : 1) * diff().fire, dead: false,
+            timer: Math.floor(Math.random() * 60), interval: LEVELS[currentLevel].fire * (tank ? 1.3 : 1) * diff().fire * fireRamp, dead: false,
             aim: 0, flash: 0,
             homeX: homeX,                          // Devriye merkezi
             dir: Math.random() < 0.5 ? -1 : 1,     // Yürüme yönü
-            speed: LEVELS[currentLevel].speed * (riot ? 0.7 : tank ? 0.8 : 1) * diff().speed,   // bölüm ilerledikçe hızlanır; çevik kuvvet yavaş
+            speed: LEVELS[currentLevel].speed * (riot ? 0.7 : tank ? 0.8 : 1) * diff().speed * ramp,   // bölüm ilerledikçe hızlanır; çevik kuvvet yavaş
             walkCycle: Math.random() * Math.PI * 2,
             hp: riot ? 2 : 1, maxHp: riot ? 2 : 1, hurt: 0   // çevik kuvvet 2 vuruşta düşer
         });

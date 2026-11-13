@@ -264,8 +264,15 @@ function drawCover(im, x, y, w, h) {   // fotoğrafı kareyi dolduracak şekilde
     ctx.drawImage(im, (im.width - sw) / 2, (im.height - sh) / 2, sw, sh, x, y, w, h);
 }
 
-// Yazıyı en çok n satıra sığdır (yazı boyu küçülerek)
+// Yazıyı en çok n satıra sığdır (yazı boyu küçülerek). Sonuç saklanır: her karede yeniden ölçmek telefonda pahalı.
+const fitCache = new Map();
 function fitLines(text, maxW, maxLines, size, font = "Arial") {
+    const key = text + '|' + maxW + '|' + maxLines + '|' + size + '|' + font;
+    let r = fitCache.get(key);
+    if (!r) { r = fitLinesRaw(text, maxW, maxLines, size, font); fitCache.set(key, r); }
+    return r;
+}
+function fitLinesRaw(text, maxW, maxLines, size, font) {
     for (let s = size; s >= 9; s--) {
         ctx.font = `bold ${s}px ${font}`;
         const words = text.split(' '), lines = []; let line = '';

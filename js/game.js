@@ -20,7 +20,10 @@ function update() {
         // Adım hızı yürüme hızına bağlı: ayaklar yerde kaymaz
         if(player.grounded) player.legCycle += Math.abs(player.vx) * 0.06;
 
-        player.vy += GRAVITY;
+        // İnerken yerçekimi daha güçlü (tok iniş), tepede tuş basılıyken yarım (kontrol kolay), düşüş hızının sınırı var
+        let g = player.vy > 0 ? GRAVITY * FALL_MULT : GRAVITY;
+        if(jumpHeld && Math.abs(player.vy) < APEX_THRESHOLD) g *= APEX_HANG;
+        player.vy = Math.min(player.vy + g, MAX_FALL);
         player.x += player.vx;
         player.y += player.vy;
 
@@ -32,6 +35,7 @@ function update() {
         if(player.mouthOpen > 0) player.mouthOpen -= 0.05;
         updateHammer();
 
+        const wasGrounded = player.grounded, fallVy = player.vy;
         player.grounded = false;
         for(let p of platforms) {
             if (player.x + player.w * 0.2 < p.x + p.w && player.x + player.w * 0.8 > p.x &&
@@ -41,11 +45,17 @@ function update() {
                 if(player.x >= p.x && player.x + player.w <= p.x + p.w) { player.safePlat = p; player.safeOff = player.x - p.x; }
             } else if (p.h < 100 && player.vy < 0 && player.x + 30 < p.x + p.w && player.x + player.w - 30 > p.x &&
                        player.y < p.y + p.h && player.y - player.vy >= p.y + p.h - 2) {
+                // Köşe düzeltmesi: rafın kenarına birkaç piksel değdiyse kafa çarpmaz, yana kayıp geçer
+                const fromRight = (p.x + p.w) - (player.x + 30), fromLeft = (player.x + player.w - 30) - p.x;
+                if(fromRight <= CORNER_NUDGE && fromRight < fromLeft) { player.x += fromRight + 1; continue; }
+                if(fromLeft <= CORNER_NUDGE) { player.x -= fromLeft + 1; continue; }
                 // Tuğla rafa alttan kafa attı: yukarı çıkamaz
                 player.y = p.y + p.h; player.vy = 2; player.jumping = false;
             }
         }
         collideBricks();
+        if(!wasGrounded && player.grounded && fallVy > 6) onLand(fallVy);   // iniş tozu + ezilme
+        if(player.squash) { player.squash *= 0.78; if(Math.abs(player.squash) < 0.01) player.squash = 0; }
         updateJumpAssist();
     } else {
         player.y += 2; player.deathAngle += 0.05; player.opacity -= 0.01;
@@ -168,11 +178,35 @@ let lastTime = null, accumulator = 0;
 function loop(now) {
     if(lastTime === null) lastTime = now;
     // Sekme arka plandayken biriken süreyi sınırla (geri dönünce ışınlanma olmasın)
-    accumulator += Math.min(now - lastTime, 250);
+    const frameMs = now - lastTime;
+    accumulator += Math.min(frameMs, 250);
     lastTime = now;
+    const t0 = fpsMeter ? performance.now() : 0;
     while(accumulator >= STEP) { update(); accumulator -= STEP; }
+    const t1 = fpsMeter ? performance.now() : 0;
     draw();
+    if(fpsMeter) fpsSample(frameMs, t1 - t0, performance.now() - t1);
     requestAnimationFrame(loop);
+}
+
+// Performans göstergesi: adrese ?fps=1 eklenince sol altta çıkar (telefonda takılma ölçmek için).
+// FPS, kare süresi (ort. / en kötü %5), oyun mantığı ve çizim süresi (ms). Saniyede bir yenilenir.
+const fpsMeter = /[?&]fps=1/.test(location.search) ? { frames: [], upd: 0, drw: 0, last: 0, el: null } : null;
+function fpsSample(frameMs, updMs, drawMs) {
+    const m = fpsMeter;
+    if(!m.el) {
+        m.el = document.createElement('div');
+        m.el.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:9999;background:rgba(0,0,0,.75);color:#4ade80;font:12px monospace;padding:4px 6px;border-radius:4px;pointer-events:none;white-space:pre';
+        document.body.appendChild(m.el);
+    }
+    if(frameMs > 0 && frameMs < 1000) m.frames.push(frameMs);
+    m.upd += updMs; m.drw += drawMs;
+    const now = performance.now();
+    if(now - m.last < 1000 || !m.frames.length) return;
+    const n = m.frames.length, avg = m.frames.reduce((a, b) => a + b, 0) / n;
+    const p95 = m.frames.slice().sort((a, b) => a - b)[Math.floor(n * 0.95)];
+    m.el.textContent = `FPS ${(1000 / avg).toFixed(0)}  kare ${avg.toFixed(1)}ms  kötü ${p95.toFixed(1)}ms\nmantık ${(m.upd / n).toFixed(1)}ms  çizim ${(m.drw / n).toFixed(1)}ms  ${canvas.width}x${canvas.height}`;
+    m.frames = []; m.upd = 0; m.drw = 0; m.last = now;
 }
 
 // --- DURAKLATMA ---
@@ -209,7 +243,7 @@ function startGame(n = startLevelChoice) {
 const MIN_VIEW_H = 620, MIN_VIEW_W = 960;
 let viewScale = 1;
 function resizeCanvas() {
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);   // 3x ekranda 9 kat piksel çizilirdi; 2 ile sınırla (telefonda akıcılık)
     const cssW = window.innerWidth, cssH = window.innerHeight;
     viewScale = Math.min(1, cssH / MIN_VIEW_H, cssW / MIN_VIEW_W);
     width = cssW / viewScale;

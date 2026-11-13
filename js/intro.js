@@ -10,7 +10,7 @@ let introW = 0, introH = 0, introRAF = null, introSky = null;
 const introT0 = performance.now();
 
 function resizeIntro() {
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);   // telefonda 3x yoğunluk 9 kat piksel demek: 2 ile sınırla
     introW = window.innerWidth; introH = window.innerHeight;
     introCanvas.width = Math.round(introW * dpr); introCanvas.height = Math.round(introH * dpr);
     ictx.setTransform(dpr, 0, 0, dpr, 0, 0);

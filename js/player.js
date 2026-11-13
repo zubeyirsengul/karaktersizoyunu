@@ -13,6 +13,7 @@ let jumpHeld = false;
 function doJump() {
     player.vy = player.jumpPower; player.grounded = false;
     player.coyote = 0; player.jumpBuffer = 0; player.jumping = true;
+    player.squash = -0.12;   // kalkışta incelip uzar
 }
 // Zıplama tuşu erken bırakılırsa alçak zıplar (basılı tutunca tam yükseklik)
 function releaseJump() {
@@ -20,6 +21,17 @@ function releaseJump() {
     if(isFlight() || !player.jumping) return;
     if(player.vy < JUMP_CUT_VY) player.vy = JUMP_CUT_VY;
     player.jumping = false;
+}
+// Yere iniş: hızına göre toz, gövde ezilir, çok sert inişte hafif sarsıntı
+function onLand(v) {
+    const k = Math.min(1, (v - 6) / 18), fx = player.x + player.w / 2, fy = player.y + player.h;
+    player.squash = Math.max(player.squash || 0, 0.08 + 0.14 * k);
+    for (let i = 0, n = 3 + Math.round(5 * k); i < n; i++) {
+        const d = i % 2 ? 1 : -1;
+        particles.push({ x: fx + d * 20, y: fy - 4, vx: d * (1 + Math.random() * 3), vy: -Math.random() * 1.5,
+                         life: 0.35, maxLife: 0.35, size: 3 + Math.random() * 4 * (0.5 + k), text: null, color: "rgba(214,211,209,0.85)" });
+    }
+    if (v > 20) camShake = Math.max(camShake, 3);
 }
 // Her karede, platform çarpışmasından sonra çağrılır
 function updateJumpAssist() {
@@ -109,8 +121,7 @@ function die() {
     hitStop = 4;
     playSfx('hit', { rate: 1.1, vol: 0.8 });
     createParticle(player.x + player.w / 2, player.y, "-1 ❤️", "#ef4444", 1.0);
-    $('game-container').classList.remove('shake'); void $('game-container').offsetWidth;
-    $('game-container').classList.add('shake');
+    domShake();
     if(!playSfx('voice_ouch')) speak(t("ouch"), "Kore");
 }
 
@@ -130,8 +141,7 @@ function fallIntoPit() {
     if(!free) {
         createParticle(player.x + player.w / 2, player.y, "-1 ❤️", "#ef4444", 1.0);
         playSfx('hit', { rate: 1.1, vol: 0.8 });
-        $('game-container').classList.remove('shake'); void $('game-container').offsetWidth;
-        $('game-container').classList.add('shake');
+        domShake();
     }
 }
 
@@ -142,7 +152,7 @@ async function killPlayer() {
     player.hp = 0; updateHearts();
     saveBest();
     player.isDying = true;
-    $('game-container').classList.add('shake');
+    domShake();
     $('sfx-explosion').currentTime = 0; $('sfx-explosion').play().catch(()=>{});
 
     // Vurulunca GEBER yazısı çıkar

@@ -129,18 +129,18 @@ function aihmRain() {
 }
 function drawNote(ctx, x, y, angle) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
-    ctx.shadowColor = "#e879f9"; ctx.shadowBlur = 12;
+    drawGlow(ctx, "#e879f9", 32);
     ctx.fillStyle = "#a21caf"; ctx.strokeStyle = "#a21caf"; ctx.lineWidth = 4;
     ctx.beginPath(); ctx.ellipse(-8, 10, 9, 7, -0.4, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(14, 6, 9, 7, -0.4, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.moveTo(0, 9); ctx.lineTo(0, -18); ctx.lineTo(22, -22); ctx.lineTo(22, 5); ctx.stroke();
     ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(22, -19); ctx.stroke();
-    ctx.shadowBlur = 0; ctx.restore();
+    ctx.restore();
 }
 function drawAihmPaper(ctx, x, y, angle) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(angle * 0.6);
-    ctx.shadowColor = "#60a5fa"; ctx.shadowBlur = 12;
-    ctx.fillStyle = "#f8fafc"; ctx.fillRect(-20, -26, 40, 52); ctx.shadowBlur = 0;
+    drawGlow(ctx, "#60a5fa", 38);
+    ctx.fillStyle = "#f8fafc"; ctx.fillRect(-20, -26, 40, 52);
     ctx.fillStyle = "#1d4ed8"; ctx.fillRect(-20, -26, 40, 14);
     ctx.fillStyle = "#fde047";
     for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; ctx.fillRect(Math.cos(a) * 5 - 1, -19 + Math.sin(a) * 5 - 1, 2, 2); }

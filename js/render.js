@@ -298,8 +298,8 @@ function draw() {
     if (isPuzzle()) return;   // bulmaca ekranı canvas'ın üstünde
     drawBackground();
     ctx.save();
-    const sh = camShake > 0 ? camShake : 0;
-    ctx.translate(-camX + (Math.random() - 0.5) * sh * 2, (Math.random() - 0.5) * sh * 2);
+    const [shx, shy] = shakeOffset();
+    ctx.translate(-camX + shx, shy);
 
     drawPits(ctx);
     drawCheckpointFlag(ctx);
@@ -339,6 +339,7 @@ function draw() {
 
     const playerMoving = player.grounded && Math.abs(player.vx) > 1;
     ctx.translate(0, player.h / 2);   // çizim orijini: ayakların ortası
+    if(player.squash && !player.isDying) ctx.scale(1 + player.squash, 1 - player.squash);   // inişte ezilir, kalkışta uzar (ayaklar yerinde kalır)
     drawRecep(ctx, { h: player.h, phase: player.legCycle, moving: playerMoving, airborne: !player.grounded,
                      mouthOpen: player.mouthOpen, hammerAngle: hammerAngle(), sack: sackFill, shield: player.shield, bigHammer: power.hammer > 0,
                      dir: player.dir === -1 && !player.isDying ? -1 : 1 });
@@ -381,7 +382,7 @@ function drawParticles(ctx) {
             ctx.strokeText(p.text, p.x, p.y);
             ctx.fillText(p.text, p.x, p.y);
         } else {
-            ctx.fillStyle = "white";
+            ctx.fillStyle = p.color || "white";
             ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
         }
     });

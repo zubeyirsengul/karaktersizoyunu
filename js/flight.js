@@ -204,9 +204,8 @@ function drawJet(ctx, j) {
 }
 function drawMissile(ctx, p) {
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
-    ctx.shadowColor = "#ef4444"; ctx.shadowBlur = 8;
+    drawGlow(ctx, "#ef4444", 20);
     ctx.fillStyle = "#f8fafc"; ctx.fillRect(-12, -3.5, 24, 7);
-    ctx.shadowBlur = 0;
     ctx.fillStyle = "#dc2626"; ctx.beginPath(); ctx.moveTo(12, -3.5); ctx.lineTo(19, 0); ctx.lineTo(12, 3.5); ctx.fill();
     ctx.fillStyle = "#f97316"; ctx.beginPath(); ctx.moveTo(-12, -3); ctx.lineTo(-22 - Math.random() * 8, 0); ctx.lineTo(-12, 3); ctx.fill();
     ctx.restore();

@@ -66,9 +66,8 @@ function drawOneDollar(ctx, x, y, angle) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
-    ctx.shadowColor = "#ef4444"; ctx.shadowBlur = 10;
+    drawGlow(ctx, "#ef4444", 30);
     ctx.fillStyle = "#4d7c0f"; ctx.fillRect(-22, -11, 44, 22);
-    ctx.shadowBlur = 0;
     ctx.fillStyle = "#a3e635"; ctx.fillRect(-19, -8, 38, 16);
     ctx.fillStyle = "#4d7c0f";
     ctx.beginPath(); ctx.ellipse(0, 0, 7, 6, 0, 0, Math.PI * 2); ctx.fill();

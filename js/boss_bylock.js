@@ -43,8 +43,8 @@ function lockVolley(b) {
 }
 function drawLockIcon(ctx, x, y, angle) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
-    ctx.shadowColor = "#ef4444"; ctx.shadowBlur = 10;
-    ctx.fillStyle = "#0ea5e9"; ctx.beginPath(); ctx.roundRect(-18, -18, 36, 36, 9); ctx.fill(); ctx.shadowBlur = 0;
+    drawGlow(ctx, "#ef4444", 32);
+    ctx.fillStyle = "#0ea5e9"; ctx.beginPath(); ctx.roundRect(-18, -18, 36, 36, 9); ctx.fill();
     ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, -3, 7, Math.PI, 0); ctx.stroke();
     ctx.fillStyle = "#fff"; ctx.fillRect(-10, -3, 20, 14);
     ctx.restore();

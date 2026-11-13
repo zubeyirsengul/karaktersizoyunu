@@ -11,12 +11,12 @@ const DIFFS = {
 };
 const DIFF_ORDER = ['easy', 'normal', 'hard'];
 const DIFF_TEXT = {
-    tr: { easy: "KOLAY", normal: "NORMAL", hard: "ZOR", label: "Zorluk", pts: "puan" },
-    en: { easy: "EASY", normal: "NORMAL", hard: "HARD", label: "Difficulty", pts: "points" },
-    fr: { easy: "FACILE", normal: "NORMAL", hard: "DIFFICILE", label: "Difficulté", pts: "points" },
-    nl: { easy: "MAKKELIJK", normal: "NORMAAL", hard: "MOEILIJK", label: "Moeilijkheid", pts: "punten" },
-    de: { easy: "LEICHT", normal: "NORMAL", hard: "SCHWER", label: "Schwierigkeit", pts: "Punkte" },
-    ru: { easy: "ЛЕГКО", normal: "НОРМА", hard: "СЛОЖНО", label: "Сложность", pts: "очки" }
+    tr: { easy: "KOLAY", normal: "NORMAL", hard: "ZOR", label: "Zorluk", pts: "puan", shake: "Sarsıntı" },
+    en: { easy: "EASY", normal: "NORMAL", hard: "HARD", label: "Difficulty", pts: "points", shake: "Shake" },
+    fr: { easy: "FACILE", normal: "NORMAL", hard: "DIFFICILE", label: "Difficulté", pts: "points", shake: "Secousses" },
+    nl: { easy: "MAKKELIJK", normal: "NORMAAL", hard: "MOEILIJK", label: "Moeilijkheid", pts: "punten", shake: "Schudden" },
+    de: { easy: "LEICHT", normal: "NORMAL", hard: "SCHWER", label: "Schwierigkeit", pts: "Punkte", shake: "Wackeln" },
+    ru: { easy: "ЛЕГКО", normal: "НОРМА", hard: "СЛОЖНО", label: "Сложность", pts: "очки", shake: "Тряска" }
 };
 const dfT = k => (DIFF_TEXT[lang] || DIFF_TEXT.en)[k];
 
@@ -44,6 +44,12 @@ function renderDiffPicker() {
     el.innerHTML = `<span class="diff-label">${dfT('label')}:</span>` + DIFF_ORDER.map(d =>
         `<button type="button" class="lang-btn diff-btn${d === difficulty ? ' active' : ''}" data-diff="${d}">${dfT(d)}<small>${diffMult(d)}</small></button>`).join('');
     el.querySelectorAll('.diff-btn').forEach(b => b.addEventListener('click', () => setDifficulty(b.dataset.diff)));
+    // Ekran sarsıntısı açık/kapalı (baş dönmesi yapanlar için; core.js shakeOn)
+    const sb = document.createElement('button');
+    sb.type = 'button'; sb.className = 'lang-btn' + (shakeOn ? ' active' : '');
+    sb.textContent = (shakeOn ? '📳 ' : '📴 ') + dfT('shake');
+    sb.addEventListener('click', () => { setShake(!shakeOn); renderDiffPicker(); });
+    el.appendChild(sb);
 }
 // Canavarın zorluğa göre canı (en az 1)
 const bossMaxHp = b => Math.max(1, Math.round(b.T.hp * diff().boss));

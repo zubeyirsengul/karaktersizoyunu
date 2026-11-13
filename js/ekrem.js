@@ -156,15 +156,15 @@ function voteRain() {   // gökten oy pusulaları: kalkan yukarı!
 }
 function drawHeartIcon(ctx, x, y, angle) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(angle * 0.5);
-    ctx.shadowColor = "#fb7185"; ctx.shadowBlur = 12; ctx.fillStyle = "#e11d48";
+    drawGlow(ctx, "#fb7185", 28); ctx.fillStyle = "#e11d48";
     ctx.beginPath(); ctx.moveTo(0, 14); ctx.bezierCurveTo(-26, -4, -12, -22, 0, -8); ctx.bezierCurveTo(12, -22, 26, -4, 0, 14); ctx.fill();
-    ctx.shadowBlur = 0; ctx.fillStyle = "rgba(255,255,255,0.5)"; ctx.beginPath(); ctx.arc(-7, -6, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.5)"; ctx.beginPath(); ctx.arc(-7, -6, 3, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 }
 function drawVotePaper(ctx, x, y, angle) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(angle * 0.6);
-    ctx.shadowColor = "#4ade80"; ctx.shadowBlur = 10;
-    ctx.fillStyle = "#fefce8"; ctx.fillRect(-20, -26, 40, 52); ctx.shadowBlur = 0;
+    drawGlow(ctx, "#4ade80", 38);
+    ctx.fillStyle = "#fefce8"; ctx.fillRect(-20, -26, 40, 52);
     ctx.strokeStyle = "#a8a29e"; ctx.lineWidth = 1; for (let i = 0; i < 3; i++) ctx.strokeRect(-16, -22 + i * 16, 32, 14);
     ctx.strokeStyle = "#7c3aed"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, -15, 6, 0, Math.PI * 2); ctx.stroke();   // "EVET" mührü
     ctx.fillStyle = "#7c3aed"; ctx.font = "bold 5px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("EVET", 0, -15);

@@ -118,6 +118,7 @@ function updateFlight() {
 }
 
 // --- TANKER UÇAK (6. bölüm sonu canavarı) ---
+const TANKER_FIRE = 95;   // tankerin atışları arası (kare); zorlukla çarpılır (kolay 133, normal 95, zor 66)
 BOSS_TYPES.tanker = { say: "İNİŞ İZNİ YOK!", w: 360, h: 140, scale: 1, hp: 20, nameKey: "tankerName", labelY: 20, update: () => {}, draw: drawTanker };
 
 function updateTanker(b) {
@@ -129,17 +130,23 @@ function updateTanker(b) {
     else b.x = tx + Math.sin(b.anim * 0.03) * 24;
     b.y = height * 0.22 + (Math.sin(b.anim * 0.015) * 0.5 + 0.5) * (height * 0.5 - b.h * 0.3);
     if (b.talk > 0) { b.talk--; return; }
-    if (!player.isDying && ++b.timer > 70) {
+    // Nişanlı üçlü atış: oyun karesiyle sayılır (duraklatınca da durur)
+    if (b.burst > 0 && --b.burstCd <= 0) {
+        b.burst--; b.burstCd = 14;
+        projectiles.push({ type: 'missile', x: b.x + 20, y: b.y + b.h * 0.55, vx: b.aimVx, vy: b.aimVy, active: true, life: 220, angle: 0 });
+    }
+    if (!player.isDying && ++b.timer > TANKER_FIRE * diff().fire) {
         b.timer = 0; b.attacks++;
         const mx = b.x + 20, my = b.y + b.h * 0.55;
         if (b.attacks % 2) {
-            for (let i = -2; i <= 2; i++) projectiles.push({ type: 'missile', x: mx, y: my, vx: -8, vy: i * 1.6, active: true, life: 220, angle: 0 });
+            // Füze yelpazesi: geniş açılır ve ortadaki üçünden biri atlanır, böylece her seferinde uçağın geçebileceği bir boşluk kalır
+            const gap = -1 + Math.floor(Math.random() * 3);
+            for (let i = -2; i <= 2; i++) if (i !== gap) projectiles.push({ type: 'missile', x: mx, y: my, vx: -8, vy: i * 2.2, active: true, life: 220, angle: 0 });
             createParticle(mx, b.y - 10, "FÜZE!", "#fca5a5", 0.9);
         } else {
             const d = Math.hypot(player.x - mx, player.y + player.h / 2 - my) || 1;
-            [0, 10, 20].forEach(k => setTimeout(() => {
-                if (boss && !boss.dying) projectiles.push({ type: 'missile', x: boss.x + 20, y: boss.y + boss.h * 0.55, vx: (player.x - mx) / d * 10, vy: (player.y + player.h / 2 - my) / d * 10, active: true, life: 220, angle: 0 });
-            }, k * 16));
+            b.aimVx = (player.x - mx) / d * 8.5; b.aimVy = (player.y + player.h / 2 - my) / d * 8.5;
+            b.burst = 3; b.burstCd = 0;
         }
     }
     const [px, py, pw, ph] = planeBox();
